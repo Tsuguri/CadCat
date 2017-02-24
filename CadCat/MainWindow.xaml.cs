@@ -59,22 +59,21 @@ namespace CadCat
 
 		private void Resize(double width, double height)
 		{
-				ctx.Resize(width, height);
+			data.RandomizePoints();
+
+			ctx.Resize(width, height);
 		}
 		private void RunTimer()
 		{
 			timer = new DispatcherTimer();
+
 			timer.Tick += (o, e) =>
 			{
 				data.RandomizePoints();
-				ctx.UpdatePoints(imageSize);
+				ctx.UpdatePoints();
 			};
 			timer.Interval = new TimeSpan(0, 0, 0,0,33);
 			timer.Start();
-		}
-
-		private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
-		{
 		}
 	}
 }

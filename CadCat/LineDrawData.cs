@@ -14,19 +14,28 @@ namespace CadCat
 	}
 	class LineDrawData
 	{
-		Line line;
-		
+		public Point[] points;
+		Line line = new Line();
+		Random rand = new Random();
+		public LineDrawData()
+		{
+			points = new Point[2];
+			points[0] = new Point(rand.Next(100), rand.Next(100));
+			points[1] = new Point(rand.Next(100) + 100, rand.Next(100) + 100);
+
+		}
 		public void RandomizePoints()
 		{
-			Random rand = new Random();
-			line = new Line();
 			line.from = new Point(rand.Next(100), rand.Next(100));
 			line.to = new Point(rand.Next(100)+100, rand.Next(100)+100);
+			points[0] = line.from;
+			points[1] = line.to;
 		}
 
 		public IEnumerable<Line> GetLines()
 		{
-			yield return line;
+			for (int i = 0; i < 1000; i++)
+				yield return line;
 			yield break;
 		}
 
