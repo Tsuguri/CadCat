@@ -14,6 +14,8 @@ namespace CadCat
 	{
 		private LineDrawData ldd;
 		private RenderTargetBitmap buffer;
+		private WriteableBitmap bufferBitmap;
+
 		private Image targetImage;
 		private Brush color;
 		private Pen linePen;
@@ -41,36 +43,30 @@ namespace CadCat
 
 		public void UpdatePoints()
 		{
-			if (targetImage.Width > 10 && targetImage.Width < 1000)
-				throw new Exception("lol");
-			DrawingVisual dv = new DrawingVisual();
-
 			#region stupid hack
-			if (buffer == null) //stupid hack
+			if (bufferBitmap == null) //stupid hack
 			{
-				buffer = new RenderTargetBitmap(1, 1, 96, 96, PixelFormats.Pbgra32);
-				targetImage.Source = buffer;
+				bufferBitmap = new WriteableBitmap(1, 1, 96, 96, PixelFormats.Pbgra32, null);
+				targetImage.Source = bufferBitmap;
 			}
 			#endregion
 
-			buffer.Clear();
-			using (DrawingContext dc = dv.RenderOpen())
+			using (bufferBitmap.GetBitmapContext())
 			{
-				for (int i = 0; i < 300;i++)
-					dc.DrawLine(linePen, ldd.points[0], ldd.points[1]);
-		//			foreach (Line l in ldd.GetLines())
-						//dc.DrawLine(linePen, l.from, l.to);
-				dc.Close();
+				
+				bufferBitmap.Clear(Colors.Bisque);
+				for (int i = 0; i < 32; i++)
+					for (int j = 0; j < 32; j++)
+						bufferBitmap.DrawLineAa(i*40 + (int)ldd.points[0].X, j*40+100, 50+(int)ldd.points[1].X, 50 + (int)ldd.points[1].Y, Colors.Black);
 			}
 
-			buffer.Render(dv);
-			targetImage.InvalidateVisual();
 		}
 
 		public void Resize(double width, double height)
 		{
 			buffer = new RenderTargetBitmap((int)width, (int)height, 96, 96, PixelFormats.Pbgra32);
-			targetImage.Source = buffer;
+			bufferBitmap = new WriteableBitmap((int)width, (int)height, 96, 96, PixelFormats.Pbgra32, null);
+			targetImage.Source = bufferBitmap;
 
 		}
 	}
