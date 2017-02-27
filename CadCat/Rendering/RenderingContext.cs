@@ -7,14 +7,15 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using CadCat.DataStructures;
 
-namespace CadCat
+namespace CadCat.Rendering
 {
 	class RenderingContext
 	{
-		private LineDrawData ldd;
-		private RenderTargetBitmap buffer;
+		private ModelsData models;
 		private WriteableBitmap bufferBitmap;
+		private ModelData modelData = new ModelData();
 
 		private Image targetImage;
 		private Brush color;
@@ -33,10 +34,10 @@ namespace CadCat
 				linePen = new Pen(color, thickness);
 			}
 		}
-		public RenderingContext(LineDrawData lineData, Image image)
+		public RenderingContext(ModelsData lineData, Image image)
 		{
 			targetImage = image;
-			ldd = lineData;
+			models = lineData;
 			thickness = 1;
 			LineColor = Brushes.Black;
 		}
@@ -53,18 +54,28 @@ namespace CadCat
 
 			using (bufferBitmap.GetBitmapContext())
 			{
-				
-				bufferBitmap.Clear(Colors.Bisque);
-				for (int i = 0; i < 32; i++)
-					for (int j = 0; j < 32; j++)
-						bufferBitmap.DrawLineAa(i*40 + (int)ldd.points[0].X, j*40+100, 50+(int)ldd.points[1].X, 50 + (int)ldd.points[1].Y, Colors.Black);
+				bufferBitmap.Clear(Colors.Black);
+				foreach (var line in models.GetLines(modelData))
+				{
+					//apply transformations based on modelData transform and stuff
+					var transformedLine = line;
+					var from = transformedLine.from;
+					from.X += modelData.transform.Position.X;
+					from.Y += modelData.transform.Position.Y;
+					transformedLine.from = from;
+					transformedLine.to.X += modelData.transform.Position.X;
+					transformedLine.to.Y += modelData.transform.Position.Y;
+
+					bufferBitmap.DrawLineAa((int)transformedLine.from.X, (int)transformedLine.from.Y, (int)transformedLine.to.X, (int)transformedLine.to.Y, Colors.Gold);
+				}
+
+
 			}
 
 		}
 
 		public void Resize(double width, double height)
 		{
-			buffer = new RenderTargetBitmap((int)width, (int)height, 96, 96, PixelFormats.Pbgra32);
 			bufferBitmap = new WriteableBitmap((int)width, (int)height, 96, 96, PixelFormats.Pbgra32, null);
 			targetImage.Source = bufferBitmap;
 

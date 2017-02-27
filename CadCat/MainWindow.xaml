@@ -12,7 +12,8 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Menu Grid.Row="0">
-            <MenuItem Header="File"/>
+            <MenuItem Header="Add Torus" Click="AddTorus_Click"/>
+            <MenuItem Header="Add Cube" Click="AddCube_Click"/>
             <MenuItem Header="Edit"/>
             <MenuItem Header="Info"/>
         </Menu>

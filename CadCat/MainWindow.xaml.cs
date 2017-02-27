@@ -13,6 +13,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using CadCat.Rendering;
+using CadCat.DataStructures;
 
 namespace CadCat
 {
@@ -22,7 +24,7 @@ namespace CadCat
 	public partial class MainWindow : Window
 	{
 		RenderingContext ctx = null;
-		LineDrawData data;
+		ModelsData data;
 		DispatcherTimer timer;
 		DispatcherTimer resizeTimer;
 		Size imageSize;
@@ -31,7 +33,7 @@ namespace CadCat
 		{
 			InitializeComponent();
 			//image.Loaded += Image_Initialized;
-			data = new LineDrawData();
+			data = new ModelsData();
 			ctx = new RenderingContext(data, image);
 
 			image.SizeChanged += Image_SizeChanged;
@@ -59,8 +61,6 @@ namespace CadCat
 
 		private void Resize(double width, double height)
 		{
-			data.RandomizePoints();
-
 			ctx.Resize(width, height);
 		}
 		private void RunTimer()
@@ -69,11 +69,32 @@ namespace CadCat
 
 			timer.Tick += (o, e) =>
 			{
-				data.RandomizePoints();
 				ctx.UpdatePoints();
 			};
 			timer.Interval = new TimeSpan(0, 0, 0,0,33);
 			timer.Start();
+		}
+
+		private void AddTorus_Click(object sender, RoutedEventArgs e)
+		{
+			var torus = new GeometryModels.Torus();
+			Random rand = new Random();
+			var pos = torus.transform.Position;
+			pos.X = rand.Next(200);
+			pos.Y = rand.Next(200);
+			torus.transform.Position = pos;
+			data.AddModel(torus);
+		}
+
+		private void AddCube_Click(object sender, RoutedEventArgs e)
+		{
+			var cube = new GeometryModels.Cube();
+			Random rand = new Random();
+			var pos = cube.transform.Position;
+			pos.X = rand.Next(200);
+			pos.Y = rand.Next(200);
+			cube.transform.Position = pos;
+			data.AddModel(cube);
 		}
 	}
 }
