@@ -78,25 +78,23 @@ namespace CadCat.Rendering
 					}
 					var from = (activeMatrix * new Vector4 (line.from,1)).ToNormalizedVector3();
 					var to = (activeMatrix * new Vector4 (line.to,1)).ToNormalizedVector3();
+
 					from.X += 0.5;
 					from.Y += 0.5;
 					from.Y = 1 - from.Y;
+
 					to.X += 0.5;
 					to.Y += 0.5;
 					to.Y = 1 - to.Y;
 					bufferBitmap.DrawLineAa((int)(from.X * width), (int)(from.Y * height), (int)(to.X * width), (int)(to.Y * height), Colors.Gold, 4);
 				}
-
-
 			}
-
 		}
 
 		public void Resize(double width, double height)
 		{
 			bufferBitmap = new WriteableBitmap((int)width, (int)height, 96, 96, PixelFormats.Pbgra32, null);
 			targetImage.Source = bufferBitmap;
-
 		}
 	}
 }
