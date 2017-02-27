@@ -38,6 +38,7 @@ namespace CadCat.DataStructures
 			foreach(var model in models)
 			{
 				modelData.transform = model.transform;
+				modelData.ModelID = model.ModelID;
 				foreach (var line in model.GetLines())
 					yield return line;
 			}

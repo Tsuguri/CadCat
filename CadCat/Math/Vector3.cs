@@ -6,13 +6,15 @@ using System.Threading.Tasks;
 
 namespace CadCat.Math
 {
-    public struct Vector3
-    {
-        public float X { get; set; }
-        public float Y { get; set; }
-        public float Z { get; set; }
+	using Real = System.Double;
 
-        public Vector3(float x = 0.0f, float y = 0.0f, float z = 0.0f)
+	public struct Vector3
+    {
+        public Real X { get; set; }
+        public Real Y { get; set; }
+        public Real Z { get; set; }
+
+        public Vector3(Real x = 0.0f, Real y = 0.0f, Real z = 0.0f)
         {
             X = x;
             Y = y;

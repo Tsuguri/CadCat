@@ -14,5 +14,10 @@ namespace CadCat.DataStructures
         public Vector3 Rotation { get; set; }
 
 
+		public Matrix4 CreateTransformMatrix()
+		{
+			return Matrix4.CreateTranslation(Position.X, Position.Y, Position.Z) * Matrix4.CreateRotation(Rotation.X, Rotation.Y, Rotation.Z);
+		}
+
     }
 }

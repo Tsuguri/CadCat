@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using CadCat.DataStructures;
+using CadCat.Math;
 
 namespace CadCat.Rendering
 {
@@ -34,6 +35,10 @@ namespace CadCat.Rendering
 				linePen = new Pen(color, thickness);
 			}
 		}
+		public Camera ActiveCamera
+		{
+			get; set;
+		}
 		public RenderingContext(ModelsData lineData, Image image)
 		{
 			targetImage = image;
@@ -55,18 +60,31 @@ namespace CadCat.Rendering
 			using (bufferBitmap.GetBitmapContext())
 			{
 				bufferBitmap.Clear(Colors.Black);
+
+				var cameraMatrix = ActiveCamera.ViewProjectionMatrix;
+
+				Matrix4 activeMatrix = cameraMatrix;
+				var activeModel = -1;
+				var width = bufferBitmap.PixelWidth;
+				var height = bufferBitmap.PixelHeight;
+
 				foreach (var line in models.GetLines(modelData))
 				{
-					//apply transformations based on modelData transform and stuff
-					var transformedLine = line;
-					var from = transformedLine.from;
-					from.X += modelData.transform.Position.X;
-					from.Y += modelData.transform.Position.Y;
-					transformedLine.from = from;
-					transformedLine.to.X += modelData.transform.Position.X;
-					transformedLine.to.Y += modelData.transform.Position.Y;
-
-					bufferBitmap.DrawLineAa((int)transformedLine.from.X, (int)transformedLine.from.Y, (int)transformedLine.to.X, (int)transformedLine.to.Y, Colors.Gold);
+					if (modelData.ModelID != activeModel)
+					{
+						activeModel = modelData.ModelID;
+						var modelmat = modelData.transform.CreateTransformMatrix();
+						activeMatrix = cameraMatrix * modelmat;
+					}
+					var from = (activeMatrix * new Vector4 (line.from,1)).ToNormalizedVector3();
+					var to = (activeMatrix * new Vector4 (line.to,1)).ToNormalizedVector3();
+					from.X += 0.5;
+					from.Y += 0.5;
+					from.Y = 1 - from.Y;
+					to.X += 0.5;
+					to.Y += 0.5;
+					to.Y = 1 - to.Y;
+					bufferBitmap.DrawLineAa((int)(from.X * width), (int)(from.Y * height), (int)(to.X * width), (int)(to.Y * height), Colors.Gold, 4);
 				}
 
 

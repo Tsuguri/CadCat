@@ -10,10 +10,19 @@ namespace CadCat.DataStructures
     public class Model
     {
         public Transform transform;
+		public int ModelID
+		{
+			get;
+			private set;
+		}
+
+		private static int idCounter = 0;
 
 		public Model()
 		{
 			transform = new Transform();
+			ModelID = idCounter;
+			idCounter++;
 		}
 		public virtual IEnumerable<Line> GetLines()
 		{

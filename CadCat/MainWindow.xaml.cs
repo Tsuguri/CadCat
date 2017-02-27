@@ -35,7 +35,10 @@ namespace CadCat
 			//image.Loaded += Image_Initialized;
 			data = new ModelsData();
 			ctx = new RenderingContext(data, image);
-
+			var cam = new Camera();
+			cam.transform.Position = new Math.Vector3(0.2,0.2,-2);
+			cam.transform.Rotation = new Math.Vector3(0, 0, 0);
+			ctx.ActiveCamera = cam;
 			image.SizeChanged += Image_SizeChanged;
 			resizeTimer = new DispatcherTimer();
 			resizeTimer.Interval = new TimeSpan(0, 0, 0, 0, 300);
@@ -49,6 +52,7 @@ namespace CadCat
 			resizeTimer.Tick += (o, g) =>
 			{
 				Resize(e.NewSize.Width, e.NewSize.Height);
+				ctx.ActiveCamera.AspectRatio = e.NewSize.Width / e.NewSize.Height;
 				resizeTimer.Stop();
 			};
 			resizeTimer.Start();
@@ -91,8 +95,8 @@ namespace CadCat
 			var cube = new GeometryModels.Cube();
 			Random rand = new Random();
 			var pos = cube.transform.Position;
-			pos.X = rand.Next(200);
-			pos.Y = rand.Next(200);
+			pos.X = 0;
+			pos.Y = 0;
 			cube.transform.Position = pos;
 			data.AddModel(cube);
 		}
