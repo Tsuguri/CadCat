@@ -9,9 +9,18 @@ namespace CadCat.Rendering
 {
 	public class Camera
 	{
+		private Vector3 lookingAt;
 		public Vector3 LookingAt
 		{
-			get; set;
+			get
+			{
+				return lookingAt;
+			}
+			set
+			{
+				lookingAt = value;
+				viewProjection = null;
+			}
 		}
 		public double HorizontalAngle { get; set; }
 		public double VerticalAngle { get; set; }
@@ -95,7 +104,7 @@ namespace CadCat.Rendering
 		public void Rotate(double vertical, double horizontal)
 		{
 			HorizontalAngle += horizontal;
-			VerticalAngle += vertical;
+			VerticalAngle -= vertical;
 			if (HorizontalAngle < 0)
 				HorizontalAngle += 360;
 			if (HorizontalAngle > 360)
@@ -107,6 +116,13 @@ namespace CadCat.Rendering
 				VerticalAngle = -90;
 
 			viewProjection = null;
+		}
+
+		public void Move(double dX, double dY)
+		{
+			var trans = new Vector3(dX, -dY,0);
+			var trans2 = Matrix4.CreateRotationY(Utils.DegToRad(180+ HorizontalAngle))*Matrix4.CreateRotationX(Utils.DegToRad(-VerticalAngle)) * trans;
+			LookingAt += trans2*Radius * 0.001;
 		}
 	}
 }

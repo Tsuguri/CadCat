@@ -77,7 +77,7 @@ namespace CadCat.DataStructures
 		{
 			var delta = Delta;
 			control.Header = Delta;
-			if (delta.Length > 0.001 && Mouse.LeftButton == MouseButtonState.Pressed)
+			if (delta.X!=-1 && delta.Length > 0.001 && Mouse.LeftButton == MouseButtonState.Pressed)
 			{
 				if (Keyboard.IsKeyDown(Key.A))
 				{
@@ -87,6 +87,10 @@ namespace CadCat.DataStructures
 				{
 					ActiveCamera.Rotate(delta.Y * rotateSpeed, delta.X * rotateSpeed);
 
+				}
+				else
+				{
+					ActiveCamera.Move(delta.X, delta.Y);
 				}
 			}
 

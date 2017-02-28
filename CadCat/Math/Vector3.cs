@@ -20,5 +20,15 @@ namespace CadCat.Math
             Y = y;
             Z = z;
         }
+
+		public static Vector3 operator +(Vector3 vec1, Vector3 vec2)
+		{
+			return new Vector3(vec1.X+vec2.X,vec1.Y+vec2.Y,vec1.Z+vec2.Z);
+		}
+
+		public static Vector3 operator *(Vector3 vec, double scalar)
+		{
+			return new Vector3(vec.X * scalar, vec.Y * scalar, vec.Z * scalar);
+		}
     }
 }

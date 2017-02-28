@@ -78,21 +78,17 @@ namespace CadCat.Rendering
 						activeMatrix = cameraMatrix * modelmat;
 					}
 					var from = (activeMatrix * new Vector4 (line.from,1)).ToNormalizedVector3();
-					//var to = (activeMatrix * new Vector4 (line.to,1)).ToNormalizedVector3();
-					var to = new Vector4(line.to, 1);
-					var to1 = trans * to;
-					var to2 = rot * to1;
-					var to3 = transRadius * to2;
-					var to4 = view * to3;
-					var to5 = to4.ToNormalizedVector3();
 					from.X += 0.5;
 					from.Y += 0.5;
 					from.Y = 1 - from.Y;
 
-					to5.X += 0.5;
-					to5.Y += 0.5;
-					to5.Y = 1 - to5.Y;
-					bufferBitmap.DrawLineAa((int)(from.X * width), (int)(from.Y * height), (int)(to5.X * width), (int)(to5.Y * height), Colors.Gold, 4);
+					var to = (activeMatrix * new Vector4(line.to, 1)).ToNormalizedVector3();
+
+					to.X += 0.5;
+					to.Y += 0.5;
+					to.Y = 1 - to.Y;
+
+					bufferBitmap.DrawLineAa((int)(from.X * width), (int)(from.Y * height), (int)(to.X * width), (int)(to.Y * height), Colors.Gold, 4);
 				}
 			}
 		}
