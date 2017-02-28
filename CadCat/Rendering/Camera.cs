@@ -118,9 +118,9 @@ namespace CadCat.Rendering
 			viewProjection = null;
 		}
 
-		public void Move(double dX, double dY)
+		public void Move(double dX, double dY,double dZ=0.0)
 		{
-			var trans = new Vector3(dX, -dY,0);
+			var trans = new Vector3(dX, -dY,dZ*Radius);
 			var trans2 = Matrix4.CreateRotationY(Utils.DegToRad(180+ HorizontalAngle))*Matrix4.CreateRotationX(Utils.DegToRad(-VerticalAngle)) * trans;
 			LookingAt += trans2*Radius * 0.001;
 		}

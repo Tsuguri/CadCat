@@ -88,6 +88,10 @@ namespace CadCat.DataStructures
 					ActiveCamera.Rotate(delta.Y * rotateSpeed, delta.X * rotateSpeed);
 
 				}
+				else if (Keyboard.IsKeyDown(Key.LeftAlt))
+				{
+					ActiveCamera.Move(0, 0, delta.Y);
+				}
 				else
 				{
 					ActiveCamera.Move(delta.X, delta.Y);

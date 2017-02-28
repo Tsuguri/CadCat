@@ -53,7 +53,7 @@ namespace CadCat.Rendering
 				targetImage.Source = bufferBitmap;
 			}
 			#endregion
-
+			var tmpLine = new Line();
 			using (bufferBitmap.GetBitmapContext())
 			{
 				bufferBitmap.Clear(Colors.Black);
@@ -77,9 +77,10 @@ namespace CadCat.Rendering
 						var modelmat = modelData.transform.CreateTransformMatrix();
 						activeMatrix = cameraMatrix * modelmat;
 					}
-					var from = (activeMatrix * new Vector4 (line.from,1)).ToNormalizedVector3();
+					var from = (activeMatrix * new Vector4(line.from, 1)).ToNormalizedVector3();
 					from.X += 0.5;
 					from.Y += 0.5;
+					from.Z += 0.5;
 					from.Y = 1 - from.Y;
 
 					var to = (activeMatrix * new Vector4(line.to, 1)).ToNormalizedVector3();
@@ -87,10 +88,30 @@ namespace CadCat.Rendering
 					to.X += 0.5;
 					to.Y += 0.5;
 					to.Y = 1 - to.Y;
-
-					bufferBitmap.DrawLineAa((int)(from.X * width), (int)(from.Y * height), (int)(to.X * width), (int)(to.Y * height), Colors.Gold, 4);
+					to.Z += 0.5;
+					tmpLine.from = from;
+					tmpLine.to = to;
+					//if (ClipZ(tmpLine))
+						bufferBitmap.DrawLineAa((int)(tmpLine.from.X * width), (int)(tmpLine.from.Y * height), (int)(tmpLine.to.X * width), (int)(tmpLine.to.Y * height), Colors.Gold, 4);
 				}
 			}
+		}
+
+		private bool ClipZ(Line clipped)
+		{
+			if (clipped.from.Z < 0 && clipped.to.Z < 0)//clipping both
+				return false;
+			if (clipped.from.Z < 0)//clipping from
+			{
+				var l = System.Math.Abs(clipped.from.Z) / System.Math.Abs(clipped.from.Z - clipped.to.Z);
+				clipped.from = clipped.from * (1 - l) + clipped.to * l;
+			}
+			else if (clipped.to.Z < 0)//clipping to
+			{
+				var l = System.Math.Abs(clipped.to.Z) / System.Math.Abs(clipped.from.Z - clipped.to.Z);
+				clipped.to = clipped.to * (1 - l) + clipped.from * l;
+			}
+			return true;
 		}
 
 		public void Resize(double width, double height)
