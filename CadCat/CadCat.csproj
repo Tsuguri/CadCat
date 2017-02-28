@@ -59,7 +59,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="DataStructures\ModelsData.cs" />
+    <Compile Include="DataStructures\SceneData.cs" />
     <Compile Include="DataStructures\Model.cs" />
     <Compile Include="DataStructures\Transform.cs" />
     <Compile Include="GeometryModels\Cube.cs" />

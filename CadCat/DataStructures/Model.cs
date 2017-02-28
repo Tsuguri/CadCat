@@ -7,9 +7,20 @@ using CadCat.Math;
 
 namespace CadCat.DataStructures
 {
-    public class Model
-    {
-        public Transform transform;
+	internal struct ModelLine
+	{
+		public int from;
+		public int to;
+
+		public ModelLine(int from, int to)
+		{
+			this.from = from;
+			this.to = to;
+		}
+	}
+	public class Model
+	{
+		public Transform transform;
 		public int ModelID
 		{
 			get;

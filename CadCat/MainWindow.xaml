@@ -14,8 +14,10 @@
         <Menu Grid.Row="0">
             <MenuItem Header="Add Torus" Click="AddTorus_Click"/>
             <MenuItem Header="Add Cube" Click="AddCube_Click"/>
-            <MenuItem Header="Edit"/>
-            <MenuItem Header="Info"/>
+            <MenuItem Name="modificationableButton" Header="Edit"/>
+            <MenuItem Name="infobutton" Header="Info"/>
+            <MenuItem Name="infobutton2" Header="Info"/>
+            <MenuItem Name="infobutton3" Header="Info"/>
         </Menu>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>

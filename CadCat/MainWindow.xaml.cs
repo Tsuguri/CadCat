@@ -24,7 +24,7 @@ namespace CadCat
 	public partial class MainWindow : Window
 	{
 		RenderingContext ctx = null;
-		ModelsData data;
+		SceneData data;
 		DispatcherTimer timer;
 		DispatcherTimer resizeTimer;
 		Size imageSize;
@@ -33,12 +33,14 @@ namespace CadCat
 		{
 			InitializeComponent();
 			//image.Loaded += Image_Initialized;
-			data = new ModelsData();
+			data = new SceneData();
 			ctx = new RenderingContext(data, image);
 			var cam = new Camera();
-			cam.transform.Position = new Math.Vector3(0.2,0.2,-2);
-			cam.transform.Rotation = new Math.Vector3(0, 0, 0);
-			ctx.ActiveCamera = cam;
+			cam.LookingAt = new Math.Vector3();
+			cam.Radius = 6;
+			cam.HorizontalAngle = cam.VerticalAngle = 0;
+
+			data.ActiveCamera = cam;
 			image.SizeChanged += Image_SizeChanged;
 			resizeTimer = new DispatcherTimer();
 			resizeTimer.Interval = new TimeSpan(0, 0, 0, 0, 300);
@@ -52,7 +54,7 @@ namespace CadCat
 			resizeTimer.Tick += (o, g) =>
 			{
 				Resize(e.NewSize.Width, e.NewSize.Height);
-				ctx.ActiveCamera.AspectRatio = e.NewSize.Width / e.NewSize.Height;
+				data.ActiveCamera.AspectRatio = e.NewSize.Width / e.NewSize.Height;
 				resizeTimer.Stop();
 			};
 			resizeTimer.Start();
@@ -73,6 +75,19 @@ namespace CadCat
 
 			timer.Tick += (o, e) =>
 			{
+				var point = Mouse.GetPosition(image);
+				if (point.X < 0 || point.Y < 0 || point.X > imageSize.Width || point.Y > imageSize.Height)
+					point.X = point.Y = -1;
+				else
+					point.Y = imageSize.Height - point.Y;
+
+				data.MousePosition = point;
+				modificationableButton.Header = point.ToString();
+				infobutton2.Header = Mouse.LeftButton == MouseButtonState.Pressed;
+				infobutton3.Header = data.ActiveCamera.HorizontalAngle + " " + data.ActiveCamera.VerticalAngle + " " + data.ActiveCamera.Radius;
+				//infobutton.Header = data.Delta;
+
+				data.UpdateFrameData(infobutton);
 				ctx.UpdatePoints();
 			};
 			timer.Interval = new TimeSpan(0, 0, 0,0,33);

@@ -403,7 +403,7 @@ namespace CadCat.Math
 			Real cot = 1.0 / System.Math.Tan(fovy / 2.0);
 			Real diff = 1.0 / (far - near);
 
-
+			//return new Matrix4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 / 5, 0);
 			return new Matrix4(
 				cot / aspect, 0, 0, 0,
 				0, cot, 0, 0,
@@ -418,8 +418,8 @@ namespace CadCat.Math
 			//return new Matrix4(
 			//	cot / aspect, 0, 0, 0,
 			//	0, cot, 0, 0,
-			//	0, 0, far * diff, -far * near * diff,
-			//	0, 0, 1.0, 0
+			//	0, 0, far * diff, 1.0,
+			//	0, 0, -far * near * diff, 0
 			//);
 		}
 	}
