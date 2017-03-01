@@ -78,26 +78,93 @@ namespace CadCat.Rendering
 						activeMatrix = cameraMatrix * modelmat;
 					}
 					var from = (activeMatrix * new Vector4(line.from, 1)).ToNormalizedVector3();
-					from.X += 0.5;
-					from.Y += 0.5;
-					from.Z += 0.5;
+					from.X = from.X / 2 + 0.5;
+					from.Y = from.Y / 2 + 0.5;
+					from.Z = from.Z / 2 + 0.5;
 					from.Y = 1 - from.Y;
 
 					var to = (activeMatrix * new Vector4(line.to, 1)).ToNormalizedVector3();
 
-					to.X += 0.5;
-					to.Y += 0.5;
+					to.X = to.X / 2 + 0.5;
+					to.Y = to.Y / 2 + 0.5;
+					to.Z = to.Z / 2 + 0.5;
 					to.Y = 1 - to.Y;
-					to.Z += 0.5;
+
 					tmpLine.from = from;
 					tmpLine.to = to;
-					//if (ClipZ(tmpLine))
+					if (Clip(tmpLine, 0.99, 0.01))
 						bufferBitmap.DrawLineAa((int)(tmpLine.from.X * width), (int)(tmpLine.from.Y * height), (int)(tmpLine.to.X * width), (int)(tmpLine.to.Y * height), Colors.Gold, 4);
 				}
 			}
 		}
 
-		private bool ClipZ(Line clipped)
+		private double CountClipParameter(double from, double to, double margin)
+		{
+			return System.Math.Abs(to - margin) / System.Math.Abs(to - from);
+		}
+
+		private bool ClipAxis(Line clipped, double fromAxis, double toAxis, double farMargin, double closeMargin)
+		{
+			if ((fromAxis > farMargin && toAxis > farMargin) || (fromAxis < closeMargin && toAxis < closeMargin))
+				return false;
+			if (toAxis > farMargin)
+			{
+				var l = CountClipParameter(fromAxis, toAxis, farMargin);//System.Math.Abs(clipped.to.X - farMargin) / System.Math.Abs(clipped.to.X - clipped.from.X);
+				clipped.to = clipped.to * (1 - l) + clipped.from * l;
+			}
+			if (fromAxis > farMargin)
+			{
+				var l = CountClipParameter(toAxis, fromAxis, farMargin);// System.Math.Abs(clipped.from.X - farMargin) / System.Math.Abs(clipped.to.X - clipped.from.X);
+				clipped.from = clipped.to * l + clipped.from * (1 - l);
+			}
+
+			if (toAxis < closeMargin)
+			{
+				var l = CountClipParameter(fromAxis, toAxis, closeMargin);//System.Math.Abs(clipped.to.X - farMargin) / System.Math.Abs(clipped.to.X - clipped.from.X);
+				clipped.to = clipped.to * (1 - l) + clipped.from * l;
+			}
+			if (fromAxis < closeMargin)
+			{
+				var l = CountClipParameter(toAxis, fromAxis, closeMargin);// System.Math.Abs(clipped.from.X - farMargin) / System.Math.Abs(clipped.to.X - clipped.from.X);
+				clipped.from = clipped.to * l + clipped.from * (1 - l);
+			}
+			return true;
+		}
+
+		private bool Clip(Line clipped, double farMargin = 1.0, double closeMargin = 0.0)
+		{
+			return ClipAxis(clipped, clipped.from.Z, clipped.to.Z, 1.0, 0) &&
+				ClipAxis(clipped, clipped.from.X, clipped.to.X, farMargin, closeMargin) &&
+				ClipAxis(clipped, clipped.from.Y, clipped.to.Y, farMargin, closeMargin);
+
+
+			//if ((clipped.from.X > farMargin && clipped.to.X > farMargin) || (clipped.from.X < closeMargin && clipped.to.X < closeMargin))
+			//	return false;
+			//if (clipped.to.X > farMargin)
+			//{
+			//	var l = CountClipParameter(clipped.from.X, clipped.to.X, farMargin);//System.Math.Abs(clipped.to.X - farMargin) / System.Math.Abs(clipped.to.X - clipped.from.X);
+			//	clipped.to = clipped.to * (1 - l) + clipped.from * l;
+			//}
+			//if (clipped.from.X > farMargin)
+			//{
+			//	var l = CountClipParameter(clipped.to.X, clipped.from.X, farMargin);// System.Math.Abs(clipped.from.X - farMargin) / System.Math.Abs(clipped.to.X - clipped.from.X);
+			//	clipped.from = clipped.to * l + clipped.from * (1 - l);
+			//}
+
+			//if (clipped.to.X <closeMargin)
+			//{
+			//	var l = CountClipParameter(clipped.from.X, clipped.to.X, closeMargin);//System.Math.Abs(clipped.to.X - farMargin) / System.Math.Abs(clipped.to.X - clipped.from.X);
+			//	clipped.to = clipped.to * (1 - l) + clipped.from * l;
+			//}
+			//if (clipped.from.X <closeMargin)
+			//{
+			//	var l = CountClipParameter(clipped.to.X, clipped.from.X, closeMargin);// System.Math.Abs(clipped.from.X - farMargin) / System.Math.Abs(clipped.to.X - clipped.from.X);
+			//	clipped.from = clipped.to * l + clipped.from * (1 - l);
+			//}
+			//return true;
+		}
+
+		private bool ClipZ(Line clipped, double margin)
 		{
 			if (clipped.from.Z < 0 && clipped.to.Z < 0)//clipping both
 				return false;

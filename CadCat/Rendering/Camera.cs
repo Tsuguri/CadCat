@@ -81,7 +81,7 @@ namespace CadCat.Rendering
 
 		public Matrix4 CreateFrustum()
 		{
-			return Matrix4.CreateFrustum(Utils.DegToRad(60), aspectRatio, 0.1, 20);
+			return Matrix4.CreateFrustum(Utils.DegToRad(60), aspectRatio, 0.1, 100);
 		}
 		public Matrix4 CreateTransRadius()
 		{

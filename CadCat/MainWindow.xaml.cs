@@ -36,8 +36,8 @@ namespace CadCat
 			data = new SceneData();
 			ctx = new RenderingContext(data, image);
 			var cam = new Camera();
-			cam.LookingAt = new Math.Vector3(0,0,4);
-			cam.Radius = 4;
+			cam.LookingAt = new Math.Vector3(0,0,0);
+			cam.Radius = 6;
 			cam.HorizontalAngle = cam.VerticalAngle = 0;
 
 			data.ActiveCamera = cam;
