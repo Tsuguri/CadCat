@@ -52,5 +52,10 @@ namespace CadCat.DataStructures
 				}
 
 		}
+
+		public virtual string GetName()
+		{
+			return ModelID.ToString();
+		}
 	}
 }

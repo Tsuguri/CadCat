@@ -40,6 +40,7 @@ namespace CadCat
 			cam.Radius = 6;
 			cam.HorizontalAngle = cam.VerticalAngle = 0;
 
+			ctx.Thickness = 1;
 			data.ActiveCamera = cam;
 			image.SizeChanged += Image_SizeChanged;
 			resizeTimer = new DispatcherTimer();
