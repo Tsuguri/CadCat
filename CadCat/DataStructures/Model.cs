@@ -26,6 +26,13 @@ namespace CadCat.DataStructures
 			get;
 			private set;
 		}
+		public string Name
+		{
+			get
+			{
+				return GetName();
+			}
+		}
 
 		private static int idCounter = 0;
 

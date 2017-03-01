@@ -15,31 +15,76 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using CadCat.Rendering;
 using CadCat.DataStructures;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace CadCat
 {
+	public abstract class BindableObject : INotifyPropertyChanged
+	{
+		public event PropertyChangedEventHandler PropertyChanged;
+
+		protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+		{
+			if (PropertyChanged != null)
+			{
+				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+	}
+
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
 	/// </summary>
-	public partial class MainWindow : Window
+	/// 
+	public partial class MainWindow : Window, INotifyPropertyChanged
 	{
+
+		public event PropertyChangedEventHandler PropertyChanged;
+
+		protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+		{
+			if (PropertyChanged != null)
+			{
+				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+
+
 		RenderingContext ctx = null;
 		SceneData data;
 		DispatcherTimer timer;
 		DispatcherTimer resizeTimer;
 		Size imageSize;
+		private ObservableCollection<Model> models = new ObservableCollection<Model>();
+		public ObservableCollection<Model> Models { get { return models; } }
+
+		private Model selectedModel = null;
+		public Model SelectedModel
+		{
+			get
+			{
+				return selectedModel;
+			}
+			set
+			{
+				selectedModel = value;
+				OnPropertyChanged();
+			}
+		}
 
 		public MainWindow()
 		{
+			DataContext = this;
 			InitializeComponent();
 			//image.Loaded += Image_Initialized;
 			data = new SceneData();
 			ctx = new RenderingContext(data, image);
 			var cam = new Camera();
-			cam.LookingAt = new Math.Vector3(0,0,0);
+			cam.LookingAt = new Math.Vector3(0, 0, 0);
 			cam.Radius = 6;
 			cam.HorizontalAngle = cam.VerticalAngle = 0;
-
 			ctx.Thickness = 1;
 			data.ActiveCamera = cam;
 			image.SizeChanged += Image_SizeChanged;
@@ -91,7 +136,7 @@ namespace CadCat
 				data.UpdateFrameData(infobutton);
 				ctx.UpdatePoints();
 			};
-			timer.Interval = new TimeSpan(0, 0, 0,0,33);
+			timer.Interval = new TimeSpan(0, 0, 0, 0, 33);
 			timer.Start();
 		}
 
@@ -104,6 +149,7 @@ namespace CadCat
 			pos.Y = rand.Next(200);
 			torus.transform.Position = pos;
 			data.AddModel(torus);
+			Models.Add(torus);
 		}
 
 		private void AddCube_Click(object sender, RoutedEventArgs e)
@@ -115,6 +161,7 @@ namespace CadCat
 			pos.Y = 0;
 			cube.transform.Position = pos;
 			data.AddModel(cube);
+			Models.Add(cube);
 		}
 	}
 }

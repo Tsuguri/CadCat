@@ -12,6 +12,7 @@ namespace CadCat.GeometryModels
 	{
 		private List<ModelLine> lines;
 		private Math.Vector3[] points;
+
 		public Torus()
 		{
 			Real bigRadius = 5;
