@@ -25,6 +25,10 @@ namespace CadCat.Rendering
 			get;
 			set;
 		}
+		public int SelectedItemThickness
+		{
+			get; set;
+		}
 		public Color LineColor
 		{
 			get;
@@ -36,6 +40,7 @@ namespace CadCat.Rendering
 			targetImage = image;
 			Scene = lineData;
 			Thickness = 1;
+			SelectedItemThickness = 3;
 			LineColor = Colors.Gold;
 		}
 
@@ -59,6 +64,7 @@ namespace CadCat.Rendering
 				var activeModel = -1;
 				var width = bufferBitmap.PixelWidth;
 				var height = bufferBitmap.PixelHeight;
+				int stroke = Thickness;
 
 				var view = Scene.ActiveCamera.CreateFrustum();
 				var transRadius = Scene.ActiveCamera.CreateTransRadius();
@@ -71,6 +77,7 @@ namespace CadCat.Rendering
 						activeModel = modelData.ModelID;
 						var modelmat = modelData.transform.CreateTransformMatrix();
 						activeMatrix = cameraMatrix * modelmat;
+						stroke = (Scene.SelectedModel != null && Scene.SelectedModel.ModelID == modelData.ModelID) ? SelectedItemThickness : Thickness;
 					}
 					var from = (activeMatrix * new Vector4(line.from, 1)).ToNormalizedVector3();
 					from.X = from.X / 2 + 0.5;
@@ -88,7 +95,7 @@ namespace CadCat.Rendering
 					tmpLine.from = from;
 					tmpLine.to = to;
 					if (Clip(tmpLine, 0.99, 0.01))
-						bufferBitmap.DrawLineAa((int)(tmpLine.from.X * width), (int)(tmpLine.from.Y * height), (int)(tmpLine.to.X * width), (int)(tmpLine.to.Y * height), LineColor, Thickness);
+						bufferBitmap.DrawLineAa((int)(tmpLine.from.X * width), (int)(tmpLine.from.Y * height), (int)(tmpLine.to.X * width), (int)(tmpLine.to.Y * height), LineColor, stroke);
 				}
 			}
 		}

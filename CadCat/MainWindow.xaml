@@ -36,15 +36,20 @@
                     <RowDefinition Height="20"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <TextBox Grid.Row="2">Models:</TextBox>
-                <ListBox Grid.Row="3" ItemsSource="{Binding Models}" SelectedItem="{Binding Path=SelectedModel, Mode=TwoWay}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="60" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Row="2" Grid.Column="0">Models:</TextBlock>
+                <Button Grid.Row="2" Grid.Column="1">Deselect</Button>
+                <ListBox Grid.Row="3" Grid.ColumnSpan="2" ItemsSource="{Binding Models}" SelectedItem="{Binding Path=SelectedModel, Mode=TwoWay}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Name}"/>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-                <ContentControl Grid.Row="0" Content="{Binding SelectedModel}">
+                <ContentControl Grid.Row="0" Grid.ColumnSpan="2" Content="{Binding SelectedModel}">
                     <ContentControl.Resources>
                         <DataTemplate DataType="{x:Type models:Model}">
                             <Grid>
@@ -80,7 +85,7 @@
                         </DataTemplate>
                     </ContentControl.Resources>
                 </ContentControl>
-                <ContentControl Grid.Row="1" Content="{Binding SelectedModel}">
+                <ContentControl Grid.Row="1" Grid.ColumnSpan="2" Content="{Binding SelectedModel}">
                     <ContentControl.Resources>
                         <DataTemplate DataType="{x:Type models:Torus}" >
 
