@@ -69,8 +69,8 @@ namespace CadCat.Rendering
 					if (modelData.ModelID != activeModel)
 					{
 						activeModel = modelData.ModelID;
-						//var modelmat = modelData.transform.CreateTransformMatrix();
-						activeMatrix = cameraMatrix;// * modelmat;
+						var modelmat = modelData.transform.CreateTransformMatrix();
+						activeMatrix = cameraMatrix * modelmat;
 					}
 					var from = (activeMatrix * new Vector4(line.from, 1)).ToNormalizedVector3();
 					from.X = from.X / 2 + 0.5;
@@ -104,23 +104,23 @@ namespace CadCat.Rendering
 				return false;
 			if (toAxis > farMargin)
 			{
-				var l = CountClipParameter(fromAxis, toAxis, farMargin);//System.Math.Abs(clipped.to.X - farMargin) / System.Math.Abs(clipped.to.X - clipped.from.X);
+				var l = CountClipParameter(fromAxis, toAxis, farMargin);
 				clipped.to = clipped.to * (1 - l) + clipped.from * l;
 			}
 			if (fromAxis > farMargin)
 			{
-				var l = CountClipParameter(toAxis, fromAxis, farMargin);// System.Math.Abs(clipped.from.X - farMargin) / System.Math.Abs(clipped.to.X - clipped.from.X);
+				var l = CountClipParameter(toAxis, fromAxis, farMargin);
 				clipped.from = clipped.to * l + clipped.from * (1 - l);
 			}
 
 			if (toAxis < closeMargin)
 			{
-				var l = CountClipParameter(fromAxis, toAxis, closeMargin);//System.Math.Abs(clipped.to.X - farMargin) / System.Math.Abs(clipped.to.X - clipped.from.X);
+				var l = CountClipParameter(fromAxis, toAxis, closeMargin);
 				clipped.to = clipped.to * (1 - l) + clipped.from * l;
 			}
 			if (fromAxis < closeMargin)
 			{
-				var l = CountClipParameter(toAxis, fromAxis, closeMargin);// System.Math.Abs(clipped.from.X - farMargin) / System.Math.Abs(clipped.to.X - clipped.from.X);
+				var l = CountClipParameter(toAxis, fromAxis, closeMargin);
 				clipped.from = clipped.to * l + clipped.from * (1 - l);
 			}
 			return true;

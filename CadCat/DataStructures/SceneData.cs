@@ -9,6 +9,8 @@ using CadCat.Math;
 using CadCat.Rendering;
 using System.Windows.Input;
 using System.Windows.Controls;
+using CadCat.GeometryModels;
+using System.Collections.ObjectModel;
 
 namespace CadCat.DataStructures
 {
@@ -17,8 +19,31 @@ namespace CadCat.DataStructures
 		public Vector3 from;
 		public Vector3 to;
 	}
-	public class SceneData
+	public class SceneData : Utilities.BindableObject
 	{
+		#region Models
+
+		private ObservableCollection<Model> models = new ObservableCollection<Model>();
+		public ObservableCollection<Model> Models { get { return models; } }
+
+		private Model selectedModel = null;
+		public Model SelectedModel
+		{
+			get
+			{
+				return selectedModel;
+			}
+			set
+			{
+				selectedModel = value;
+				OnPropertyChanged();
+			}
+		}
+
+		#endregion
+
+		#region MouseData
+
 		public Point MousePosition
 		{
 			get
@@ -30,6 +55,7 @@ namespace CadCat.DataStructures
 				previousMousePosition = mousePosition;
 				mousePosition = value;
 				Delta = mousePosition - previousMousePosition;
+				OnPropertyChanged();
 			}
 		}
 		public Vector Delta
@@ -38,24 +64,71 @@ namespace CadCat.DataStructures
 		}
 		private Point mousePosition;
 		private Point previousMousePosition;
+
+		#endregion
+
+		#region Commands
+
+		private ICommand createTorusCommand;
+		private ICommand createCubeCommand;
+		private ICommand goToSelectedCommand;
+
+		public ICommand CreateTorusCommand
+		{
+			get
+			{
+				return createTorusCommand ?? (createTorusCommand = new Utilities.CommandHandler(CreateTorus));
+			}
+		}
+
+		public ICommand CreateCubeCommand
+		{
+			get
+			{
+				return createCubeCommand ?? (createCubeCommand = new Utilities.CommandHandler(CreateCube));
+			}
+		}
+
+		public ICommand GoToSelectedCommand
+		{
+			get
+			{
+				return goToSelectedCommand ?? (goToSelectedCommand = new Utilities.CommandHandler(GoToSelected));
+			}
+		}
+
+		#endregion
+
+		#region CreatingModels
+
+		private void AddNewModel(Model model)
+		{
+			model.transform.Position = ActiveCamera.LookingAt;
+			models.Add(model);
+			SelectedModel = model;
+		}
+		private void CreateTorus()
+		{
+			AddNewModel(new Torus());
+		}
+
+		private void CreateCube()
+		{
+			AddNewModel(new Cube());
+		}
+
+		#endregion
+
+		double rotateSpeed = 0.2;
+
+
 		public Camera ActiveCamera
 		{
 			get; set;
 		}
-		List<Model> models = new List<Model>();
 
 		public SceneData()
 		{
-		}
-
-		public void AddModel(Model model)
-		{
-			models.Add(model);
-		}
-
-		public void RemoveModel(Model model)
-		{
-			models.Remove(model);
 		}
 
 		public IEnumerable<Line> GetLines(Rendering.ModelData modelData)
@@ -72,16 +145,16 @@ namespace CadCat.DataStructures
 			yield break;
 
 		}
-		double rotateSpeed = 0.2;
-		internal void UpdateFrameData(MenuItem control)
+
+
+		internal void UpdateFrameData()
 		{
 			var delta = Delta;
-			control.Header = Delta;
-			if (delta.X!=-1 && delta.Length > 0.001 && Mouse.LeftButton == MouseButtonState.Pressed)
+			if (delta.X != -1 && delta.Length > 0.001 && Mouse.LeftButton == MouseButtonState.Pressed)
 			{
 				if (Keyboard.IsKeyDown(Key.A))
 				{
-					ActiveCamera.Radius = ActiveCamera.Radius + delta.Y*0.05;
+					ActiveCamera.Radius = ActiveCamera.Radius + delta.Y * 0.05;
 				}
 				else if (Keyboard.IsKeyDown(Key.LeftCtrl))
 				{
@@ -98,6 +171,14 @@ namespace CadCat.DataStructures
 				}
 			}
 
+		}
+
+		private void GoToSelected()
+		{
+			if (SelectedModel != null)
+			{
+				ActiveCamera.LookingAt = SelectedModel.transform.Position;
+			}
 		}
 	}
 }

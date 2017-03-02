@@ -8,18 +8,88 @@ using CadCat.DataStructures;
 namespace CadCat.GeometryModels
 {
 	using Real = System.Double;
-	class Torus : DataStructures.Model
+	class Torus : Model
 	{
 		private List<ModelLine> lines;
 		private Math.Vector3[] points;
 
+		private bool modelReady = false;
+
+		private Real bigRadius = 5.0;
+		private Real smallRadius = 1.0;
+		private int bigAngleDensity = 16;
+		private int smallAngleDensity = 16;
+
+		public Real R
+		{
+			get
+			{
+				return bigRadius;
+			}
+			set
+			{
+				if(bigRadius!=value)
+				{
+					bigRadius = value;
+					modelReady = false;
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		public Real r
+		{
+			get
+			{
+				return smallRadius;
+			}
+			set
+			{
+				if (bigRadius != value)
+				{
+					smallRadius = value;
+					modelReady = false;
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		public int RDensity
+		{
+			get
+			{
+				return bigAngleDensity;
+			}
+			set
+			{
+				if (bigAngleDensity != value)
+				{
+					bigAngleDensity = value;
+					modelReady = false;
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		public int rDensity
+		{
+			get
+			{
+				return smallAngleDensity;
+			}
+			set
+			{
+				if (smallAngleDensity != value)
+				{
+					smallAngleDensity = value;
+					modelReady = false;
+					OnPropertyChanged();
+				}
+			}
+		}
+
 		public Torus()
 		{
-			Real bigRadius = 5;
-			Real smallRadius = 1;
-			int bigAngleCount = 16;
-			int smallAngleCount = 16;
-			GenerateModel(bigRadius, smallRadius, bigAngleCount, smallAngleCount);
 		}
 
 		private void GenerateModel(Real bigRadius, Real smallRadius, int bigAngleDensity, int smallAngleDensity)
@@ -28,35 +98,35 @@ namespace CadCat.GeometryModels
 			Real smallStep = Math.Utils.PI * 2 / smallAngleDensity;
 			lines = new List<ModelLine>(bigAngleDensity * smallAngleDensity * 2);
 			points = new Math.Vector3[bigAngleDensity * smallAngleDensity];
-			int i = 0, j = 0;
-			for (Real bigAngle = 0.0; bigAngle < 2 * Math.Utils.PI; bigAngle += bigStep, i++)
+			for (int i=0; i<bigAngleDensity;  i++)
 			{
-				j = 0;
-				for (Real smallAngle = 0.0; smallAngle < 2 * Math.Utils.PI; smallAngle += smallStep, j++)
+				Real bigAngle = bigStep * i;
+				for (int j=0; j<smallAngleDensity; j++)
 				{
-					points[i * bigAngleDensity + j] = CalculatePoint(bigAngle, smallAngle, bigRadius, smallRadius);
+					Real smallAngle = j * smallStep;
+					points[i * smallAngleDensity + j] = CalculatePoint(bigAngle, smallAngle, bigRadius, smallRadius);
 				}
 			}
 
-			for (i = 0; i < bigAngleDensity; i++)
+			for (int i = 0; i < bigAngleDensity; i++)
 			{
-				int circleStart = i * bigAngleDensity;
-				for (j = 0; j < smallAngleDensity - 1; j++)
+				int circleStart = i * smallAngleDensity;
+				for (int j = 0; j < smallAngleDensity - 1; j++)
 				{
 					lines.Add(new ModelLine(circleStart + j, circleStart + j + 1));
 				}
-				lines.Add(new ModelLine(circleStart + j, circleStart));
+				lines.Add(new ModelLine(circleStart + smallAngleDensity-1, circleStart));
 			}
 			int vertexCount = points.Length;
-			for(i=0;i<bigAngleDensity;i++)
+			for (int i = 0; i < bigAngleDensity; i++)
 			{
-				int circleStart = i * bigAngleDensity;
-				for(j=0;j<smallAngleDensity;j++)
+				int circleStart = i * smallAngleDensity;
+				for (int j = 0; j < smallAngleDensity; j++)
 				{
-					lines.Add(new ModelLine(circleStart+j,(circleStart+j+bigAngleDensity)%vertexCount));
+					lines.Add(new ModelLine(circleStart + j, (circleStart + j + smallAngleDensity) % vertexCount));
 				}
 			}
-
+			modelReady = true;
 		}
 
 		private Math.Vector3 CalculatePoint(Real bigAngle, Real smallAngle, Real bigRadius, Real smallRadius)
@@ -69,6 +139,8 @@ namespace CadCat.GeometryModels
 		}
 		public override IEnumerable<Line> GetLines()
 		{
+			if (!modelReady)
+				GenerateModel(bigRadius,smallRadius,bigAngleDensity,smallAngleDensity);
 			var resultLine = new Line();
 			foreach (var line in lines)
 			{

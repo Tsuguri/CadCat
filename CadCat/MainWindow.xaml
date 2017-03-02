@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CadCat"
         xmlns:models="clr-namespace:CadCat.GeometryModels"
+        xmlns:ex ="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         Title="CadCat" Height="350" Width="525" >
     <Grid>
@@ -13,18 +14,15 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Menu Grid.Row="0">
-            <MenuItem Header="Add Torus" Click="AddTorus_Click"/>
-            <MenuItem Header="Add Cube" Click="AddCube_Click"/>
-            <MenuItem Name="modificationableButton" Header="Edit"/>
-            <MenuItem Name="infobutton" Header="Info"/>
-            <MenuItem Name="infobutton2" Header="Info"/>
-            <MenuItem Name="infobutton3" Header="Info"/>
+            <MenuItem Header="Add Torus" Command="{Binding CreateTorusCommand}"/>
+            <MenuItem Header="Add Cube" Command="{Binding CreateCubeCommand}"/>
+            <MenuItem Header="Go To Selected" Command="{Binding GoToSelectedCommand}"/>
         </Menu>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="auto"/>
-                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="150"/>
             </Grid.ColumnDefinitions>
             <Image Name="image" Grid.Column="0" Stretch="Fill"/>
             <GridSplitter Grid.Column="1" Margin="2,0,2,0"
@@ -33,22 +31,80 @@
                   HorizontalAlignment="Center"  />
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="80"/>
+                    <RowDefinition Height="100"/>
                     <RowDefinition Height="20"/>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="150"/>
                 </Grid.RowDefinitions>
-                <TextBox Grid.Row="0">Models:</TextBox>
-                <ListBox Grid.Row="1" ItemsSource="{Binding Models}" SelectedItem="{Binding Path=SelectedModel, Mode=TwoWay}">
+                <TextBox Grid.Row="2">Models:</TextBox>
+                <ListBox Grid.Row="3" ItemsSource="{Binding Models}" SelectedItem="{Binding Path=SelectedModel, Mode=TwoWay}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Name}"/>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-                <ContentControl Grid.Row="2" Content="{Binding SelectedModel}">
+                <ContentControl Grid.Row="0" Content="{Binding SelectedModel}">
                     <ContentControl.Resources>
-                        <DataTemplate DataType="{x:Type models:Torus}">
-                            <TextBlock>TurboTorus</TextBlock>
+                        <DataTemplate DataType="{x:Type models:Model}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="20" />
+                                    <RowDefinition Height="20" />
+                                    <RowDefinition Height="20" />
+                                    <RowDefinition Height="20" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="20" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding Name}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" />
+                                <TextBlock Text="Pos" Grid.Row="1" Grid.Column="0" />
+                                <ex:DoubleUpDown Increment="0.1" Grid.Column="1" Grid.Row="1" Value="{Binding TrPosX}" />
+                                <ex:DoubleUpDown Increment="0.1" Grid.Column="2" Grid.Row="1" Value="{Binding TrPosY}" />
+                                <ex:DoubleUpDown Increment="0.1" Grid.Column="3" Grid.Row="1" Value="{Binding TrPosZ}" />
+                                <TextBlock Text="Rot" Grid.Row="2" Grid.Column="0" />
+                                <ex:DoubleUpDown Increment="1" Grid.Column="1" Grid.Row="2" Value="{Binding TrRotX}" />
+                                <ex:DoubleUpDown Increment="1" Grid.Column="2" Grid.Row="2" Value="{Binding TrRotY}" />
+                                <ex:DoubleUpDown Increment="1" Grid.Column="3" Grid.Row="2" Value="{Binding TrRotZ}" />
+                                <TextBlock Text="Scale" Grid.Row="3" Grid.Column="0" />
+                                <ex:DoubleUpDown Increment="0.1" Grid.Column="1" Grid.Row="3" Value="{Binding TrScaleX}" />
+                                <ex:DoubleUpDown Increment="0.1" Grid.Column="2" Grid.Row="3" Value="{Binding TrScaleY}" />
+                                <ex:DoubleUpDown Increment="0.1" Grid.Column="3" Grid.Row="3" Value="{Binding TrScaleZ}" />
+
+                                <TextBlock Text="Rot" Grid.Row="2" Grid.Column="0" />
+                                <TextBlock Text="Scale" Grid.Row="3" Grid.Column="0" />
+                            </Grid>
+                        </DataTemplate>
+                    </ContentControl.Resources>
+                </ContentControl>
+                <ContentControl Grid.Row="1" Content="{Binding SelectedModel}">
+                    <ContentControl.Resources>
+                        <DataTemplate DataType="{x:Type models:Torus}" >
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="20"/>
+                                    <RowDefinition Height="20"/>
+                                    <RowDefinition Height="20"/>
+                                    <RowDefinition Height="20"/>
+
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Column="0" Grid.Row="0">R</TextBlock>
+                                <ex:DoubleUpDown Grid.Column="1" Grid.Row="0" Value="{Binding R}"/>
+                                <TextBlock Grid.Column="0" Grid.Row="1">r</TextBlock>
+                                <ex:DoubleUpDown Grid.Column="1" Grid.Row="1" Value="{Binding r}"/>
+                                <TextBlock Grid.Column="0" Grid.Row="2">RDensity</TextBlock>
+                                <ex:DoubleUpDown Grid.Column="1" Grid.Row="2" Value="{Binding RDensity}"/>
+                                <TextBlock Grid.Column="0" Grid.Row="3">rDensity</TextBlock>
+                                <ex:DoubleUpDown Grid.Column="1" Grid.Row="3" Value="{Binding rDensity}"/>
+                            </Grid>
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type models:Cube}">
                             <TextBlock>turbo cube</TextBlock>

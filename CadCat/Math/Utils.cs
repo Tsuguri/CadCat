@@ -21,7 +21,12 @@ namespace CadCat.Math
 		}
 		public static Real DegToRad(Real deg)
 		{
-			return deg / 180.0f * PI;
+			return deg / 180.0 * PI;
+		}
+
+		public static Real RadToDeg(Real rad)
+		{
+			return rad / PI * 180.0;
 		}
 	}
 }

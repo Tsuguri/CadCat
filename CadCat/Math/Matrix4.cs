@@ -340,6 +340,10 @@ namespace CadCat.Math
 			return mat;
 		}
 
+		public static Matrix4 CreateTranslation(Vector3 vec)
+		{
+			return CreateTranslation(vec.X, vec.Y, vec.Z);
+		}
 		public static Matrix4 CreateTranslation(Real x = 0, Real y = 0, Real z = 0)
 		{
 			Matrix4 mat = CreateIdentity();
@@ -375,17 +379,29 @@ namespace CadCat.Math
 			return mat;
 		}
 
+		public static Matrix4 CreateRotation(Vector3 vec)
+		{
+			return CreateRotation(vec.X, vec.Y, vec.Z);
+		}
 		public static Matrix4 CreateRotation(Real x, Real y, Real z)
 		{
 			return CreateRotationX(x) * CreateRotationY(y) * CreateRotationZ(z);
 		}
 
+		public static Matrix4 CreateScale(Vector3 vec)
+		{
+			return CreateScale(vec.X, vec.Y, vec.Z);
+		}
 		public static Matrix4 CreateScale(Real scale)
 		{
+			return CreateScale(scale, scale, scale);
+		}
+		public static Matrix4 CreateScale(Real xScale, Real yScale, Real zScale)
+		{
 			var mat = CreateIdentity();
-			mat.m11 *= scale;
-			mat.m22 *= scale;
-			mat.m33 *= scale;
+			mat.m11 = xScale;
+			mat.m22 = yScale;
+			mat.m33 = zScale;
 			return mat;
 		}
 

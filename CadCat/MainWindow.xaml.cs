@@ -15,24 +15,15 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using CadCat.Rendering;
 using CadCat.DataStructures;
+using CadCat.GeometryModels;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
+
 namespace CadCat
 {
-	public abstract class BindableObject : INotifyPropertyChanged
-	{
-		public event PropertyChangedEventHandler PropertyChanged;
 
-		protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-		{
-			if (PropertyChanged != null)
-			{
-				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-			}
-		}
-	}
 
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
@@ -57,29 +48,15 @@ namespace CadCat
 		DispatcherTimer timer;
 		DispatcherTimer resizeTimer;
 		Size imageSize;
-		private ObservableCollection<Model> models = new ObservableCollection<Model>();
-		public ObservableCollection<Model> Models { get { return models; } }
 
-		private Model selectedModel = null;
-		public Model SelectedModel
-		{
-			get
-			{
-				return selectedModel;
-			}
-			set
-			{
-				selectedModel = value;
-				OnPropertyChanged();
-			}
-		}
+
+
 
 		public MainWindow()
 		{
-			DataContext = this;
-			InitializeComponent();
-			//image.Loaded += Image_Initialized;
 			data = new SceneData();
+			DataContext = data;
+			InitializeComponent();
 			ctx = new RenderingContext(data, image);
 			var cam = new Camera();
 			cam.LookingAt = new Math.Vector3(0, 0, 0);
@@ -126,42 +103,13 @@ namespace CadCat
 					point.X = point.Y = -1;
 				else
 					point.Y = imageSize.Height - point.Y;
-
 				data.MousePosition = point;
-				modificationableButton.Header = point.ToString();
-				infobutton2.Header = Mouse.LeftButton == MouseButtonState.Pressed;
-				infobutton3.Header = data.ActiveCamera.HorizontalAngle + " " + data.ActiveCamera.VerticalAngle + " " + data.ActiveCamera.Radius;
-				//infobutton.Header = data.Delta;
 
-				data.UpdateFrameData(infobutton);
+				data.UpdateFrameData();
 				ctx.UpdatePoints();
 			};
 			timer.Interval = new TimeSpan(0, 0, 0, 0, 33);
 			timer.Start();
-		}
-
-		private void AddTorus_Click(object sender, RoutedEventArgs e)
-		{
-			var torus = new GeometryModels.Torus();
-			Random rand = new Random();
-			var pos = torus.transform.Position;
-			pos.X = rand.Next(200);
-			pos.Y = rand.Next(200);
-			torus.transform.Position = pos;
-			data.AddModel(torus);
-			Models.Add(torus);
-		}
-
-		private void AddCube_Click(object sender, RoutedEventArgs e)
-		{
-			var cube = new GeometryModels.Cube();
-			Random rand = new Random();
-			var pos = cube.transform.Position;
-			pos.X = 0;
-			pos.Y = 0;
-			cube.transform.Position = pos;
-			data.AddModel(cube);
-			Models.Add(cube);
 		}
 	}
 }

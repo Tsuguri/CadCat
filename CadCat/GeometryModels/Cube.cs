@@ -7,7 +7,7 @@ using CadCat.DataStructures;
 
 namespace CadCat.GeometryModels
 {
-	class Cube : DataStructures.Model
+	class Cube : Model
 	{
 		public override IEnumerable<Line> GetLines()
 		{
