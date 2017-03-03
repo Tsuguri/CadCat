@@ -438,5 +438,141 @@ namespace CadCat.Math
 			//	0, 0, -far * near * diff, 0
 			//);
 		}
+
+		public Matrix4 Inversed()
+		{
+			Real tmp1 =
+				m22 * m33 * m44 -
+				m22 * m34 * m43 -
+				m32 * m23 * m44 +
+				m32 * m24 * m43 +
+				m42 * m23 * m34 -
+				m42 * m24 * m33;
+
+			Real tmp2 =
+				-m21 * m33 * m44 +
+				m21 * m34 * m43 +
+				m31 * m23 * m44 -
+				m31 * m24 * m43 -
+				m41 * m23 * m34 +
+				m41 * m24 * m33;
+
+			Real tmp3 =
+				m21 * m32 * m44 -
+				m21 * m34 * m42 -
+				m31 * m22 * m44 +
+				m31 * m24 * m42 +
+				m41 * m22 * m34 -
+				m41 * m24 * m32;
+
+			Real tmp4 =
+				-m21 * m32 * m43 +
+				m21 * m33 * m42 +
+				m31 * m22 * m43 -
+				m31 * m23 * m42 -
+				m41 * m22 * m33 +
+				m41 * m23 * m32;
+
+			Real det = m11 * tmp1 + m12 * tmp2 + m13 * tmp3 + m14 * tmp4;
+
+			if (det == 0.0)
+				return new Matrix4();
+
+			Real invdet = 1.0 / det;
+
+			return new Matrix4(
+				tmp1 * invdet,
+
+				(-m12 * m33 * m44 +
+				m12 * m34 * m43 +
+				m32 * m13 * m44 -
+				m32 * m14 * m43 -
+				m42 * m13 * m34 +
+				m42 * m14 * m33) * invdet,
+
+				(m12 * m23 * m44 -
+				m12 * m24 * m43 -
+				m22 * m13 * m44 +
+				m22 * m14 * m43 +
+				m42 * m13 * m24 -
+				m42 * m14 * m23) * invdet,
+
+				(-m12 * m23 * m34 +
+				m12 * m24 * m33 +
+				m22 * m13 * m34 -
+				m22 * m14 * m33 -
+				m32 * m13 * m24 +
+				m32 * m14 * m23) * invdet,
+
+				tmp2 * invdet,
+
+				(m11 * m33 * m44 -
+				m11 * m34 * m43 -
+				m31 * m13 * m44 +
+				m31 * m14 * m43 +
+				m41 * m13 * m34 -
+				m41 * m14 * m33) * invdet,
+
+				(-m11 * m23 * m44 +
+				m11 * m24 * m43 +
+				m21 * m13 * m44 -
+				m21 * m14 * m43 -
+				m41 * m13 * m24 +
+				m41 * m14 * m23) * invdet,
+
+				(m11 * m23 * m34 -
+				m11 * m24 * m33 -
+				m21 * m13 * m34 +
+				m21 * m14 * m33 +
+				m31 * m13 * m24 -
+				m31 * m14 * m23) * invdet,
+
+				tmp3 * invdet,
+
+				(-m11 * m32 * m44 +
+				m11 * m34 * m42 +
+				m31 * m12 * m44 -
+				m31 * m14 * m42 -
+				m41 * m12 * m34 +
+				m41 * m14 * m32) * invdet,
+
+				(m11 * m22 * m44 -
+				m11 * m24 * m42 -
+				m21 * m12 * m44 +
+				m21 * m14 * m42 +
+				m41 * m12 * m24 -
+				m41 * m14 * m22) * invdet,
+
+				(-m11 * m22 * m34 +
+				m11 * m24 * m32 +
+				m21 * m12 * m34 -
+				m21 * m14 * m32 -
+				m31 * m12 * m24 +
+				m31 * m14 * m22) * invdet,
+
+				tmp4 * invdet,
+
+				(m11 * m32 * m43 -
+				m11 * m33 * m42 -
+				m31 * m12 * m43 +
+				m31 * m13 * m42 +
+				m41 * m12 * m33 -
+				m41 * m13 * m32) * invdet,
+
+				(-m11 * m22 * m43 +
+				m11 * m23 * m42 +
+				m21 * m12 * m43 -
+				m21 * m13 * m42 -
+				m41 * m12 * m23 +
+				m41 * m13 * m22) * invdet,
+
+				(m11 * m22 * m33 -
+				m11 * m23 * m32 -
+				m21 * m12 * m33 +
+				m21 * m13 * m32 +
+				m31 * m12 * m23 -
+				m31 * m13 * m22) * invdet
+			);
+		}
 	}
 }
