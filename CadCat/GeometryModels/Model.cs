@@ -24,11 +24,13 @@ namespace CadCat.GeometryModels
 	public class Model : Utilities.BindableObject
 	{
 		public Transform transform;
+
 		public int ModelID
 		{
 			get;
 			private set;
 		}
+
 		public string Name
 		{
 			get

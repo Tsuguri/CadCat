@@ -72,6 +72,7 @@ namespace CadCat.DataStructures
 		private ICommand createTorusCommand;
 		private ICommand createCubeCommand;
 		private ICommand goToSelectedCommand;
+		private ICommand createElipsoideCommand;
 
 		public ICommand CreateTorusCommand
 		{
@@ -97,6 +98,14 @@ namespace CadCat.DataStructures
 			}
 		}
 
+		public ICommand CreateEllipsoideCommand
+		{
+			get
+			{
+				return createElipsoideCommand ?? (createElipsoideCommand = new Utilities.CommandHandler(CreateEllipsoide));
+			}
+		}
+
 		#endregion
 
 		#region CreatingModels
@@ -115,6 +124,11 @@ namespace CadCat.DataStructures
 		private void CreateCube()
 		{
 			AddNewModel(new Cube());
+		}
+
+		private void CreateEllipsoide()
+		{
+			AddNewModel(new Elipsoide());
 		}
 
 		#endregion

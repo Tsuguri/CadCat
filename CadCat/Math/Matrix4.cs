@@ -574,5 +574,10 @@ namespace CadCat.Math
 				m31 * m13 * m22) * invdet
 			);
 		}
+
+		public Matrix4 GetTransposed()
+		{
+			return new Matrix4(m11, m21, m31, m41, m12, m22, m32, m43, m13, m23, m33, m43, m14, m24, m34, m44);
+		}
 	}
 }

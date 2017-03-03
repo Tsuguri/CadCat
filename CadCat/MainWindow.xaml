@@ -16,6 +16,7 @@
         <Menu Grid.Row="0">
             <MenuItem Header="Add Torus" Command="{Binding CreateTorusCommand}"/>
             <MenuItem Header="Add Cube" Command="{Binding CreateCubeCommand}"/>
+            <MenuItem Header="Add Ellipsoide" Command="{Binding CreateEllipsoideCommand}" />
             <MenuItem Header="Go To Selected" Command="{Binding GoToSelectedCommand}"/>
         </Menu>
         <Grid Grid.Row="1">
@@ -113,6 +114,25 @@
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type models:Cube}">
                             <TextBlock>turbo cube</TextBlock>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type models:Elipsoide}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="20"/>
+                                    <RowDefinition Height="20"/>
+                                    <RowDefinition Height="20"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Column="0" Grid.Row="0">A</TextBlock>
+                                <ex:DoubleUpDown Grid.Column="1" Grid.Row="0" Value="{Binding A}"/>
+                                <TextBlock Grid.Column="0" Grid.Row="1">B</TextBlock>
+                                <ex:DoubleUpDown Grid.Column="1" Grid.Row="1" Value="{Binding B}"/>
+                                <TextBlock Grid.Column="0" Grid.Row="2">C</TextBlock>
+                                <ex:DoubleUpDown Grid.Column="1" Grid.Row="2" Value="{Binding C}"/>
+                            </Grid>
                         </DataTemplate>
                     </ContentControl.Resources>
                 </ContentControl>

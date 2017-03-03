@@ -44,6 +44,20 @@ namespace CadCat.Rendering
 			LineColor = Colors.Gold;
 		}
 
+		private double SolveEquation(double A, double B, double C)
+		{
+			double delta = System.Math.Sqrt(B * B - 4 * A * C);
+			if (delta >= 0)
+			{
+				double sqrt = System.Math.Sqrt(delta);
+				double x1 = (-B - sqrt) / (2 * A);
+				double x2 = (-B + sqrt) / (2 * A);
+				return System.Math.Abs( System.Math.Min(x1, x2));
+			}
+			else
+				return -1.0;
+		}
+
 		public void UpdatePoints()
 		{
 			#region stupid hack
@@ -53,50 +67,90 @@ namespace CadCat.Rendering
 				targetImage.Source = bufferBitmap;
 			}
 			#endregion
+
+			int k = 0;
+			GeometryModels.Elipsoide ellipsoide = null;
+			while (ellipsoide == null && k < Scene.Models.Count)
+			{
+				ellipsoide = Scene.Models[k] as GeometryModels.Elipsoide;
+				k++;
+			}
+			if (ellipsoide == null)
+				return;
+
+			Matrix4 diagonal = Matrix4.CreateIdentity();
+			diagonal[0, 0] = ellipsoide.A;
+			diagonal[1, 1] = ellipsoide.B;
+			diagonal[2, 2] = ellipsoide.C;
+			diagonal[3, 3] = -1.0;
+
+			Matrix4 mat = Matrix4.CreateTranslation(0,0,-3) ;// Scene.ActiveCamera.ViewProjectionMatrix * ellipsoide.transform.CreateTransformMatrix(); // zmienić na coś mądrzejszego
+			Matrix4 invmat = mat.Inversed().GetTransposed();
+
+			Matrix4 em =invmat * diagonal * mat;
+
+
 			var tmpLine = new Line();
 			using (bufferBitmap.GetBitmapContext())
 			{
 				bufferBitmap.Clear(Colors.Black);
-
-				var cameraMatrix = Scene.ActiveCamera.ViewProjectionMatrix;
-
-				Matrix4 activeMatrix = cameraMatrix;
-				var activeModel = -1;
-				var width = bufferBitmap.PixelWidth;
-				var height = bufferBitmap.PixelHeight;
-				int stroke = Thickness;
-
-				var view = Scene.ActiveCamera.CreateFrustum();
-				var transRadius = Scene.ActiveCamera.CreateTransRadius();
-				var rot = Scene.ActiveCamera.CreateAngleRotation();
-				var trans = Scene.ActiveCamera.CreateTargetTranslation();
-				foreach (var line in Scene.GetLines(modelData))
-				{
-					if (modelData.ModelID != activeModel)
+				for (int i = 0; i < bufferBitmap.Width; i++)
+					for (int j = 0; j < bufferBitmap.Height; j++)
 					{
-						activeModel = modelData.ModelID;
-						var modelmat = modelData.transform.CreateTransformMatrix();
-						activeMatrix = cameraMatrix * modelmat;
-						stroke = (Scene.SelectedModel != null && Scene.SelectedModel.ModelID == modelData.ModelID) ? SelectedItemThickness : Thickness;
+						double x = 10*(i / bufferBitmap.Width - 0.5);
+						double y = 10*(j / bufferBitmap.Height - 0.5);
+
+
+						double A = em[2, 2];
+						double B = em[2, 0] * x + em[2, 1] * y + em[2, 3] + em[0, 2] * x + em[1, 2] * y + em[3, 2];
+						double C = em[0, 0] * x * x + em[0, 1] * x * y + em[0, 3] * x +
+							em[1, 0] * x * y + em[1, 1] * y * y + em[1, 3] * y +
+							em[3, 0] * x + em[3, 1] * y + em[3, 3];
+
+						double result = SolveEquation(A, B, C);
+						if (result <= 0)
+							continue;
+						bufferBitmap.SetPixel(i, j, (byte)(255 * (result)), 0, 0);
 					}
-					var from = (activeMatrix * new Vector4(line.from, 1)).ToNormalizedVector3();
-					from.X = from.X / 2 + 0.5;
-					from.Y = from.Y / 2 + 0.5;
-					from.Z = from.Z / 2 + 0.5;
-					from.Y = 1 - from.Y;
+				//var cameraMatrix = Scene.ActiveCamera.ViewProjectionMatrix;
 
-					var to = (activeMatrix * new Vector4(line.to, 1)).ToNormalizedVector3();
+				//Matrix4 activeMatrix = cameraMatrix;
+				//var activeModel = -1;
+				//var width = bufferBitmap.PixelWidth;
+				//var height = bufferBitmap.PixelHeight;
+				//int stroke = Thickness;
 
-					to.X = to.X / 2 + 0.5;
-					to.Y = to.Y / 2 + 0.5;
-					to.Z = to.Z / 2 + 0.5;
-					to.Y = 1 - to.Y;
+				//var view = Scene.ActiveCamera.CreateFrustum();
+				//var transRadius = Scene.ActiveCamera.CreateTransRadius();
+				//var rot = Scene.ActiveCamera.CreateAngleRotation();
+				//var trans = Scene.ActiveCamera.CreateTargetTranslation();
+				//foreach (var line in Scene.GetLines(modelData))
+				//{
+				//	if (modelData.ModelID != activeModel)
+				//	{
+				//		activeModel = modelData.ModelID;
+				//		var modelmat = modelData.transform.CreateTransformMatrix();
+				//		activeMatrix = cameraMatrix * modelmat;
+				//		stroke = (Scene.SelectedModel != null && Scene.SelectedModel.ModelID == modelData.ModelID) ? SelectedItemThickness : Thickness;
+				//	}
+				//	var from = (activeMatrix * new Vector4(line.from, 1)).ToNormalizedVector3();
+				//	from.X = from.X / 2 + 0.5;
+				//	from.Y = from.Y / 2 + 0.5;
+				//	from.Z = from.Z / 2 + 0.5;
+				//	from.Y = 1 - from.Y;
 
-					tmpLine.from = from;
-					tmpLine.to = to;
-					if (Clip(tmpLine, 0.99, 0.01))
-						bufferBitmap.DrawLineAa((int)(tmpLine.from.X * width), (int)(tmpLine.from.Y * height), (int)(tmpLine.to.X * width), (int)(tmpLine.to.Y * height), LineColor, stroke);
-				}
+				//	var to = (activeMatrix * new Vector4(line.to, 1)).ToNormalizedVector3();
+
+				//	to.X = to.X / 2 + 0.5;
+				//	to.Y = to.Y / 2 + 0.5;
+				//	to.Z = to.Z / 2 + 0.5;
+				//	to.Y = 1 - to.Y;
+
+				//	tmpLine.from = from;
+				//	tmpLine.to = to;
+				//	if (Clip(tmpLine, 0.99, 0.01))
+				//		bufferBitmap.DrawLineAa((int)(tmpLine.from.X * width), (int)(tmpLine.from.Y * height), (int)(tmpLine.to.X * width), (int)(tmpLine.to.Y * height), LineColor, stroke);
+				//}
 			}
 		}
 

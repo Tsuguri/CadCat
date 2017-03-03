@@ -84,6 +84,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="DataStructures\SceneData.cs" />
+    <Compile Include="GeometryModels\Elipsoida.cs" />
     <Compile Include="GeometryModels\Model.cs" />
     <Compile Include="DataStructures\Transform.cs" />
     <Compile Include="GeometryModels\Cube.cs" />

@@ -72,11 +72,11 @@ namespace CadCat.Rendering
 
 		private void CreateViewProjectionMatrix()
 		{
-			var view = CreateFrustum();
+			//var view = CreateFrustum();
 			var transRadius = CreateTransRadius();
 			var rot = CreateAngleRotation();
 			var trans = CreateTargetTranslation();
-			viewProjection = view * transRadius * rot * trans;
+			viewProjection = /*view **/ transRadius * rot * trans;
 		}
 
 		public Matrix4 CreateFrustum()
