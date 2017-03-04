@@ -52,10 +52,32 @@ namespace CadCat.Rendering
 				double sqrt = System.Math.Sqrt(delta);
 				double x1 = (-B - sqrt) / (2 * A);
 				double x2 = (-B + sqrt) / (2 * A);
-				return System.Math.Abs( System.Math.Min(x1, x2));
+				return System.Math.Min(x1, x2);
 			}
 			else
 				return -1.0;
+		}
+
+		Vector4 ComputeNormal(Vector4 position, GeometryModels.Elipsoide ellipsoide)
+		{
+			return new Vector4( new Vector3(position.X * ellipsoide.A, position.Y * ellipsoide.B, position.Z * ellipsoide.C).Normalized());
+		}
+
+		private Vector3 lightColor = new Vector3(1.0, 1.0, 0.0);
+		private Vector3 ellipseColor = new Vector3(1.0, 1.0, 0.0);
+		private double lightIntensity = 2.0;
+		private double specularStrength = 0.6;
+		Vector3 ComputePhong(Vector3 normal,Vector3 lightDir)
+		{
+			double ambient = 0.1;
+			Vector3 ambientColor = lightColor * ambient;
+			double diff = System.Math.Max(normal.DotProduct(lightDir), 0.0);
+			Vector3 diffuse = lightColor * diff;
+
+			double spec = System.Math.Pow(System.Math.Max(lightDir.DotProduct(normal), 0.0f), lightIntensity);
+			Vector3 specular = lightColor * spec * specularStrength;
+			return (ambientColor + diffuse + specular) * ellipseColor;
+
 		}
 
 		public void UpdatePoints()
@@ -84,12 +106,18 @@ namespace CadCat.Rendering
 			diagonal[2, 2] = ellipsoide.C;
 			diagonal[3, 3] = -1.0;
 
-			Matrix4 mat = Matrix4.CreateTranslation(0,0,-3) ;// Scene.ActiveCamera.ViewProjectionMatrix * ellipsoide.transform.CreateTransformMatrix(); // zmienić na coś mądrzejszego
-			Matrix4 invmat = mat.Inversed().GetTransposed();
+			Matrix4 cameraMatrix = Scene.ActiveCamera.ViewProjectionMatrix;
+			Matrix4 modelMatrix = ellipsoide.transform.CreateTransformMatrix();
+			Matrix4 mat = cameraMatrix * modelMatrix; // zmienić na coś mądrzejszego
+			mat = mat.Inversed();
+			Matrix4 invmat = mat.GetTransposed();
+			Matrix4 tmp = diagonal * mat;
+			Matrix4 em =invmat * tmp;
 
-			Matrix4 em =invmat * diagonal * mat;
+			Matrix4 inversedCamera = Scene.ActiveCamera.ViewProjectionMatrix.Inversed();
+			Matrix4 inversedModel = ellipsoide.transform.CreateTransformMatrix().Inversed();
 
-
+			Matrix4 transposedInverseViewModel = (inversedModel * inversedCamera).GetTransposed();
 			var tmpLine = new Line();
 			using (bufferBitmap.GetBitmapContext())
 			{
@@ -97,8 +125,8 @@ namespace CadCat.Rendering
 				for (int i = 0; i < bufferBitmap.Width; i++)
 					for (int j = 0; j < bufferBitmap.Height; j++)
 					{
-						double x = 10*(i / bufferBitmap.Width - 0.5);
-						double y = 10*(j / bufferBitmap.Height - 0.5);
+						double x = 2*(i / bufferBitmap.Width) - 1.0;
+						double y = 2*(j / bufferBitmap.Height) - 1.0;
 
 
 						double A = em[2, 2];
@@ -110,7 +138,19 @@ namespace CadCat.Rendering
 						double result = SolveEquation(A, B, C);
 						if (result <= 0)
 							continue;
-						bufferBitmap.SetPixel(i, j, (byte)(255 * (result)), 0, 0);
+
+						Vector4 worldPosition = inversedCamera * new Vector4(x, y, result);
+						Vector4 modelPosition = inversedModel * worldPosition;
+						Vector4 modelSpaceNormal = ComputeNormal(modelPosition, ellipsoide);
+						Vector4 viewNormal = transposedInverseViewModel * modelSpaceNormal;
+						Vector3 normal = new Vector3(viewNormal.X, viewNormal.Y, viewNormal.Z).Normalized();
+
+						Vector3 color = ComputePhong(normal, (new Vector3(-x,-y,-result)).Normalized());
+
+						color.X = System.Math.Min(color.X, 1.0);
+						color.Y = System.Math.Min(color.Y, 1.0);
+						color.Z = System.Math.Min(color.Z, 1.0);
+						bufferBitmap.SetPixel(i, j, (byte)(255 * (color.X)),(byte)(255 * (color.Y)), (byte)(255 * (color.Z)));
 					}
 				//var cameraMatrix = Scene.ActiveCamera.ViewProjectionMatrix;
 

@@ -21,6 +21,14 @@ namespace CadCat.Math
 			W = point;
 		}
 
+		public Vector4(Real x, Real y, Real z, Real w=1.0)
+		{
+			X = x;
+			Y = y;
+			Z = z;
+			W = w;
+		}
+
 		public Vector3 ToNormalizedVector3()
 		{
 			Vector3 vec = new Vector3();

@@ -30,5 +30,21 @@ namespace CadCat.Math
 		{
 			return new Vector3(vec.X * scalar, vec.Y * scalar, vec.Z * scalar);
 		}
+
+		public static Vector3 operator *(Vector3 vec1, Vector3 vec2)
+		{
+			return new Vector3(vec1.X * vec2.X, vec1.Y * vec2.Y, vec1.Z * vec2.Z);
+		}
+
+		public Vector3 Normalized()
+		{
+			Real length = System.Math.Sqrt(X*X+Y*Y+Z*Z);
+			return new Vector3(X / length, Y / length, Z / length);
+		}
+
+		public Real DotProduct(Vector3 vec)
+		{
+			return X * vec.X + Y * vec.Y + Z * vec.Z;
+		}
     }
 }
