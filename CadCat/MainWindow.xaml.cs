@@ -108,7 +108,7 @@ namespace CadCat
 				data.UpdateFrameData();
 				ctx.UpdatePoints();
 			};
-			timer.Interval = new TimeSpan(0, 0, 0, 0, 33);
+			timer.Interval = new TimeSpan(0, 0, 0, 0, 100);
 			timer.Start();
 		}
 	}

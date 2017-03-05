@@ -9,6 +9,9 @@ namespace CadCat.Rendering
 {
 	public class Camera
 	{
+		internal bool changed = false;
+
+
 		private Vector3 lookingAt;
 		public Vector3 LookingAt
 		{
@@ -19,11 +22,38 @@ namespace CadCat.Rendering
 			set
 			{
 				lookingAt = value;
+				changed = true;
 				viewProjection = null;
 			}
 		}
-		public double HorizontalAngle { get; set; }
-		public double VerticalAngle { get; set; }
+		private double horizontalA;
+		private double verticalA;
+
+		public double HorizontalAngle
+		{
+			get
+			{
+				return horizontalA;
+			}
+
+			set
+			{
+				horizontalA = value;
+				changed = true;
+			}
+		}
+		public double VerticalAngle
+		{
+			get
+			{
+				return verticalA;
+			}
+			set
+			{
+				verticalA = value;
+				changed = true;
+			}
+		}
 		private double radius;
 		public double Radius
 		{
@@ -36,6 +66,8 @@ namespace CadCat.Rendering
 
 				viewProjection = null;
 				radius = value;
+				changed = true;
+
 				if (radius < 1)
 					radius = 1;
 
@@ -56,6 +88,7 @@ namespace CadCat.Rendering
 			{
 				if (aspectRatio != value)
 					viewProjection = null;
+				changed = true;
 				aspectRatio = value;
 			}
 		}
@@ -118,11 +151,11 @@ namespace CadCat.Rendering
 			viewProjection = null;
 		}
 
-		public void Move(double dX, double dY,double dZ=0.0)
+		public void Move(double dX, double dY, double dZ = 0.0)
 		{
-			var trans = new Vector3(dX, -dY,dZ*Radius);
-			var trans2 = Matrix4.CreateRotationY(Utils.DegToRad(180+ HorizontalAngle))*Matrix4.CreateRotationX(Utils.DegToRad(-VerticalAngle)) * trans;
-			LookingAt += trans2*Radius * 0.001;
+			var trans = new Vector3(dX, -dY, dZ * Radius);
+			var trans2 = Matrix4.CreateRotationY(Utils.DegToRad(180 + HorizontalAngle)) * Matrix4.CreateRotationX(Utils.DegToRad(-VerticalAngle)) * trans;
+			LookingAt += trans2 * Radius * 0.001;
 		}
 	}
 }

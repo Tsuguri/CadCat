@@ -23,6 +23,9 @@ namespace CadCat.GeometryModels
 	}
 	public class Model : Utilities.BindableObject
 	{
+		internal bool changed = false;
+
+
 		public Transform transform;
 
 		public int ModelID
@@ -60,6 +63,7 @@ namespace CadCat.GeometryModels
 			set
 			{
 				transform.Position.Y = value;
+				
 				OnPropertyChanged();
 			}
 		}

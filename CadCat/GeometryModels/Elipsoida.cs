@@ -12,6 +12,23 @@ namespace CadCat.GeometryModels
 		private double b = 1;
 		private double c = 1;
 
+
+		public Elipsoide()
+		{
+			Handler();
+		}
+
+		private void Handler()
+		{
+			base.PropertyChanged += Elipsoide_PropertyChanged;
+			changed = true;
+		}
+
+		private void Elipsoide_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+		{
+			changed = true;
+		}
+
 		public double A
 		{
 			get
@@ -20,6 +37,7 @@ namespace CadCat.GeometryModels
 			}
 			set
 			{
+				changed = true;
 				a = value;
 				OnPropertyChanged();
 			}
@@ -34,6 +52,7 @@ namespace CadCat.GeometryModels
 			set
 			{
 				b = value;
+				changed = true;
 				OnPropertyChanged();
 			}
 		}
@@ -47,6 +66,7 @@ namespace CadCat.GeometryModels
 			set
 			{
 				c = value;
+				changed = true;
 				OnPropertyChanged();
 			}
 		}
@@ -60,10 +80,12 @@ namespace CadCat.GeometryModels
 			}
 			set
 			{
+				changed = true;
 				lightIntensity = value;
 				OnPropertyChanged();
 			}
 		}
+
 
 		public override string GetName()
 		{

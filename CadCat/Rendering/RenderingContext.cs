@@ -60,14 +60,14 @@ namespace CadCat.Rendering
 
 		Vector4 ComputeNormal(Vector4 position, GeometryModels.Elipsoide ellipsoide)
 		{
-			return new Vector4( new Vector3(position.X * ellipsoide.A, position.Y * ellipsoide.B, position.Z * ellipsoide.C).Normalized());
+			return new Vector4(new Vector3(position.X * ellipsoide.A, position.Y * ellipsoide.B, position.Z * ellipsoide.C).Normalized());
 		}
 
 		private Vector3 lightColor = new Vector3(1.0, 1.0, 0.0);
 		private Vector3 ellipseColor = new Vector3(1.0, 1.0, 0.0);
 		private double lightIntensity = 2.0;
 		private double specularStrength = 0.6;
-		Vector3 ComputePhong(Vector3 normal,Vector3 lightDir)
+		Vector3 ComputePhong(Vector3 normal, Vector3 lightDir)
 		{
 			double ambient = 0.1;
 			Vector3 ambientColor = lightColor * ambient;
@@ -79,6 +79,8 @@ namespace CadCat.Rendering
 			return (/*ambientColor + diffuse + */specular) * ellipseColor;
 
 		}
+
+		int detailLevel = 4;
 
 		public void UpdatePoints()
 		{
@@ -100,6 +102,17 @@ namespace CadCat.Rendering
 			if (ellipsoide == null)
 				return;
 
+			if (ellipsoide.changed || Scene.ActiveCamera.changed)
+			{
+				ellipsoide.changed = false;
+				Scene.ActiveCamera.changed = false;
+				detailLevel = 4;
+			}
+
+			if (detailLevel < 0)
+				return;
+
+
 			lightIntensity = ellipsoide.LightIntensity;
 
 			Matrix4 diagonal = Matrix4.CreateIdentity();
@@ -114,7 +127,7 @@ namespace CadCat.Rendering
 			mat = mat.Inversed();
 			Matrix4 invmat = mat.GetTransposed();
 			Matrix4 tmp = diagonal * mat;
-			Matrix4 em =invmat * tmp;
+			Matrix4 em = invmat * tmp;
 
 			Matrix4 inversedCamera = Scene.ActiveCamera.ViewProjectionMatrix.Inversed();
 			Matrix4 inversedModel = ellipsoide.transform.CreateTransformMatrix().Inversed();
@@ -125,11 +138,23 @@ namespace CadCat.Rendering
 			using (bufferBitmap.GetBitmapContext())
 			{
 				bufferBitmap.Clear(Colors.DarkBlue);
-				for (int i = 0; i < bufferBitmap.Width; i++)
-					for (int j = 0; j < bufferBitmap.Height; j++)
+				bool standardRendering = false;
+				int hDetails = detailLevel * 4;
+				int vDetails = detailLevel * 4;
+				if (hDetails > bufferBitmap.Height)
+					standardRendering = true;
+				if (vDetails > bufferBitmap.Width)
+					standardRendering = true;
+				int hWidth = 1 + (int)bufferBitmap.Width / hDetails;
+				int vWidth = 1 + (int)bufferBitmap.Height / vDetails;
+
+				int iMax = standardRendering ? (int)bufferBitmap.Width : hDetails;
+				int jMax = standardRendering ? (int)bufferBitmap.Height : vDetails;
+				for (int i = 0; i < iMax; i++)
+					for (int j = 0; j < jMax; j++)
 					{
-						double x = (2*(i / bufferBitmap.Width) - 1.0)*ratio;
-						double y = 2*(j / bufferBitmap.Height) - 1.0;
+						double x = (2 * ((standardRendering ? i : ((i + 0.5) * hWidth)) / bufferBitmap.Width) - 1.0) * ratio;
+						double y = 2 * ((standardRendering ? j : ((j + 0.5) * vWidth)) / bufferBitmap.Height) - 1.0;
 
 
 						double A = em[2, 2];
@@ -148,52 +173,28 @@ namespace CadCat.Rendering
 						Vector4 viewNormal = transposedInverseViewModel * modelSpaceNormal;
 						Vector3 normal = new Vector3(viewNormal.X, viewNormal.Y, viewNormal.Z).Normalized();
 
-						Vector3 color = ComputePhong(normal, (new Vector3(-x,-y,-result)).Normalized());
+						Vector3 color = ComputePhong(normal, (new Vector3(-x, -y, -result)).Normalized());
 
 						color.X = System.Math.Min(color.X, 1.0);
 						color.Y = System.Math.Min(color.Y, 1.0);
 						color.Z = System.Math.Min(color.Z, 1.0);
-						bufferBitmap.SetPixel(i, j, (byte)(255 * (color.X)),(byte)(255 * (color.Y)), (byte)(255 * (color.Z)));
+						if (standardRendering)
+							bufferBitmap.SetPixel(i, j, (byte)(255 * (color.X)), (byte)(255 * (color.Y)), (byte)(255 * (color.Z)));
+						else
+						{
+							int x0 = i * hWidth;
+							int y0 = j * vWidth;
+							int x1 = (i + 1) * hWidth;
+							int y1 = (j + 1) * vWidth;
+							//bufferBitmap.DrawQuad(x0, y0, x1, y0, x1, y1, x0, y1, Color.FromRgb((byte)(255 * (color.X)), (byte)(255 * (color.Y)), (byte)(255 * (color.Z))));
+							bufferBitmap.FillRectangle(x0, y0, x1, y1, Color.FromRgb((byte)(255 * (color.X)), (byte)(255 * (color.Y)), (byte)(255 * (color.Z))));
+						}
 					}
-				//var cameraMatrix = Scene.ActiveCamera.ViewProjectionMatrix;
+				////if (detailLevel < 9)
+				detailLevel *= 2;
+				if (standardRendering)
+					detailLevel = -1;
 
-				//Matrix4 activeMatrix = cameraMatrix;
-				//var activeModel = -1;
-				//var width = bufferBitmap.PixelWidth;
-				//var height = bufferBitmap.PixelHeight;
-				//int stroke = Thickness;
-
-				//var view = Scene.ActiveCamera.CreateFrustum();
-				//var transRadius = Scene.ActiveCamera.CreateTransRadius();
-				//var rot = Scene.ActiveCamera.CreateAngleRotation();
-				//var trans = Scene.ActiveCamera.CreateTargetTranslation();
-				//foreach (var line in Scene.GetLines(modelData))
-				//{
-				//	if (modelData.ModelID != activeModel)
-				//	{
-				//		activeModel = modelData.ModelID;
-				//		var modelmat = modelData.transform.CreateTransformMatrix();
-				//		activeMatrix = cameraMatrix * modelmat;
-				//		stroke = (Scene.SelectedModel != null && Scene.SelectedModel.ModelID == modelData.ModelID) ? SelectedItemThickness : Thickness;
-				//	}
-				//	var from = (activeMatrix * new Vector4(line.from, 1)).ToNormalizedVector3();
-				//	from.X = from.X / 2 + 0.5;
-				//	from.Y = from.Y / 2 + 0.5;
-				//	from.Z = from.Z / 2 + 0.5;
-				//	from.Y = 1 - from.Y;
-
-				//	var to = (activeMatrix * new Vector4(line.to, 1)).ToNormalizedVector3();
-
-				//	to.X = to.X / 2 + 0.5;
-				//	to.Y = to.Y / 2 + 0.5;
-				//	to.Z = to.Z / 2 + 0.5;
-				//	to.Y = 1 - to.Y;
-
-				//	tmpLine.from = from;
-				//	tmpLine.to = to;
-				//	if (Clip(tmpLine, 0.99, 0.01))
-				//		bufferBitmap.DrawLineAa((int)(tmpLine.from.X * width), (int)(tmpLine.from.Y * height), (int)(tmpLine.to.X * width), (int)(tmpLine.to.Y * height), LineColor, stroke);
-				//}
 			}
 		}
 
