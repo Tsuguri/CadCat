@@ -22,7 +22,7 @@ namespace CadCat.DataStructures
 
 		public Matrix4 CreateTransformMatrix()
 		{
-			return Matrix4.CreateTranslation(Position) * Matrix4.CreateRotation(Rotation) * Matrix4.CreateScale(Scale);
+			return Matrix4.CreateTranslation(Position.X,-Position.Y,Position.Z) * Matrix4.CreateRotation(Rotation) * Matrix4.CreateScale(Scale);
 		}
 
     }
