@@ -125,6 +125,7 @@
                                     <RowDefinition Height="20"/>
                                     <RowDefinition Height="20"/>
                                     <RowDefinition Height="20"/>
+                                    <RowDefinition Height="20"/>
                                 </Grid.RowDefinitions>
                                 <TextBlock Grid.Column="0" Grid.Row="0">A</TextBlock>
                                 <ex:DoubleUpDown Grid.Column="1" Grid.Row="0" Value="{Binding A}"/>
@@ -132,6 +133,9 @@
                                 <ex:DoubleUpDown Grid.Column="1" Grid.Row="1" Value="{Binding B}"/>
                                 <TextBlock Grid.Column="0" Grid.Row="2">C</TextBlock>
                                 <ex:DoubleUpDown Grid.Column="1" Grid.Row="2" Value="{Binding C}"/>
+                                <TextBlock Grid.Column="0" Grid.Row="3">Light</TextBlock>
+                                <!--<ex:IntegerUpDown Grid.Column="1" Grid.Row="3" Value="{Binding LightIntensity}"/>-->
+                                <Slider Minimum="0" Maximum="50" Ticks="200" Value="{Binding LightIntensity}" Grid.Column="1" Grid.Row="3" />
                             </Grid>
                         </DataTemplate>
                     </ContentControl.Resources>

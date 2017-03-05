@@ -89,11 +89,11 @@ namespace CadCat.Rendering
 		}
 		public Matrix4 CreateAngleRotation()
 		{
-			return Matrix4.CreateRotation(Utils.DegToRad(-VerticalAngle), Utils.DegToRad(-HorizontalAngle), 0);
+			return Matrix4.CreateRotation(Utils.DegToRad(VerticalAngle), Utils.DegToRad(-HorizontalAngle), 0);
 		}
 		public Matrix4 CreateTargetTranslation()
 		{
-			return Matrix4.CreateTranslation(-LookingAt.X, -LookingAt.Y, -LookingAt.Z);
+			return Matrix4.CreateTranslation(-LookingAt.X, LookingAt.Y, -LookingAt.Z);
 		}
 
 		public Camera()

@@ -76,7 +76,7 @@ namespace CadCat.Rendering
 
 			double spec = System.Math.Pow(System.Math.Max(lightDir.DotProduct(normal), 0.0f), lightIntensity);
 			Vector3 specular = lightColor * spec * specularStrength;
-			return (ambientColor + diffuse + specular) * ellipseColor;
+			return (/*ambientColor + diffuse + */specular) * ellipseColor;
 
 		}
 
@@ -100,6 +100,8 @@ namespace CadCat.Rendering
 			if (ellipsoide == null)
 				return;
 
+			lightIntensity = ellipsoide.LightIntensity;
+
 			Matrix4 diagonal = Matrix4.CreateIdentity();
 			diagonal[0, 0] = ellipsoide.A;
 			diagonal[1, 1] = ellipsoide.B;
@@ -119,13 +121,14 @@ namespace CadCat.Rendering
 
 			Matrix4 transposedInverseViewModel = (inversedModel * inversedCamera).GetTransposed();
 			var tmpLine = new Line();
+			double ratio = bufferBitmap.Width / bufferBitmap.Height;
 			using (bufferBitmap.GetBitmapContext())
 			{
-				bufferBitmap.Clear(Colors.Black);
+				bufferBitmap.Clear(Colors.DarkBlue);
 				for (int i = 0; i < bufferBitmap.Width; i++)
 					for (int j = 0; j < bufferBitmap.Height; j++)
 					{
-						double x = 2*(i / bufferBitmap.Width) - 1.0;
+						double x = (2*(i / bufferBitmap.Width) - 1.0)*ratio;
 						double y = 2*(j / bufferBitmap.Height) - 1.0;
 
 

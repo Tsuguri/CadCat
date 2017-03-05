@@ -51,6 +51,20 @@ namespace CadCat.GeometryModels
 			}
 		}
 
+		private int lightIntensity = 2;
+		public int LightIntensity
+		{
+			get
+			{
+				return lightIntensity;
+			}
+			set
+			{
+				lightIntensity = value;
+				OnPropertyChanged();
+			}
+		}
+
 		public override string GetName()
 		{
 			return "Elipsoida " + base.GetName();
