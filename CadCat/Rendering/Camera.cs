@@ -118,7 +118,7 @@ namespace CadCat.Rendering
 		}
 		public Matrix4 CreateTransRadius()
 		{
-			return Matrix4.CreateTranslation(0, 0, Radius);
+			return Matrix4.CreateTranslation(0, 0, 5);
 		}
 		public Matrix4 CreateAngleRotation()
 		{

@@ -116,9 +116,9 @@ namespace CadCat.Rendering
 			lightIntensity = ellipsoide.LightIntensity;
 
 			Matrix4 diagonal = Matrix4.CreateIdentity();
-			diagonal[0, 0] = ellipsoide.A;
-			diagonal[1, 1] = ellipsoide.B;
-			diagonal[2, 2] = ellipsoide.C;
+			diagonal[0, 0] = 1 / (ellipsoide.A * ellipsoide.A);
+			diagonal[1, 1] = 1 / (ellipsoide.B * ellipsoide.B);
+			diagonal[2, 2] = 1 / (ellipsoide.C * ellipsoide.C);
 			diagonal[3, 3] = -1.0;
 
 			Matrix4 cameraMatrix = Scene.ActiveCamera.ViewProjectionMatrix;
@@ -153,8 +153,8 @@ namespace CadCat.Rendering
 				for (int i = 0; i < iMax; i++)
 					for (int j = 0; j < jMax; j++)
 					{
-						double x = (2 * ((standardRendering ? i : ((i + 0.5) * hWidth)) / bufferBitmap.Width) - 1.0) * ratio;
-						double y = 2 * ((standardRendering ? j : ((j + 0.5) * vWidth)) / bufferBitmap.Height) - 1.0;
+						double x = (2 * ((standardRendering ? i : ((i + 0.5) * hWidth)) / bufferBitmap.Width) - 1.0) * ratio * Scene.ActiveCamera.Radius;
+						double y = (2 * ((standardRendering ? j : ((j + 0.5) * vWidth)) / bufferBitmap.Height) - 1.0) * Scene.ActiveCamera.Radius;
 
 
 						double A = em[2, 2];
