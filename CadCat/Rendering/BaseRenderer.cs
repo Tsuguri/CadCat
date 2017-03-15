@@ -80,7 +80,7 @@ namespace CadCat.Rendering
 
 		public bool Clip(DataStructures.Line clipped, double farMargin = 1.0, double closeMargin = 0.0)
 		{
-			return clipped.from.Z > 0.0 && clipped.to.Z > 0.0 &&
+			return //clipped.from.Z > 0.0 && clipped.to.Z > 0.0 &&
 					ClipAxis(clipped, clipped.from.X, clipped.to.X, farMargin, closeMargin) &&
 					ClipAxis(clipped, clipped.from.Y, clipped.to.Y, farMargin, closeMargin);
 		}
@@ -100,7 +100,7 @@ namespace CadCat.Rendering
 
 		}
 
-		protected void ProcessLine(WriteableBitmap bitmap, Line line, Matrix4 matrix,Color color, int stroke)
+		protected void ProcessLine(WriteableBitmap bitmap, Line line, Matrix4 matrix, Color color, int stroke)
 		{
 			var from = (matrix * new Vector4(line.from, 1)).ToNormalizedVector3();
 			from = NormalizeToBitmapSpace(from);

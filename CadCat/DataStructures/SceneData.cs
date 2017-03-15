@@ -26,7 +26,7 @@ namespace CadCat.DataStructures
 			get;set;
 		}
 
-		public double EyeDistance;
+		public double EyeDistance = 0.1;
 
 
 		#region Models

@@ -15,8 +15,8 @@ namespace CadCat.Rendering
 		private ModelData modelData = new ModelData();
 		//public WriteableBitmap leftBitmap;
 		public WriteableBitmap rightBitmap;
-		private Color leftEye = Colors.Magenta;
-		private Color rightEye = Colors.Blue;
+		private Color leftEye = Color.FromRgb(0, 240, 255);
+		private Color rightEye = Colors.Red;
 
 		public override void Resize(double width, double height)
 		{
@@ -38,8 +38,8 @@ namespace CadCat.Rendering
 
 			#endregion
 
-			var cameraLeftMatrix = scene.ActiveCamera.GetLeftEyeMatrix();
-			var cameraRightMatrix = scene.ActiveCamera.ViewProjectionMatrix;
+			var cameraLeftMatrix = scene.ActiveCamera.GetLeftEyeMatrix(scene.EyeDistance/2.0,scene.ActiveCamera.Radius*5);
+			var cameraRightMatrix = scene.ActiveCamera.GetRightEyeMatrix(scene.EyeDistance / 2.0, scene.ActiveCamera.Radius*5);
 
 			Matrix4 activeLeftMatrix = cameraLeftMatrix;
 			Matrix4 activeRightMatrix = cameraRightMatrix;
@@ -61,7 +61,7 @@ namespace CadCat.Rendering
 			}
 
 			#region BlitAndDispose
-			bufferBitmap.Blit(new System.Windows.Rect(0, 0, bufferBitmap.Width, bufferBitmap.Height), rightBitmap, new System.Windows.Rect(0, 0, rightBitmap.Width, rightBitmap.Height));
+			bufferBitmap.Blit(new System.Windows.Rect(0, 0, bufferBitmap.Width, bufferBitmap.Height), rightBitmap, new System.Windows.Rect(0, 0, rightBitmap.Width, rightBitmap.Height), WriteableBitmapExtensions.BlendMode.Additive);
 			rightContext.Dispose();
 			leftContext.Dispose();
 			#endregion

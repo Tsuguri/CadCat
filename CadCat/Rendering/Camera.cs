@@ -79,9 +79,42 @@ namespace CadCat.Rendering
 			viewProjection = view * transRadius * rot * trans;
 		}
 
-		public Matrix4 GetLeftEyeMatrix()
+		public Matrix4 GetRightEyeMatrix(double halfEyeSeparation, double focusDepth)
 		{
-			var view = Matrix4.CreatePerspectiveOffCenter(-1, 1, -1, 1, 0.1, 100);
+			double fovy = Math.Utils.DegToRad(45);
+			double zNear = 1;
+			double zFar = 60;
+			double top = zNear * System.Math.Tan(0.5 * fovy);
+			double bottom = -top;
+			double left = bottom * AspectRatio;
+			double right = top * AspectRatio;
+
+
+			double frustumShift = halfEyeSeparation * zNear / focusDepth;
+
+
+			var view = Matrix4.CreatePerspectiveOffCenter(left - frustumShift, right - frustumShift, bottom, top, zNear, zFar) * Matrix4.CreateTranslation((float)halfEyeSeparation, 0.0f, 0.0f);
+			var transRadius = CreateTransRadius();
+			var rot = CreateAngleRotation();
+			var trans = CreateTargetTranslation();
+			return view * transRadius * rot * trans;
+		}
+
+		public Matrix4 GetLeftEyeMatrix(double halfEyeSeparation, double focusDepth)
+		{
+			double fovy = Math.Utils.DegToRad(45);
+			double zNear = 1;
+			double zFar = 60;
+			double top = zNear * System.Math.Tan(0.5 * fovy);
+			double bottom = -top;
+			double left = bottom * AspectRatio;
+			double right = top * AspectRatio;
+
+
+			double frustumShift = halfEyeSeparation * zNear / focusDepth;
+
+
+			var view = Matrix4.CreatePerspectiveOffCenter(left + frustumShift, right + frustumShift, bottom, top, zNear, zFar) * Matrix4.CreateTranslation(-(float)halfEyeSeparation, 0.0f, 0.0f);
 			var transRadius = CreateTransRadius();
 			var rot = CreateAngleRotation();
 			var trans = CreateTargetTranslation();
@@ -93,7 +126,7 @@ namespace CadCat.Rendering
 			return Matrix4.CreateFrustum(Utils.DegToRad(60), aspectRatio, 0.1, 100);
 		}
 
-		
+
 		public Matrix4 CreateTransRadius()
 		{
 			return Matrix4.CreateTranslation(0, 0, Radius);
@@ -129,11 +162,11 @@ namespace CadCat.Rendering
 			viewProjection = null;
 		}
 
-		public void Move(double dX, double dY,double dZ=0.0)
+		public void Move(double dX, double dY, double dZ = 0.0)
 		{
-			var trans = new Vector3(dX, -dY,dZ*Radius);
-			var trans2 = Matrix4.CreateRotationY(Utils.DegToRad(180+ HorizontalAngle))*Matrix4.CreateRotationX(Utils.DegToRad(-VerticalAngle)) * trans;
-			LookingAt += trans2*Radius * 0.001;
+			var trans = new Vector3(dX, -dY, dZ * Radius);
+			var trans2 = Matrix4.CreateRotationY(Utils.DegToRad(180 + HorizontalAngle)) * Matrix4.CreateRotationX(Utils.DegToRad(-VerticalAngle)) * trans;
+			LookingAt += trans2 * Radius * 0.001;
 		}
 	}
 }
