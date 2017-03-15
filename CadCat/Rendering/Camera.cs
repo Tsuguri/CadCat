@@ -79,10 +79,21 @@ namespace CadCat.Rendering
 			viewProjection = view * transRadius * rot * trans;
 		}
 
+		public Matrix4 GetLeftEyeMatrix()
+		{
+			var view = Matrix4.CreatePerspectiveOffCenter(-1, 1, -1, 1, 0.1, 100);
+			var transRadius = CreateTransRadius();
+			var rot = CreateAngleRotation();
+			var trans = CreateTargetTranslation();
+			return view * transRadius * rot * trans;
+		}
+
 		public Matrix4 CreateFrustum()
 		{
 			return Matrix4.CreateFrustum(Utils.DegToRad(60), aspectRatio, 0.1, 100);
 		}
+
+		
 		public Matrix4 CreateTransRadius()
 		{
 			return Matrix4.CreateTranslation(0, 0, Radius);

@@ -426,17 +426,41 @@ namespace CadCat.Math
 				0, 0, -(far + near) * diff, 2 * far * near * diff,
 				0, 0, 1, 0
 			);
+		}
 
+		public static Matrix4 CreatePerspectiveOffCenter(double left, double right, double bottom, double top, double zNear, double zFar)
+		{
 
+			double sizeX = right - left;
+			double sizeY = top - bottom;
+			double sizeZ = zFar - zNear;
 
+			double centerX = right + left;
+			double centerY = top + bottom;
+			double centerZ = zFar + zNear;
 
+			float num1 = (float)(2.0 * zNear / sizeX);
+			float num2 = (float)(2.0 * zNear / sizeY);
 
-			//return new Matrix4(
-			//	cot / aspect, 0, 0, 0,
-			//	0, cot, 0, 0,
-			//	0, 0, far * diff, 1.0,
-			//	0, 0, -far * near * diff, 0
-			//);
+			//return new Matrix4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 / 5, 0);
+			return new Matrix4(
+				num1, 0, 0, 0,
+				0, num2, 0, 0,
+				0, 0, -(centerZ) /sizeZ, 2 * zFar * zNear /sizeZ,
+				0, 0, 1, 0
+			);
+
+			float num3 = (float)(centerX / sizeX);
+			float num4 = (float)(centerY / sizeY);
+			float num5 = (float)(-centerZ / sizeZ);
+			float num6 = (float)(-(2.0 * zFar * zNear) / sizeZ);
+
+			return new Matrix4(
+				num1, 0.0f, num3, 0.0f,
+				0.0f, num2, num4, 0.0f,
+				0.0f, 0.0f, num5, num6,
+				0.0f, 0.0f, 1.0f, 0.0f
+			);
 		}
 	}
 }

@@ -94,7 +94,10 @@
     <Compile Include="Math\Vector4.cs" />
     <Compile Include="Rendering\Camera.cs" />
     <Compile Include="Rendering\ModelData.cs" />
+    <Compile Include="Rendering\BaseRenderer.cs" />
     <Compile Include="Rendering\RenderingContext.cs" />
+    <Compile Include="Rendering\StandardRenderer.cs" />
+    <Compile Include="Rendering\StereoscopicRender.cs" />
     <Compile Include="Utilities\BindableObject.cs" />
     <Compile Include="Utilities\CommandHandler.cs" />
     <Page Include="MainWindow.xaml">

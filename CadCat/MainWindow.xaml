@@ -6,8 +6,18 @@
         xmlns:local="clr-namespace:CadCat"
         xmlns:models="clr-namespace:CadCat.GeometryModels"
         xmlns:ex ="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:System="clr-namespace:System;assembly=mscorlib"
+        xmlns:rend="clr-namespace:CadCat.Rendering"
         mc:Ignorable="d"
-        Title="CadCat" Height="350" Width="525" >
+        Title="CadCat" Height="450" Width="525" >
+    <Window.Resources>
+        <ObjectDataProvider x:Key="dataFromEnum" MethodName="GetValues"
+                            ObjectType="{x:Type System:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="rend:RendererType"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />
@@ -35,6 +45,7 @@
                     <RowDefinition Height="100"/>
                     <RowDefinition Height="20"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="100"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -116,6 +127,8 @@
                         </DataTemplate>
                     </ContentControl.Resources>
                 </ContentControl>
+
+                <ComboBox Grid.Row="4" ItemsSource="{Binding Source={StaticResource dataFromEnum}}" SelectedItem="{Binding RenderingMode}" />
             </Grid>
         </Grid>
     </Grid>

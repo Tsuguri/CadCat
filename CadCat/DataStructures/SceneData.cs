@@ -21,6 +21,14 @@ namespace CadCat.DataStructures
 	}
 	public class SceneData : Utilities.BindableObject
 	{
+		public RendererType RenderingMode
+		{
+			get;set;
+		}
+
+		public double EyeDistance;
+
+
 		#region Models
 
 		private ObservableCollection<Model> models = new ObservableCollection<Model>();
