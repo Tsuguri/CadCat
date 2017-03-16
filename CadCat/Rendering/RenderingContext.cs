@@ -71,6 +71,7 @@ namespace CadCat.Rendering
 				renderer.SetImageContent(targetImage);
 				renderer.Resize(imageSize.X, imageSize.Y);
 				rendererType = Scene.RenderingMode;
+				Scene.Renderer = renderer;
 			}
 
 			renderer.Render(Scene);

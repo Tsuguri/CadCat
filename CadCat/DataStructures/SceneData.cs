@@ -25,8 +25,21 @@ namespace CadCat.DataStructures
 		{
 			get;set;
 		}
+		private BaseRenderer renderer = null;
+		public BaseRenderer Renderer
+		{
+			get
+			{
+				return renderer;
+			}
+			set
+			{
+				renderer = value;
+				OnPropertyChanged();
+			}
+		}
 
-		public double EyeDistance = 0.1;
+
 
 
 		#region Models

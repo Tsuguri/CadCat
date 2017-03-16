@@ -128,7 +128,33 @@
                     </ContentControl.Resources>
                 </ContentControl>
 
-                <ComboBox Grid.Row="4" ItemsSource="{Binding Source={StaticResource dataFromEnum}}" SelectedItem="{Binding RenderingMode}" />
+                <Grid Grid.Row="4" Grid.ColumnSpan="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="20" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                <ComboBox Grid.Row="0" ItemsSource="{Binding Source={StaticResource dataFromEnum}}" SelectedItem="{Binding RenderingMode}" />
+                    <ContentControl Grid.Row="1" Content="{Binding Renderer}">
+                        <ContentControl.Resources>
+                            <DataTemplate DataType="{x:Type rend:StereoscopicRender}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="20"/>
+                                        <RowDefinition Height="20"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="40"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Grid.Row="0">Eye Distance</TextBlock>
+                                    <ex:DoubleUpDown Grid.Column="1" Grid.Row="0" Value="{Binding EyeDistance}" Minimum="0.01" Maximum="0.2" Increment="0.01"/>
+                                    <TextBlock Grid.Column="0" Grid.Row="1">Depth</TextBlock>
+                                    <ex:DoubleUpDown Grid.Column="1" Grid.Row="1" Value="{Binding DepthMultiplier}" Minimum="1" Maximum="20" Increment="0.25"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ContentControl.Resources>
+                    </ContentControl>
+                </Grid>
             </Grid>
         </Grid>
     </Grid>

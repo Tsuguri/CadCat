@@ -11,7 +11,7 @@ using System.Windows.Media.Imaging;
 
 namespace CadCat.Rendering
 {
-	abstract class BaseRenderer
+	public abstract class BaseRenderer : Utilities.BindableObject
 	{
 		public WriteableBitmap bufferBitmap;
 		private Image targetImage;

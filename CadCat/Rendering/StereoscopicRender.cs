@@ -12,6 +12,38 @@ namespace CadCat.Rendering
 {
 	class StereoscopicRender : BaseRenderer
 	{
+		private double eyeDistance=0.1;
+		public double EyeDistance
+		{
+			get
+			{
+				return eyeDistance;
+			}
+			set
+			{
+				eyeDistance = value;
+				OnPropertyChanged();
+			}
+		}
+
+		private double depthMultiplier = 5;
+		public double DepthMultiplier
+		{
+			get
+			{
+				return depthMultiplier;
+			}
+			set
+			{
+				depthMultiplier = value;
+				OnPropertyChanged();
+			}
+		}
+
+
+
+
+
 		private ModelData modelData = new ModelData();
 		//public WriteableBitmap leftBitmap;
 		public WriteableBitmap rightBitmap;
@@ -38,8 +70,8 @@ namespace CadCat.Rendering
 
 			#endregion
 
-			var cameraLeftMatrix = scene.ActiveCamera.GetLeftEyeMatrix(scene.EyeDistance/2.0,scene.ActiveCamera.Radius*5);
-			var cameraRightMatrix = scene.ActiveCamera.GetRightEyeMatrix(scene.EyeDistance / 2.0, scene.ActiveCamera.Radius*5);
+			var cameraLeftMatrix = scene.ActiveCamera.GetLeftEyeMatrix(EyeDistance / 2.0,  DepthMultiplier);
+			var cameraRightMatrix = scene.ActiveCamera.GetRightEyeMatrix(EyeDistance / 2.0,  DepthMultiplier);
 
 			Matrix4 activeLeftMatrix = cameraLeftMatrix;
 			Matrix4 activeRightMatrix = cameraRightMatrix;
