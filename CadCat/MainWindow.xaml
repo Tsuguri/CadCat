@@ -3,47 +3,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CadCat"
-        xmlns:models="clr-namespace:CadCat.GeometryModels"
-        xmlns:ex ="http://schemas.xceed.com/wpf/xaml/toolkit"
-        xmlns:System="clr-namespace:System;assembly=mscorlib"
-        xmlns:rend="clr-namespace:CadCat.Rendering"
+        xmlns:controls="clr-namespace:CadCat.UIControls"
         mc:Ignorable="d"
-        Title="CadCat" Height="450" Width="525" >
-    <Window.Resources>
-        <ObjectDataProvider x:Key="dataFromEnum" MethodName="GetValues"
-                            ObjectType="{x:Type System:Enum}">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="rend:RendererType"/>
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
-    </Window.Resources>
+        Title="CadCat" Height="650" Width="825" >
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-
-
-        <Menu Grid.Row="0">
-            <MenuItem Header="File">
-                <MenuItem Header="Nothing here yet" />
-            </MenuItem>
-            <MenuItem Header="Models">
-                <MenuItem Header="Torus" Command="{Binding CreateTorusCommand}"/>
-                <MenuItem Header="Cube" Command="{Binding CreateCubeCommand}"/>
-                <Separator />
-                <MenuItem Header="Point" Command="{Binding CreatePointCommand}">
-                    <MenuItem.Icon>
-                        <Image Source="Images/point.png"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-
-            </MenuItem>
-            <MenuItem Header="Go To Selected" Command="{Binding GoToSelectedCommand}"/>
-        </Menu>
-
-
+        <controls:Menu />
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -52,143 +21,10 @@
             </Grid.ColumnDefinitions>
             <Image Name="image" Grid.Column="0" Stretch="Fill"/>
             <GridSplitter Grid.Column="1" Margin="2,0,2,0"
-                  Width="3" Background="Purple" 
+                  Width="3" Background="DarkGray" 
                   VerticalAlignment="Stretch" 
                   HorizontalAlignment="Center"  />
-            <Grid Grid.Column="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="80"/>
-                    <RowDefinition Height="100"/>
-                    <RowDefinition Height="20"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="100"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="40" />
-                    <ColumnDefinition Width="40" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Row="2" Grid.Column="0">Models:</TextBlock>
-                <Button Grid.Row="2" Grid.Column="1" Command="{Binding DeselectCommand}">D</Button>
-                <Button Grid.Row="2" Grid.Column="2" Command="{Binding RemoveCommand}">R</Button>
-                <ListBox Grid.Row="3" Grid.ColumnSpan="3" ItemsSource="{Binding Models}" SelectedItem="{Binding Path=SelectedModel, Mode=TwoWay}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Name}"/>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-                <ContentControl Grid.Row="0" Grid.ColumnSpan="3" Content="{Binding SelectedModel}">
-                    <ContentControl.Resources>
-                        <DataTemplate DataType="{x:Type models:Model}">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="20" />
-                                    <RowDefinition Height="20" />
-                                    <RowDefinition Height="20" />
-                                    <RowDefinition Height="20" />
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="20" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBox Text="{Binding Name}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" />
-                                <TextBlock Text="Pos" Grid.Row="1" Grid.Column="0" />
-                                <ex:DoubleUpDown Increment="0.1" Grid.Column="1" Grid.Row="1" Value="{Binding TrPosX}" />
-                                <ex:DoubleUpDown Increment="0.1" Grid.Column="2" Grid.Row="1" Value="{Binding TrPosY}" />
-                                <ex:DoubleUpDown Increment="0.1" Grid.Column="3" Grid.Row="1" Value="{Binding TrPosZ}" />
-                                <TextBlock Text="Rot" Grid.Row="2" Grid.Column="0" />
-                                <ex:DoubleUpDown Increment="1" Grid.Column="1" Grid.Row="2" Value="{Binding TrRotX}" />
-                                <ex:DoubleUpDown Increment="1" Grid.Column="2" Grid.Row="2" Value="{Binding TrRotY}" />
-                                <ex:DoubleUpDown Increment="1" Grid.Column="3" Grid.Row="2" Value="{Binding TrRotZ}" />
-                                <TextBlock Text="Scale" Grid.Row="3" Grid.Column="0" />
-                                <ex:DoubleUpDown Increment="0.1" Grid.Column="1" Grid.Row="3" Value="{Binding TrScaleX}" />
-                                <ex:DoubleUpDown Increment="0.1" Grid.Column="2" Grid.Row="3" Value="{Binding TrScaleY}" />
-                                <ex:DoubleUpDown Increment="0.1" Grid.Column="3" Grid.Row="3" Value="{Binding TrScaleZ}" />
-
-                                <TextBlock Text="Rot" Grid.Row="2" Grid.Column="0" />
-                                <TextBlock Text="Scale" Grid.Row="3" Grid.Column="0" />
-                            </Grid>
-                        </DataTemplate>
-                    </ContentControl.Resources>
-                </ContentControl>
-                <ContentControl Grid.Row="1" Grid.ColumnSpan="3" Content="{Binding SelectedModel}">
-                    <ContentControl.Resources>
-                        <DataTemplate DataType="{x:Type models:Torus}" >
-
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="60"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="20"/>
-                                    <RowDefinition Height="20"/>
-                                    <RowDefinition Height="20"/>
-                                    <RowDefinition Height="20"/>
-
-                                </Grid.RowDefinitions>
-                                <TextBlock Grid.Column="0" Grid.Row="0">R</TextBlock>
-                                <ex:DoubleUpDown Grid.Column="1" Grid.Row="0" Value="{Binding R}"/>
-                                <TextBlock Grid.Column="0" Grid.Row="1">r</TextBlock>
-                                <ex:DoubleUpDown Grid.Column="1" Grid.Row="1" Value="{Binding r}"/>
-                                <TextBlock Grid.Column="0" Grid.Row="2">RDensity</TextBlock>
-                                <ex:DoubleUpDown Grid.Column="1" Grid.Row="2" Value="{Binding RDensity}"/>
-                                <TextBlock Grid.Column="0" Grid.Row="3">rDensity</TextBlock>
-                                <ex:DoubleUpDown Grid.Column="1" Grid.Row="3" Value="{Binding rDensity}"/>
-                            </Grid>
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type models:Cube}">
-                            <TextBlock>turbo cube</TextBlock>
-                        </DataTemplate>
-                    </ContentControl.Resources>
-                </ContentControl>
-                <ScrollViewer Grid.Row="4" Grid.ColumnSpan="3" >
-                    <StackPanel>
-                        <Expander  Header="Camera Options">
-
-                            <StackPanel >
-                                <!--<Grid.RowDefinitions>
-                                    <RowDefinition Height="20" />
-                                    <RowDefinition Height="20" />
-                                    <RowDefinition Height="20" />
-                                    <RowDefinition Height="*" />
-                                </Grid.RowDefinitions>-->
-                                
-                                
-                                
-                                <ComboBox ItemsSource="{Binding Source={StaticResource dataFromEnum}}" SelectedItem="{Binding RenderingMode}" />
-                                <ContentControl Content="{Binding Renderer}">
-                                    <ContentControl.Resources>
-                                        <DataTemplate DataType="{x:Type rend:StandardRenderer}" />
-                                        <DataTemplate DataType="{x:Type rend:StereoscopicRender}">
-                                            <Grid>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="20"/>
-                                                    <RowDefinition Height="20"/>
-                                                </Grid.RowDefinitions>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="40"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Grid.Row="0">Eye Distance</TextBlock>
-                                                <ex:DoubleUpDown Grid.Column="1" Grid.Row="0" Value="{Binding EyeDistance}" Minimum="0.01" Maximum="0.2" Increment="0.01"/>
-                                                <TextBlock Grid.Column="0" Grid.Row="1">Depth</TextBlock>
-                                                <ex:DoubleUpDown Grid.Column="1" Grid.Row="1" Value="{Binding DepthMultiplier}" Minimum="1" Maximum="20" Increment="0.25"/>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ContentControl.Resources>
-                                </ContentControl>
-                            </StackPanel>
-                        </Expander>
-                        <Expander Header="Cursor Options">
-                            <TextBlock Text="cursor opt"/>
-                        </Expander>
-                    </StackPanel>
-                </ScrollViewer>
-            </Grid>
+            <controls:RightSideMenu Grid.Column="2" />
         </Grid>
     </Grid>
 </Window>

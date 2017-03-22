@@ -102,6 +102,18 @@
     <Compile Include="Rendering\StandardRenderer.cs" />
     <Compile Include="Rendering\StereoscopicRender.cs" />
     <Compile Include="Tools\Cursor.cs" />
+    <Compile Include="UIControls\Menu.xaml.cs">
+      <DependentUpon>Menu.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UIControls\RightSideMenu.xaml.cs">
+      <DependentUpon>RightSideMenu.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UIControls\SelectedModelDescription.xaml.cs">
+      <DependentUpon>SelectedModelDescription.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UIControls\ToolsMenu.xaml.cs">
+      <DependentUpon>ToolsMenu.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Utilities\BindableObject.cs" />
     <Compile Include="Utilities\CommandHandler.cs" />
     <Page Include="MainWindow.xaml">
@@ -116,6 +128,26 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="UIControls\MainWindowResources.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UIControls\Menu.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UIControls\RightSideMenu.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UIControls\SelectedModelDescription.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UIControls\ToolsMenu.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
