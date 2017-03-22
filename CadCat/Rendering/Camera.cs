@@ -19,7 +19,7 @@ namespace CadCat.Rendering
 			set
 			{
 				lookingAt = value;
-				viewProjection = null;
+				MatrixReset = null;
 			}
 		}
 		public double HorizontalAngle { get; set; }
@@ -34,7 +34,7 @@ namespace CadCat.Rendering
 			set
 			{
 
-				viewProjection = null;
+				MatrixReset = null;
 				radius = value;
 				if (radius < 1)
 					radius = 1;
@@ -42,7 +42,19 @@ namespace CadCat.Rendering
 			}
 		}
 
+		private Matrix4 MatrixReset
+		{
+			set
+			{
+				viewProjection = null;
+				viewMatrix = null;
+				projectionMatrix = null;
+			}
+		}
+
 		Matrix4 viewProjection;
+		Matrix4 viewMatrix;
+		Matrix4 projectionMatrix;
 
 		double aspectRatio = 4 / 3;
 
@@ -70,13 +82,37 @@ namespace CadCat.Rendering
 			}
 		}
 
+		public Matrix4 ViewMatrix
+		{
+			get
+			{
+				if (viewMatrix == null)
+					CreateViewMatrix();
+				return viewMatrix;
+			}
+		}
+
+		public Matrix4 ProjectionMatrix
+		{
+			get
+			{
+				if (projectionMatrix == null)
+					projectionMatrix = CreateFrustum();
+				return projectionMatrix;
+			}
+		}
+
 		private void CreateViewProjectionMatrix()
 		{
-			var view = CreateFrustum();
+			viewProjection = ProjectionMatrix * ViewMatrix;
+		}
+
+		private void CreateViewMatrix()
+		{
 			var transRadius = CreateTransRadius();
 			var rot = CreateAngleRotation();
 			var trans = CreateTargetTranslation();
-			viewProjection = view * transRadius * rot * trans;
+			viewMatrix = transRadius * rot * trans;
 		}
 
 		public Matrix4 GetRightEyeMatrix(double halfEyeSeparation, double focusDepth)
@@ -159,7 +195,7 @@ namespace CadCat.Rendering
 			if (VerticalAngle < -90)
 				VerticalAngle = -90;
 
-			viewProjection = null;
+			MatrixReset = null;
 		}
 
 		public void Move(double dX, double dY, double dZ = 0.0)
@@ -167,6 +203,20 @@ namespace CadCat.Rendering
 			var trans = new Vector3(dX, -dY, dZ * Radius);
 			var trans2 = Matrix4.CreateRotationY(Utils.DegToRad(180 + HorizontalAngle)) * Matrix4.CreateRotationX(Utils.DegToRad(-VerticalAngle)) * trans;
 			LookingAt += trans2 * Radius * 0.001;
+		}
+
+		public Ray GetViewRay(Vector2 position)
+		{
+			var inverseView = ViewMatrix.Inversed();
+			var inverseProjection = this.ProjectionMatrix.Inversed();
+
+			Vector4 direction = new Vector4(position, 1.0f, 1.0f);
+
+			direction = inverseView * inverseProjection * direction;
+
+			Vector3 origin = new Vector3(-ViewMatrix[0, 3], -ViewMatrix[1, 3], -ViewMatrix[2, 3]);
+
+			return new Ray(origin, (direction.ToNormalizedVector3() - origin).Normalized());
 		}
 	}
 }

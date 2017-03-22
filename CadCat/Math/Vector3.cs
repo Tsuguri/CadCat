@@ -26,9 +26,22 @@ namespace CadCat.Math
 			return new Vector3(vec1.X+vec2.X,vec1.Y+vec2.Y,vec1.Z+vec2.Z);
 		}
 
+		public static Vector3 operator -(Vector3 vec1, Vector3 vec2)
+		{
+			return new Vector3(vec1.X - vec2.X, vec1.Y - vec2.Y, vec1.Z - vec2.Z);
+		}
+
 		public static Vector3 operator *(Vector3 vec, double scalar)
 		{
 			return new Vector3(vec.X * scalar, vec.Y * scalar, vec.Z * scalar);
+		}
+
+		public Vector3 Normalized()
+		{
+			var length = System.Math.Sqrt(X * X + Y * Y + Z * Z);
+			if (System.Math.Abs(length) < 0.001)
+				return this;
+			return new Vector3(X / length, Y / length, Z / length);
 		}
     }
 }
