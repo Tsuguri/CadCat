@@ -8,7 +8,7 @@ using CadCat.DataStructures;
 
 namespace CadCat.GeometryModels
 {
-	using Real = System.Double;
+
 
 	internal struct ModelLine
 	{
@@ -21,147 +21,29 @@ namespace CadCat.GeometryModels
 			this.to = to;
 		}
 	}
-	public class Model : Utilities.BindableObject
+	public class Model : BindableTransform
 	{
-		public Transform transform;
+
 		public int ModelID
 		{
 			get;
 			private set;
 		}
+		private string name;
 		public string Name
 		{
 			get
 			{
-				return GetName();
-			}
-		}
-
-		public Real TrPosX
-		{
-			get
-			{
-				return transform.Position.X;
+				return name;
 			}
 			set
 			{
-				transform.Position.X = value;
-				OnPropertyChanged();
-			}
-		}
-		public Real TrPosY
-		{
-			get
-			{
-				return transform.Position.Y;
-			}
-			set
-			{
-				transform.Position.Y = value;
-				OnPropertyChanged();
-			}
-		}
-		public Real TrPosZ
-		{
-			get
-			{
-				return transform.Position.Z;
-			}
-			set
-			{
-				transform.Position.Z = value;
+				name = value;
 				OnPropertyChanged();
 			}
 		}
 
-		public Real TrRotX
-		{
-			get
-			{
-				return Math.Utils.RadToDeg(transform.Rotation.X);
-			}
-			set
-			{
-				Real deg = value;
-				if (deg > 360)
-					deg -= 360.0;
-				if (deg < 0)
-					deg += 360.0;
-				transform.Rotation.X = Math.Utils.DegToRad(deg);
-				OnPropertyChanged();
-			}
-		}
-		public Real TrRotY
-		{
-			get
-			{
-				return Math.Utils.RadToDeg(transform.Rotation.Y);
-			}
-			set
-			{
-				Real deg = value;
-				if (deg > 360)
-					deg -= 360.0;
-				if (deg < 0)
-					deg += 360.0;
-				transform.Rotation.Y = Math.Utils.DegToRad(deg);
-				OnPropertyChanged();
-			}
-		}
-		public Real TrRotZ
-		{
-			get
-			{
-				return Math.Utils.RadToDeg(transform.Rotation.Z);
-			}
-			set
-			{
-				Real deg = value;
-				if (deg > 360)
-					deg -= 360.0;
-				if (deg < 0)
-					deg += 360.0;
-				transform.Rotation.Z = Math.Utils.DegToRad(deg);
-				OnPropertyChanged();
-			}
-		}
-
-		public Real TrScaleX
-		{
-			get
-			{
-				return transform.Scale.X;
-			}
-			set
-			{
-				transform.Scale.X = value;
-				OnPropertyChanged();
-			}
-		}
-		public Real TrScaleY
-		{
-			get
-			{
-				return transform.Scale.Y;
-			}
-			set
-			{
-				transform.Scale.Y = value;
-				OnPropertyChanged();
-			}
-		}
-		public Real TrScaleZ
-		{
-			get
-			{
-				return transform.Scale.Z;
-			}
-			set
-			{
-				transform.Scale.Z = value;
-				OnPropertyChanged();
-			}
-		}
+	
 
 		private static int idCounter = 0;
 
@@ -169,8 +51,17 @@ namespace CadCat.GeometryModels
 		{
 			transform = new Transform();
 			ModelID = idCounter;
+			name = GetName();
 			idCounter++;
 		}
+		public virtual Rendering.Packets.RenderingPacket GetRenderingPacket()
+		{
+			Rendering.Packets.RenderingPacket packet;
+			packet.model = this;
+			packet.type = Rendering.Packets.PacketType.LinePacket;
+			return packet;
+		}
+
 		public virtual IEnumerable<Line> GetLines()
 		{
 			var line = new Line();
@@ -187,6 +78,11 @@ namespace CadCat.GeometryModels
 					yield return line;
 				}
 
+		}
+
+		public virtual IEnumerable<Vector3> GetPoints()
+		{
+			yield return new Vector3(1, 1, 1);
 		}
 
 		public virtual string GetName()

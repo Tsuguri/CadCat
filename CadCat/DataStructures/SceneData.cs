@@ -23,7 +23,7 @@ namespace CadCat.DataStructures
 	{
 		public RendererType RenderingMode
 		{
-			get;set;
+			get; set;
 		}
 		private BaseRenderer renderer = null;
 		public BaseRenderer Renderer
@@ -92,7 +92,10 @@ namespace CadCat.DataStructures
 
 		private ICommand createTorusCommand;
 		private ICommand createCubeCommand;
+		private ICommand createPointCommand;
 		private ICommand goToSelectedCommand;
+		private ICommand deselectCommand;
+		private ICommand removeCommand;
 
 		public ICommand CreateTorusCommand
 		{
@@ -110,11 +113,35 @@ namespace CadCat.DataStructures
 			}
 		}
 
+		public ICommand CreatePointCommand
+		{
+			get
+			{
+				return createPointCommand ?? (createPointCommand = new Utilities.CommandHandler(CreatePoint));
+			}
+		}
+
 		public ICommand GoToSelectedCommand
 		{
 			get
 			{
 				return goToSelectedCommand ?? (goToSelectedCommand = new Utilities.CommandHandler(GoToSelected));
+			}
+		}
+
+		public ICommand DeselectCommand
+		{
+			get
+			{
+				return deselectCommand ?? (deselectCommand = new Utilities.CommandHandler(DeselectSelected));
+			}
+		}
+
+		public ICommand RemoveCommand
+		{
+			get
+			{
+				return removeCommand ?? (removeCommand = new Utilities.CommandHandler(RemoveSelected));
 			}
 		}
 
@@ -136,6 +163,11 @@ namespace CadCat.DataStructures
 		private void CreateCube()
 		{
 			AddNewModel(new Cube());
+		}
+
+		private void CreatePoint()
+		{
+			AddNewModel(new CatPoint());
 		}
 
 		#endregion
@@ -167,6 +199,15 @@ namespace CadCat.DataStructures
 
 		}
 
+		public IEnumerable<Rendering.Packets.RenderingPacket> GetPackets()
+		{
+			foreach (var model in models)
+			{
+				yield return model.GetRenderingPacket();
+			}
+			yield break;
+		}
+
 
 		internal void UpdateFrameData()
 		{
@@ -194,11 +235,27 @@ namespace CadCat.DataStructures
 
 		}
 
+
+
 		private void GoToSelected()
 		{
 			if (SelectedModel != null)
 			{
 				ActiveCamera.LookingAt = SelectedModel.transform.Position;
+			}
+		}
+
+		private void DeselectSelected()
+		{
+			SelectedModel = null;
+		}
+
+		private void RemoveSelected()
+		{
+			if (SelectedModel != null)
+			{
+				models.Remove(SelectedModel);
+				SelectedModel = null;
 			}
 		}
 	}

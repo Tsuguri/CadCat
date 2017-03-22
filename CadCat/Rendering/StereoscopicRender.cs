@@ -40,12 +40,7 @@ namespace CadCat.Rendering
 			}
 		}
 
-
-
-
-
 		private ModelData modelData = new ModelData();
-		//public WriteableBitmap leftBitmap;
 		public WriteableBitmap rightBitmap;
 		private Color leftEye = Color.FromRgb(0, 240, 255);
 		private Color rightEye = Colors.Red;

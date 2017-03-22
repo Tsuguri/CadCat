@@ -13,8 +13,6 @@ namespace CadCat.Rendering
 {
 	class StandardRenderer : BaseRenderer
 	{
-		private ModelData modelData = new ModelData();
-
 		public override void Render(SceneData scene)
 		{
 			base.Render(scene);
@@ -30,19 +28,32 @@ namespace CadCat.Rendering
 
 				int stroke = 1;
 
-				foreach (var line in scene.GetLines(modelData))
+
+				foreach (var packet in scene.GetPackets())
 				{
-					if (modelData.ModelID != activeModel)
+					activeMatrix = cameraMatrix * packet.model.transform.CreateTransformMatrix();
+					stroke = (scene.SelectedModel != null && scene.SelectedModel.ModelID == packet.model.ModelID) ? 2 : 1;
+
+					switch (packet.type)
 					{
-						activeModel = modelData.ModelID;
-						var modelmat = modelData.transform.CreateTransformMatrix();
-						activeMatrix = cameraMatrix * modelmat;
-						stroke = (scene.SelectedModel != null && scene.SelectedModel.ModelID == modelData.ModelID) ? 2 : 1;
+						case Packets.PacketType.LinePacket:
+							foreach (var line in packet.model.GetLines())
+							{
+								ProcessLine(bufferBitmap, line, activeMatrix, Colors.Yellow, stroke);
+							}
+							break;
+						case Packets.PacketType.PointPacket:
+							foreach (var point in packet.model.GetPoints())
+							{
+								ProcessPoint(bufferBitmap, point, activeMatrix, Colors.Yellow);
+							}
+							break;
+						default:
+							break;
 					}
 
-					ProcessLine(bufferBitmap, line, activeMatrix,Colors.Yellow, stroke);
-
 				}
+
 			}
 		}
 	}

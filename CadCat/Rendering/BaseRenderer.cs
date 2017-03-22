@@ -80,9 +80,14 @@ namespace CadCat.Rendering
 
 		public bool Clip(DataStructures.Line clipped, double farMargin = 1.0, double closeMargin = 0.0)
 		{
-			return //clipped.from.Z > 0.0 && clipped.to.Z > 0.0 &&
+			return clipped.from.Z > 0.0 && clipped.to.Z > 0.0 &&
 					ClipAxis(clipped, clipped.from.X, clipped.to.X, farMargin, closeMargin) &&
 					ClipAxis(clipped, clipped.from.Y, clipped.to.Y, farMargin, closeMargin);
+		}
+
+		public bool ClipPoint(Vector3 point, double farMargin = 1.0, double closeMargin = 0.0)
+		{
+			return point.Z > 0.0 && point.X < farMargin && point.X > closeMargin && point.Y < farMargin && point.Y > closeMargin;
 		}
 
 		protected Vector3 NormalizeToBitmapSpace(Vector3 vec)
@@ -97,7 +102,11 @@ namespace CadCat.Rendering
 		protected void DrawLine(WriteableBitmap bitmap, Line line, Color color, int stroke)
 		{
 			bitmap.DrawLineAa((int)(line.from.X * width), (int)(line.from.Y * height), (int)(line.to.X * width), (int)(line.to.Y * height), color, stroke);
+		}
 
+		protected void DrawPoint(WriteableBitmap bitmap, Vector3 point, Color color)
+		{
+			bitmap.DrawRectangle((int)(point.X * width), (int)(point.Y * height), (int)(point.X * width + 1), (int)(point.Y * height + 1), color);
 		}
 
 		protected void ProcessLine(WriteableBitmap bitmap, Line line, Matrix4 matrix, Color color, int stroke)
@@ -112,6 +121,15 @@ namespace CadCat.Rendering
 			tmpLine.to = to;
 			if (Clip(tmpLine, 0.99, 0.01))
 				DrawLine(bitmap, tmpLine, color, stroke);
+		}
+
+		protected void ProcessPoint(WriteableBitmap bitmap, Vector3 point, Matrix4 matrix, Color color)
+		{
+			var pt = (matrix * new Vector4(point, 1)).ToNormalizedVector3();
+			pt = NormalizeToBitmapSpace(pt);
+
+			if (ClipPoint(pt))
+				DrawPoint(bitmap, pt, color);
 		}
 	}
 }

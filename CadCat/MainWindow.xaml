@@ -20,14 +20,30 @@
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="40" />
+            <RowDefinition Height="20" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
+
+
         <Menu Grid.Row="0">
-            <MenuItem Header="Add Torus" Command="{Binding CreateTorusCommand}"/>
-            <MenuItem Header="Add Cube" Command="{Binding CreateCubeCommand}"/>
+            <MenuItem Header="File">
+                <MenuItem Header="Nothing here yet" />
+            </MenuItem>
+            <MenuItem Header="Models">
+                <MenuItem Header="Torus" Command="{Binding CreateTorusCommand}"/>
+                <MenuItem Header="Cube" Command="{Binding CreateCubeCommand}"/>
+                <Separator />
+                <MenuItem Header="Point" Command="{Binding CreatePointCommand}">
+                    <MenuItem.Icon>
+                        <Image Source="Images/point.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+
+            </MenuItem>
             <MenuItem Header="Go To Selected" Command="{Binding GoToSelectedCommand}"/>
         </Menu>
+
+
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -49,18 +65,20 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="60" />
+                    <ColumnDefinition Width="40" />
+                    <ColumnDefinition Width="40" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Row="2" Grid.Column="0">Models:</TextBlock>
-                <Button Grid.Row="2" Grid.Column="1">Deselect</Button>
-                <ListBox Grid.Row="3" Grid.ColumnSpan="2" ItemsSource="{Binding Models}" SelectedItem="{Binding Path=SelectedModel, Mode=TwoWay}">
+                <Button Grid.Row="2" Grid.Column="1" Command="{Binding DeselectCommand}">D</Button>
+                <Button Grid.Row="2" Grid.Column="2" Command="{Binding RemoveCommand}">R</Button>
+                <ListBox Grid.Row="3" Grid.ColumnSpan="3" ItemsSource="{Binding Models}" SelectedItem="{Binding Path=SelectedModel, Mode=TwoWay}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Name}"/>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-                <ContentControl Grid.Row="0" Grid.ColumnSpan="2" Content="{Binding SelectedModel}">
+                <ContentControl Grid.Row="0" Grid.ColumnSpan="3" Content="{Binding SelectedModel}">
                     <ContentControl.Resources>
                         <DataTemplate DataType="{x:Type models:Model}">
                             <Grid>
@@ -76,7 +94,7 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="{Binding Name}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" />
+                                <TextBox Text="{Binding Name}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" />
                                 <TextBlock Text="Pos" Grid.Row="1" Grid.Column="0" />
                                 <ex:DoubleUpDown Increment="0.1" Grid.Column="1" Grid.Row="1" Value="{Binding TrPosX}" />
                                 <ex:DoubleUpDown Increment="0.1" Grid.Column="2" Grid.Row="1" Value="{Binding TrPosY}" />
@@ -96,7 +114,7 @@
                         </DataTemplate>
                     </ContentControl.Resources>
                 </ContentControl>
-                <ContentControl Grid.Row="1" Grid.ColumnSpan="2" Content="{Binding SelectedModel}">
+                <ContentControl Grid.Row="1" Grid.ColumnSpan="3" Content="{Binding SelectedModel}">
                     <ContentControl.Resources>
                         <DataTemplate DataType="{x:Type models:Torus}" >
 
@@ -127,34 +145,49 @@
                         </DataTemplate>
                     </ContentControl.Resources>
                 </ContentControl>
+                <ScrollViewer Grid.Row="4" Grid.ColumnSpan="3" >
+                    <StackPanel>
+                        <Expander  Header="Camera Options">
 
-                <Grid Grid.Row="4" Grid.ColumnSpan="2">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="20" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                <ComboBox Grid.Row="0" ItemsSource="{Binding Source={StaticResource dataFromEnum}}" SelectedItem="{Binding RenderingMode}" />
-                    <ContentControl Grid.Row="1" Content="{Binding Renderer}">
-                        <ContentControl.Resources>
-                            <DataTemplate DataType="{x:Type rend:StereoscopicRender}">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="20"/>
-                                        <RowDefinition Height="20"/>
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="40"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Grid.Row="0">Eye Distance</TextBlock>
-                                    <ex:DoubleUpDown Grid.Column="1" Grid.Row="0" Value="{Binding EyeDistance}" Minimum="0.01" Maximum="0.2" Increment="0.01"/>
-                                    <TextBlock Grid.Column="0" Grid.Row="1">Depth</TextBlock>
-                                    <ex:DoubleUpDown Grid.Column="1" Grid.Row="1" Value="{Binding DepthMultiplier}" Minimum="1" Maximum="20" Increment="0.25"/>
-                                </Grid>
-                            </DataTemplate>
-                        </ContentControl.Resources>
-                    </ContentControl>
-                </Grid>
+                            <StackPanel >
+                                <!--<Grid.RowDefinitions>
+                                    <RowDefinition Height="20" />
+                                    <RowDefinition Height="20" />
+                                    <RowDefinition Height="20" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>-->
+                                
+                                
+                                
+                                <ComboBox ItemsSource="{Binding Source={StaticResource dataFromEnum}}" SelectedItem="{Binding RenderingMode}" />
+                                <ContentControl Content="{Binding Renderer}">
+                                    <ContentControl.Resources>
+                                        <DataTemplate DataType="{x:Type rend:StandardRenderer}" />
+                                        <DataTemplate DataType="{x:Type rend:StereoscopicRender}">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="20"/>
+                                                    <RowDefinition Height="20"/>
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="40"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Grid.Row="0">Eye Distance</TextBlock>
+                                                <ex:DoubleUpDown Grid.Column="1" Grid.Row="0" Value="{Binding EyeDistance}" Minimum="0.01" Maximum="0.2" Increment="0.01"/>
+                                                <TextBlock Grid.Column="0" Grid.Row="1">Depth</TextBlock>
+                                                <ex:DoubleUpDown Grid.Column="1" Grid.Row="1" Value="{Binding DepthMultiplier}" Minimum="1" Maximum="20" Increment="0.25"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ContentControl.Resources>
+                                </ContentControl>
+                            </StackPanel>
+                        </Expander>
+                        <Expander Header="Cursor Options">
+                            <TextBlock Text="cursor opt"/>
+                        </Expander>
+                    </StackPanel>
+                </ScrollViewer>
             </Grid>
         </Grid>
     </Grid>
