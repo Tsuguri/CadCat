@@ -275,13 +275,16 @@ namespace CadCat.DataStructures
 				{
 					Cursor.transform.Position += (ActiveCamera.UpVector * delta.Y * 0.05 + ActiveCamera.RightVector * delta.X * 0.05);
 					Cursor.InvalidateAll();
-					Cursor.CatchedModel.InvalidateAll();
+					Cursor.CatchedModel?.InvalidateAll();
 				}
 				else
 				{
 					ActiveCamera.Move(delta.X, delta.Y);
 				}
 			}
+			var pos = (ActiveCamera.ViewProjectionMatrix * new Vector4(Cursor.transform.Position, 1.0)).ToNormalizedVector3();
+			Cursor.ScreenPosX = pos.X;
+			cursor.ScreenPosY = pos.Y;
 
 		}
 

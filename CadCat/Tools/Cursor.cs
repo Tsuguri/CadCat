@@ -34,6 +34,13 @@ namespace CadCat.Tools
 			{
 				return ScreenPos.X;
 			}
+			set
+			{
+				var p = ScreenPos;
+				p.X = value;
+				ScreenPos = p;
+				OnPropertyChanged();
+			}
 		}
 
 		public double ScreenPosY
@@ -41,6 +48,13 @@ namespace CadCat.Tools
 			get
 			{
 				return ScreenPos.Y;
+			}
+			set
+			{
+				var p = ScreenPos;
+				p.Y = value;
+				ScreenPos = p;
+				OnPropertyChanged();
 			}
 		}
 

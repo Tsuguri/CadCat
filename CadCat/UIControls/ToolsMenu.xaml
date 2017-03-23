@@ -63,8 +63,8 @@
                     <ex:DoubleUpDown Increment="0.1" Grid.Column="3" Grid.Row="1" Value="{Binding Cursor.TrPosZ}" />
 
                     <TextBlock Text="Screen Position" Grid.ColumnSpan="2" Grid.Row="2" Grid.Column="0" />
-                    <TextBlock Grid.Column="2"  TextAlignment="Right" Grid.Row="2" Text="{Binding Cursor.ScreenPosX}" />
-                    <TextBlock Grid.Column="3" TextAlignment="Right" Grid.Row="2" Text="{Binding Cursor.ScreenPosY}" />
+                    <TextBlock Grid.Column="2"  TextAlignment="Right" Grid.Row="2" Text="{Binding Cursor.ScreenPosX, StringFormat=N2}" />
+                    <TextBlock Grid.Column="3" TextAlignment="Right" Grid.Row="2" Text="{Binding Cursor.ScreenPosY, StringFormat=N2}" />
 
                     <Button  Grid.Row="3" Grid.Column="1" Command="{Binding Cursor.CatchSelectedCommand}">
                         <TextBlock TextWrapping="Wrap">
