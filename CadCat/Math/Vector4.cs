@@ -12,6 +12,13 @@ namespace CadCat.Math
     {
 		public Real X, Y, Z, W;
 
+		public Vector4(Real x, Real y, Real z, Real w)
+		{
+			X = x;
+			Y = y;
+			Z = z;
+			W = w;
+		}
 
 		public Vector4(Vector3 v3, Real point = 1.0)
 		{
@@ -36,6 +43,11 @@ namespace CadCat.Math
 			vec.Y = Y / W;
 			vec.Z = Z / W;
 			return vec;
+		}
+
+		public Vector3 ClipToVector3()
+		{
+			return new Vector3(X, Y, Z);
 		}
     }
 }

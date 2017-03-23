@@ -8,7 +8,7 @@
              xmlns:rend="clr-namespace:CadCat.Rendering"
              xmlns:local="clr-namespace:CadCat.UIControls"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="300" d:DesignWidth="150">
     <UserControl.Resources>
         <ResourceDictionary Source="MainWindowResources.xaml" />
     </UserControl.Resources>
@@ -41,7 +41,45 @@
                 </StackPanel>
             </Expander>
             <Expander Header="Cursor Options">
-                <TextBlock Text="cursor opt"/>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="20" />
+                        <RowDefinition Height="20" />
+                        <RowDefinition Height="20" />
+                        <RowDefinition Height="50" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <CheckBox Grid.Row="0" Grid.Column="0" IsChecked="{Binding Cursor.Visible}" />
+                    <TextBlock Grid.Row="0" Grid.Column="1" >Visible</TextBlock>
+                    <!--<TextBox Text="{Binding Name}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" />-->
+                    <TextBlock Text="Pos" Grid.Row="1" Grid.Column="0" />
+                    <ex:DoubleUpDown Increment="0.1" Grid.Column="1" Grid.Row="1" Value="{Binding Cursor.TrPosX}" />
+                    <ex:DoubleUpDown Increment="0.1" Grid.Column="2"  Grid.Row="1" Value="{Binding Cursor.TrPosY}" />
+                    <ex:DoubleUpDown Increment="0.1" Grid.Column="3" Grid.Row="1" Value="{Binding Cursor.TrPosZ}" />
+
+                    <TextBlock Text="Screen Position" Grid.ColumnSpan="2" Grid.Row="2" Grid.Column="0" />
+                    <TextBlock Grid.Column="2"  TextAlignment="Right" Grid.Row="2" Text="{Binding Cursor.ScreenPosX}" />
+                    <TextBlock Grid.Column="3" TextAlignment="Right" Grid.Row="2" Text="{Binding Cursor.ScreenPosY}" />
+
+                    <Button  Grid.Row="3" Grid.Column="1" Command="{Binding Cursor.CatchSelectedCommand}">
+                        <TextBlock TextWrapping="Wrap">
+                            Catch Selected
+                        </TextBlock>
+                    </Button>
+                    <Button Grid.Row="3" Grid.Column="2" Command="{Binding Cursor.CatchNearestCommand}">
+                        <TextBlock TextWrapping="Wrap">
+                        Catch Nearest
+                        </TextBlock>
+                    </Button>
+                    <Button Grid.Row="3" Grid.Column="3" Command="{Binding Cursor.ReleaseCatchedCommand}">
+                        Release
+                    </Button>
+                </Grid>
             </Expander>
         </StackPanel>
     </ScrollViewer>

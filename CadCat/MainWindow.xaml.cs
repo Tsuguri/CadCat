@@ -68,6 +68,15 @@ namespace CadCat
 			resizeTimer = new DispatcherTimer();
 			resizeTimer.Interval = new TimeSpan(0, 0, 0, 0, 300);
 			RunTimer();
+
+
+
+			var mat = Math.Matrix4.CreateFrustum(Math.Utils.DegToRad(60), 1, 0.1, 100).Inversed();
+			var p1 = (mat * new Math.Vector4(0, 0, 1, 1)).ToNormalizedVector3();
+			var p2 = (mat * new Math.Vector4(1, 1, 1, 1)).ToNormalizedVector3().Normalized();
+			var p3 = (mat * new Math.Vector4(-1, 0, 1, 1)).ToNormalizedVector3();
+			
+
 		}
 
 		private void Image_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -91,6 +100,7 @@ namespace CadCat
 		private void Resize(double width, double height)
 		{
 			ctx.Resize(width, height);
+			data.ScreenSize = new Math.Vector2(width, height);
 		}
 		private void RunTimer()
 		{
@@ -99,6 +109,7 @@ namespace CadCat
 			timer.Tick += (o, e) =>
 			{
 				var point = Mouse.GetPosition(image);
+				var pt2 = Mouse.GetPosition((FrameworkElement)image);
 				if (point.X < 0 || point.Y < 0 || point.X > imageSize.Width || point.Y > imageSize.Height)
 					point.X = point.Y = -1;
 				else
@@ -110,6 +121,16 @@ namespace CadCat
 			};
 			timer.Interval = new TimeSpan(0, 0, 0, 0, 33);
 			timer.Start();
+		}
+
+		private void image_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+		{
+			data.ImageMouse.LeftMouseUpCommand.Execute(sender);
+		}
+
+		private void image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+		{
+			data.ImageMouse.LeftMouseDownCommand.Execute(sender);
 		}
 	}
 }

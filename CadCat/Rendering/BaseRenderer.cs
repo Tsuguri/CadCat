@@ -90,7 +90,7 @@ namespace CadCat.Rendering
 			return point.Z > 0.0 && point.X < farMargin && point.X > closeMargin && point.Y < farMargin && point.Y > closeMargin;
 		}
 
-		protected Vector3 NormalizeToBitmapSpace(Vector3 vec)
+		public static Vector3 NormalizeToBitmapSpace(Vector3 vec)
 		{
 			vec.X = vec.X / 2 + 0.5;
 			vec.Y = vec.Y / 2 + 0.5;

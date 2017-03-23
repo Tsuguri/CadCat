@@ -84,6 +84,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="DataStructures\BindableTransform.cs" />
+    <Compile Include="DataStructures\ClickData.cs" />
+    <Compile Include="DataStructures\ImageMouseController.cs" />
     <Compile Include="DataStructures\SceneData.cs" />
     <Compile Include="GeometryModels\CatPoint.cs" />
     <Compile Include="GeometryModels\Model.cs" />

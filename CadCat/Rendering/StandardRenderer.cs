@@ -24,14 +24,12 @@ namespace CadCat.Rendering
 				var cameraMatrix = scene.ActiveCamera.ViewProjectionMatrix;
 
 				Matrix4 activeMatrix = cameraMatrix;
-				var activeModel = -1;
-
 				int stroke = 1;
 
 
 				foreach (var packet in scene.GetPackets())
 				{
-					activeMatrix = cameraMatrix * packet.model.transform.CreateTransformMatrix();
+					activeMatrix = cameraMatrix * packet.model.transform.CreateTransformMatrix(packet.overrideScale,packet.newScale);
 					stroke = (scene.SelectedModel != null && scene.SelectedModel.ModelID == packet.model.ModelID) ? 2 : 1;
 
 					switch (packet.type)

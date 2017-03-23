@@ -21,11 +21,17 @@ namespace CadCat.DataStructures
 	}
 	public class SceneData : Utilities.BindableObject
 	{
+		#region PropertiesAndFields
+
+		#region Rendering
+
 		public RendererType RenderingMode
 		{
 			get; set;
 		}
+
 		private BaseRenderer renderer = null;
+
 		public BaseRenderer Renderer
 		{
 			get
@@ -39,7 +45,12 @@ namespace CadCat.DataStructures
 			}
 		}
 
+		public Vector2 ScreenSize
+		{
+			get; set;
+		}
 
+		#endregion
 
 
 		#region Models
@@ -48,6 +59,7 @@ namespace CadCat.DataStructures
 		public ObservableCollection<Model> Models { get { return models; } }
 
 		private Model selectedModel = null;
+
 		public Model SelectedModel
 		{
 			get
@@ -58,6 +70,16 @@ namespace CadCat.DataStructures
 			{
 				selectedModel = value;
 				OnPropertyChanged();
+			}
+		}
+
+		private Tools.Cursor cursor;
+
+		public Tools.Cursor Cursor
+		{
+			get
+			{
+				return cursor;
 			}
 		}
 
@@ -79,16 +101,30 @@ namespace CadCat.DataStructures
 				OnPropertyChanged();
 			}
 		}
+
 		public Vector Delta
 		{
 			get; set;
 		}
+
 		private Point mousePosition;
 		private Point previousMousePosition;
 
 		#endregion
 
+		#endregion
+
 		#region Commands
+
+		private ImageMouseController imageMouse;
+
+		public ImageMouseController ImageMouse
+		{
+			get
+			{
+				return imageMouse;
+			}
+		}
 
 		private ICommand createTorusCommand;
 		private ICommand createCubeCommand;
@@ -182,12 +218,12 @@ namespace CadCat.DataStructures
 
 		public SceneData()
 		{
+			imageMouse = new ImageMouseController(this);
+			cursor = new Tools.Cursor(this);
 		}
 
 		public IEnumerable<Line> GetLines(Rendering.ModelData modelData)
 		{
-
-
 			foreach (var model in models)
 			{
 				modelData.transform = model.transform;
@@ -199,12 +235,20 @@ namespace CadCat.DataStructures
 
 		}
 
+		public IEnumerable<Model> GetModels()
+		{
+			foreach (var model in models)
+				yield return model;
+		}
+
 		public IEnumerable<Rendering.Packets.RenderingPacket> GetPackets()
 		{
 			foreach (var model in models)
 			{
 				yield return model.GetRenderingPacket();
 			}
+
+			yield return cursor.GetRenderingPacket();
 			yield break;
 		}
 
@@ -227,6 +271,12 @@ namespace CadCat.DataStructures
 				{
 					ActiveCamera.Move(0, 0, delta.Y);
 				}
+				else if (Keyboard.IsKeyDown(Key.C))
+				{
+					Cursor.transform.Position += (ActiveCamera.UpVector * delta.Y * 0.05 + ActiveCamera.RightVector * delta.X * 0.05);
+					Cursor.InvalidateAll();
+					Cursor.CatchedModel.InvalidateAll();
+				}
 				else
 				{
 					ActiveCamera.Move(delta.X, delta.Y);
@@ -235,7 +285,39 @@ namespace CadCat.DataStructures
 
 		}
 
+		internal void SceneClicked(Vector2 position)
+		{
+			Ray cameraRay = ActiveCamera.GetViewRay(position);
+			List<ClickData> clicks = new List<ClickData>();
+			var cameraMatrix = ActiveCamera.ViewProjectionMatrix;
+			foreach (var packet in GetPackets())
+			{
+				if (packet.type == Rendering.Packets.PacketType.PointPacket)
+				{
+					var activeMatrix = cameraMatrix * packet.model.transform.CreateTransformMatrix();
+					foreach (var point in packet.model.GetPoints())
+					{
+						var pt = (activeMatrix * new Vector4(point, 1.0)).ToNormalizedVector3();
+						var dt = new Vector2(pt.X, pt.Y) - position;
+						var distance = dt.Length();
+						if (distance < 0.009)
+							clicks.Add(new ClickData(pt.Z, packet.model));
+					}
+				}
+			}
 
+			if (clicks.Count > 0)
+			{
+				clicks.Sort((x, y) => y.Distance.CompareTo(x.Distance));
+
+				var clicked = clicks.First();
+				if (clicked.ClickedModel != null)
+				{
+					SelectedModel = clicked.ClickedModel;
+				}
+			}
+
+		}
 
 		private void GoToSelected()
 		{

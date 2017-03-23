@@ -32,5 +32,15 @@ namespace CadCat.GeometryModels
 			packet.type = PacketType.PointPacket;
 			return packet;
 		}
+
+		public override bool Collide(Ray ray, out double distance)
+		{
+			double dist = Vector3.CrossProduct(ray.Direction, this.transform.Position - ray.Origin).Length();
+
+
+
+			distance = dist;
+			return true;
+		}
 	}
 }

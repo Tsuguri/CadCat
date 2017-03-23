@@ -15,5 +15,7 @@ namespace CadCat.Rendering.Packets
 	{
 		public GeometryModels.Model model;
 		public PacketType type;
+		public bool overrideScale;
+		public Math.Vector3 newScale;
 	}
 }

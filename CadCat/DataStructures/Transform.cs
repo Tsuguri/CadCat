@@ -7,8 +7,8 @@ using CadCat.Math;
 
 namespace CadCat.DataStructures
 {
-    public class Transform
-    {
+	public class Transform
+	{
 		public Vector3 Position;
 		public Vector3 Scale;
 		public Vector3 Rotation;
@@ -20,10 +20,17 @@ namespace CadCat.DataStructures
 			Scale = new Vector3(1.0, 1.0, 1.0);
 		}
 
-		public Matrix4 CreateTransformMatrix()
+		public Transform(Vector3 position)
 		{
-			return Matrix4.CreateTranslation(Position) * Matrix4.CreateRotation(Rotation) * Matrix4.CreateScale(Scale);
+			Position = position;
+			Rotation = new Vector3();
+			Scale = new Vector3(1.0, 1.0, 1.0);
 		}
 
-    }
+		public Matrix4 CreateTransformMatrix(bool overrideScale = false, Vector3 newScale=new Vector3())
+		{
+			return Matrix4.CreateTranslation(Position) * Matrix4.CreateRotation(Rotation) * (Matrix4.CreateScale(overrideScale ? newScale : Scale));
+		}
+
+	}
 }

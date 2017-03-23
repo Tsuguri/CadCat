@@ -70,22 +70,46 @@ namespace CadCat.Rendering
 
 			Matrix4 activeLeftMatrix = cameraLeftMatrix;
 			Matrix4 activeRightMatrix = cameraRightMatrix;
-			var activeModel = -1;
 			int stroke = 1;
 
 			foreach (var line in scene.GetLines(modelData))
 			{
-				if (modelData.ModelID != activeModel)
-				{
-					activeModel = modelData.ModelID;
-					var modelmat = modelData.transform.CreateTransformMatrix();
-					activeLeftMatrix = cameraLeftMatrix * modelmat;
-					activeRightMatrix = cameraRightMatrix * modelmat;
-					stroke = (scene.SelectedModel != null && scene.SelectedModel.ModelID == modelData.ModelID) ? 2 : 1;
-				}
 				ProcessLine(bufferBitmap, line, activeLeftMatrix, leftEye, stroke);
 				ProcessLine(rightBitmap, line, activeRightMatrix, rightEye, stroke);
 			}
+
+
+			foreach (var packet in scene.GetPackets())
+			{
+				var modelmat = modelData.transform.CreateTransformMatrix(packet.overrideScale, packet.newScale);
+				activeLeftMatrix = cameraLeftMatrix * modelmat;
+				activeRightMatrix = cameraRightMatrix * modelmat;
+				stroke = (scene.SelectedModel != null && scene.SelectedModel.ModelID == packet.model.ModelID) ? 2 : 1;
+
+				switch (packet.type)
+				{
+					case Packets.PacketType.LinePacket:
+						foreach (var line in packet.model.GetLines())
+						{
+							ProcessLine(bufferBitmap, line, activeLeftMatrix, leftEye, stroke);
+							ProcessLine(rightBitmap, line, activeRightMatrix, rightEye, stroke);
+						}
+						break;
+					case Packets.PacketType.PointPacket:
+						foreach (var point in packet.model.GetPoints())
+						{
+							ProcessPoint(bufferBitmap, point, activeLeftMatrix, leftEye);
+							ProcessPoint(rightBitmap, point, activeRightMatrix, rightEye);
+						}
+						break;
+					default:
+						break;
+				}
+
+			}
+
+
+
 
 			#region BlitAndDispose
 			bufferBitmap.Blit(new System.Windows.Rect(0, 0, bufferBitmap.Width, bufferBitmap.Height), rightBitmap, new System.Windows.Rect(0, 0, rightBitmap.Width, rightBitmap.Height), WriteableBitmapExtensions.BlendMode.Additive);

@@ -22,6 +22,16 @@ namespace CadCat.Rendering
 				MatrixReset = null;
 			}
 		}
+
+		private Vector3 cameraPos;
+		public Vector3 CameraPosition
+		{
+			get
+			{
+				return cameraPos;
+			}
+		}
+
 		public double HorizontalAngle { get; set; }
 		public double VerticalAngle { get; set; }
 		private double radius;
@@ -102,6 +112,23 @@ namespace CadCat.Rendering
 			}
 		}
 
+		public Vector3 UpVector
+		{
+			get
+			{
+				return (ViewMatrix.Inversed() * new Vector4(0, 1, 0, 0)).ClipToVector3().Normalized();
+			}
+		}
+
+		public Vector3 RightVector
+		{
+			get
+			{
+				return (ViewMatrix.Inversed() * new Vector4(1, 0, 0, 0)).ClipToVector3().Normalized();
+			}
+		}
+
+
 		private void CreateViewProjectionMatrix()
 		{
 			viewProjection = ProjectionMatrix * ViewMatrix;
@@ -112,6 +139,11 @@ namespace CadCat.Rendering
 			var transRadius = CreateTransRadius();
 			var rot = CreateAngleRotation();
 			var trans = CreateTargetTranslation();
+
+			var revRot = CreateReversedRotation();
+			var pos = (revRot * new Vector4(0, 0, -Radius, 1)).ToNormalizedVector3();
+			cameraPos = new Vector3(pos.X, pos.Y, pos.Z);
+			//Console.WriteLine($"camera: {cameraPos.X}, {cameraPos.Y}, {cameraPos.Z}");
 			viewMatrix = transRadius * rot * trans;
 		}
 
@@ -171,6 +203,11 @@ namespace CadCat.Rendering
 		{
 			return Matrix4.CreateRotation(Utils.DegToRad(-VerticalAngle), Utils.DegToRad(-HorizontalAngle), 0);
 		}
+		private Matrix4 CreateReversedRotation()
+		{
+			//return Matrix4.CreateRotation(Utils.DegToRad(VerticalAngle), Utils.DegToRad(HorizontalAngle), 0);
+			return Matrix4.CreateRotationY(Utils.DegToRad(HorizontalAngle)) * Matrix4.CreateRotationX(Utils.DegToRad(VerticalAngle));
+		}
 		public Matrix4 CreateTargetTranslation()
 		{
 			return Matrix4.CreateTranslation(-LookingAt.X, -LookingAt.Y, -LookingAt.Z);
@@ -203,6 +240,7 @@ namespace CadCat.Rendering
 			var trans = new Vector3(dX, -dY, dZ * Radius);
 			var trans2 = Matrix4.CreateRotationY(Utils.DegToRad(180 + HorizontalAngle)) * Matrix4.CreateRotationX(Utils.DegToRad(-VerticalAngle)) * trans;
 			LookingAt += trans2 * Radius * 0.001;
+			MatrixReset = null;
 		}
 
 		public Ray GetViewRay(Vector2 position)
@@ -212,11 +250,11 @@ namespace CadCat.Rendering
 
 			Vector4 direction = new Vector4(position, 1.0f, 1.0f);
 
-			direction = inverseView * inverseProjection * direction;
+			direction = ((inverseView * inverseProjection) * direction);
 
-			Vector3 origin = new Vector3(-ViewMatrix[0, 3], -ViewMatrix[1, 3], -ViewMatrix[2, 3]);
-
-			return new Ray(origin, (direction.ToNormalizedVector3() - origin).Normalized());
+			Vector3 origin = CameraPosition;
+			var normDir = (direction.ToNormalizedVector3() - origin).Normalized();
+			return new Ray(origin, normDir);
 		}
 	}
 }

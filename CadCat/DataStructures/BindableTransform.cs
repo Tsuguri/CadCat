@@ -137,5 +137,33 @@ namespace CadCat.DataStructures
 				OnPropertyChanged();
 			}
 		}
+
+		public void InvalidateAll()
+		{
+			InvalidatePosition();
+			InvalidateRotation();
+			InvalidateScale();
+		}
+
+		public void InvalidatePosition()
+		{
+			OnPropertyChanged(nameof(TrPosX));
+			OnPropertyChanged(nameof(TrPosY));
+			OnPropertyChanged(nameof(TrPosZ));
+		}
+
+		public void InvalidateRotation()
+		{
+			OnPropertyChanged(nameof(TrRotX));
+			OnPropertyChanged(nameof(TrRotY));
+			OnPropertyChanged(nameof(TrRotZ));
+		}
+
+		public void InvalidateScale()
+		{
+			OnPropertyChanged(nameof(TrScaleX));
+			OnPropertyChanged(nameof(TrScaleY));
+			OnPropertyChanged(nameof(TrScaleZ));
+		}
 	}
 }

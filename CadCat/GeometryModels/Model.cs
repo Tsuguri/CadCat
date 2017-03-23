@@ -56,10 +56,17 @@ namespace CadCat.GeometryModels
 		}
 		public virtual Rendering.Packets.RenderingPacket GetRenderingPacket()
 		{
-			Rendering.Packets.RenderingPacket packet;
+			Rendering.Packets.RenderingPacket packet = new Rendering.Packets.RenderingPacket();
 			packet.model = this;
 			packet.type = Rendering.Packets.PacketType.LinePacket;
+			packet.overrideScale = false;
 			return packet;
+		}
+
+		public virtual bool Collide(Ray ray, out double distance)
+		{
+			distance = 0.0;
+			return false;
 		}
 
 		public virtual IEnumerable<Line> GetLines()
