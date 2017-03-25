@@ -97,12 +97,14 @@
     <Compile Include="DataStructures\SceneData.cs" />
     <Compile Include="DataStructures\CatPoint.cs" />
     <Compile Include="DataStructures\SpatialData\PosTransform.cs" />
+    <Compile Include="DropDownMenuSelector.cs" />
     <Compile Include="GeometryModels\Bezier.cs" />
-    <Compile Include="GeometryModels\IChangeablePointCount.cs" />
+    <Compile Include="GeometryModels\ParametrizedModel.cs" />
+    <Compile Include="GeometryModels\PointModel.cs" />
+    <Compile Include="ModelInterfaces\IChangeablePointCount.cs" />
     <Compile Include="GeometryModels\Model.cs" />
     <Compile Include="DataStructures\SpatialData\Transform.cs" />
     <Compile Include="GeometryModels\Cube.cs" />
-    <Compile Include="GeometryModels\PointGroup.cs" />
     <Compile Include="GeometryModels\Torus.cs" />
     <Compile Include="Math\Matrix4.cs" />
     <Compile Include="Math\Ray.cs" />
@@ -110,6 +112,7 @@
     <Compile Include="Math\Vector2.cs" />
     <Compile Include="Math\Vector3.cs" />
     <Compile Include="Math\Vector4.cs" />
+    <Compile Include="ModelInterfaces\Test.cs" />
     <Compile Include="Rendering\Camera.cs" />
     <Compile Include="Rendering\ModelData.cs" />
     <Compile Include="Rendering\BaseRenderer.cs" />
@@ -132,6 +135,9 @@
     </Compile>
     <Compile Include="UIControls\RightSideMenu.xaml.cs">
       <DependentUpon>RightSideMenu.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UIControls\SelectedItemDropDown.xaml.cs">
+      <DependentUpon>SelectedItemDropDown.xaml</DependentUpon>
     </Compile>
     <Compile Include="UIControls\SelectedModelDescription.xaml.cs">
       <DependentUpon>SelectedModelDescription.xaml</DependentUpon>
@@ -174,6 +180,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UIControls\RightSideMenu.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UIControls\SelectedItemDropDown.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

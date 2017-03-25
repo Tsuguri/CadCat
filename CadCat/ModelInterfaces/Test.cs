@@ -4,12 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CadCat.DataStructures
+namespace CadCat.ModelInterfaces
 {
-	using Real = System.Double;
-
-	public class BindableTransform : Utilities.BindableObject
+	interface Test
 	{
-
 	}
 }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CadCat.GeometryModels
+namespace CadCat.ModelInterfaces
 {
 	interface IChangeablePointCount
 	{

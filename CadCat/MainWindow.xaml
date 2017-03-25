@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:controls="clr-namespace:CadCat.UIControls"
-                     xmlns:models="clr-namespace:CadCat.GeometryModels"
+        xmlns:models="clr-namespace:CadCat.GeometryModels"
+        xmlns:interfaces="clr-namespace:CadCat.ModelInterfaces"
         mc:Ignorable="d"
         
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
@@ -61,23 +62,7 @@
                     </StackPanel>
                 </materialDesign:PopupBox>
 
-                <materialDesign:PopupBox HorizontalAlignment="Right" VerticalAlignment="Bottom" Style="{StaticResource MaterialDesignMultiFloatingActionPopupBox}"
-                                         PlacementMode="TopAndAlignCentres" 
-                                         Margin="10">
-                    <ContentControl Content="{Binding SelectedModel}">
-                        <ContentControl.Resources>
-                            <DataTemplate DataType="{x:Type models:Bezier}">
-                                <StackPanel>
-                                    <Button ToolTip="Add Selected Points">
-                                        <materialDesign:PackIcon Kind="CrosshairsGps" />
-                                    </Button>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ContentControl.Resources>
-
-                    </ContentControl>
-
-                </materialDesign:PopupBox>
+                <controls:SelectedItemDropDown  HorizontalAlignment="Right" VerticalAlignment="Bottom" />
 
             </Grid>
         </Grid>

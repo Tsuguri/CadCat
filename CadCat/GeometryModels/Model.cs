@@ -21,7 +21,7 @@ namespace CadCat.GeometryModels
 			this.to = to;
 		}
 	}
-	public class Model : BindableTransform
+	public class Model : Utilities.BindableObject, ModelInterfaces.Test
 	{
 
 		public int ModelID
@@ -56,13 +56,18 @@ namespace CadCat.GeometryModels
 			}
 		}
 
-		
+		public IEnumerable<string> Interfaces
+		{
+			get
+			{
+				return this.GetType().GetInterfaces().Select(x=> x.ToString());
+			}
+		}
 
 		private static int idCounter = 0;
 
 		public Model()
 		{
-			transform = new DataStructures.SpatialData.Transform();
 			ModelID = idCounter;
 			name = GetName();
 			idCounter++;
@@ -112,7 +117,7 @@ namespace CadCat.GeometryModels
 
 		public virtual Matrix4 GetMatrix(bool overrideScale, Vector3 newScale)
 		{
-			return transform.CreateTransformMatrix(overrideScale, newScale);
+			return Matrix4.CreateIdentity();
 		}
 	}
 }

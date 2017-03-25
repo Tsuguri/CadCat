@@ -13,6 +13,7 @@ using CadCat.GeometryModels;
 using System.Collections.ObjectModel;
 using MaterialDesignThemes.Wpf;
 using CadCat.UIControls;
+using CadCat.ModelInterfaces;
 
 namespace CadCat.DataStructures
 {
@@ -166,13 +167,11 @@ namespace CadCat.DataStructures
 		private ICommand createBezierCommand;
 
 		private ICommand createPointCommand;
-		private ICommand createPointGroupCommand;
 
 		private ICommand addPointsToCurrendIChangeablePointCount;
 
 
 		private ICommand goToSelectedCommand;
-		private ICommand deselectCommand;
 		private ICommand removeCommand;
 
 		public ICommand CreateTorusCommand
@@ -206,27 +205,12 @@ namespace CadCat.DataStructures
 				return createPointCommand ?? (createPointCommand = new Utilities.CommandHandler(CreatePoint));
 			}
 		}
-		public ICommand CreatePointGroupCommand
-		{
-			get
-			{
-				return createPointGroupCommand ?? (createPointGroupCommand = new Utilities.CommandHandler(CreatePointGroup));
-			}
-		}
 
 		public ICommand GoToSelectedCommand
 		{
 			get
 			{
 				return goToSelectedCommand ?? (goToSelectedCommand = new Utilities.CommandHandler(GoToSelected));
-			}
-		}
-
-		public ICommand DeselectCommand
-		{
-			get
-			{
-				return deselectCommand ?? (deselectCommand = new Utilities.CommandHandler(DeselectSelected));
 			}
 		}
 
@@ -242,15 +226,20 @@ namespace CadCat.DataStructures
 
 		#region CreatingModels
 
-		private void AddNewModel(Model model)
+		private void AddNewParametrizedModel(ParametrizedModel model)
 		{
 			model.transform.Position = ActiveCamera.LookingAt;
+			AddNewModel(model);
+		}
+
+		private void AddNewModel(Model model)
+		{
 			models.Add(model);
 			SelectedModel = model;
 		}
 		private void CreateTorus()
 		{
-			AddNewModel(new Torus());
+			AddNewParametrizedModel(new Torus());
 		}
 
 		private void CreateCube()
@@ -296,11 +285,6 @@ namespace CadCat.DataStructures
 			}
 		}
 
-		private void CreatePointGroup()
-		{
-			AddNewModel(new PointGroup());
-		}
-
 		#endregion
 
 		double rotateSpeed = 0.2;
@@ -315,19 +299,6 @@ namespace CadCat.DataStructures
 		{
 			imageMouse = new ImageMouseController(this);
 			cursor = new Tools.Cursor(this);
-		}
-
-		public IEnumerable<Line> GetLines(Rendering.ModelData modelData)
-		{
-			foreach (var model in models)
-			{
-				modelData.transform = model.transform;
-				modelData.ModelID = model.ModelID;
-				foreach (var line in model.GetLines())
-					yield return line;
-			}
-			yield break;
-
 		}
 
 		public IEnumerable<Model> GetModels()
@@ -375,7 +346,7 @@ namespace CadCat.DataStructures
 				{
 					Cursor.transform.Position += (ActiveCamera.UpVector * delta.Y * 0.05 + ActiveCamera.RightVector * delta.X * 0.05);
 					Cursor.InvalidateAll();
-					Cursor.CatchedModel?.InvalidateAll();
+					//Cursor.CatchedModel?.InvalidateAll(); TODO
 				}
 				else
 				{
@@ -436,13 +407,8 @@ namespace CadCat.DataStructures
 		{
 			if (SelectedModel != null)
 			{
-				ActiveCamera.LookingAt = SelectedModel.transform.Position;
+				// TODO: ActiveCamera.LookingAt = SelectedModel.transform.Position;
 			}
-		}
-
-		private void DeselectSelected()
-		{
-			SelectedModel = null;
 		}
 
 		private void RemoveSelected()

@@ -8,7 +8,7 @@ using CadCat.DataStructures;
 namespace CadCat.GeometryModels
 {
 	using Real = System.Double;
-	class Torus : Model
+	class Torus : ParametrizedModel
 	{
 		private List<ModelLine> lines;
 		private Math.Vector3[] points;

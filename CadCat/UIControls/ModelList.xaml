@@ -15,12 +15,9 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="45"/>
-            <ColumnDefinition Width="45"/>
         </Grid.ColumnDefinitions>
-
-        <Button Grid.Row="0" Grid.Column="1" Command="{Binding DeselectCommand}" Style="{StaticResource ResourceKey=MaterialDesignRaisedAccentButton}">D</Button>
-        <Button Grid.Row="0" Grid.Column="2" Command="{Binding RemoveCommand}" Style="{StaticResource ResourceKey=MaterialDesignRaisedButton}">R</Button>
-        <ListView Name="models" Grid.Row="1" Grid.ColumnSpan="3" ItemsSource="{Binding Models}" SelectedItem="{Binding Path=SelectedModel, Mode=TwoWay}">
+        <Button Grid.Row="0" Grid.Column="1" Command="{Binding RemoveCommand}" Style="{StaticResource ResourceKey=MaterialDesignRaisedButton}">R</Button>
+        <ListView Name="models" Grid.Row="1" Grid.ColumnSpan="2" ItemsSource="{Binding Models}" SelectedItem="{Binding Path=SelectedModel, Mode=TwoWay}">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Name}"/>

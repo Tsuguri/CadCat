@@ -10,7 +10,7 @@ using CadCat.DataStructures.SpatialData;
 
 namespace CadCat.Tools
 {
-	public class Cursor : GeometryModels.Model
+	public class Cursor : GeometryModels.ParametrizedModel
 	{
 		SceneData scene;
 		private bool visible = false;
@@ -69,10 +69,7 @@ namespace CadCat.Tools
 			set
 			{
 				catchedModel = value;
-				if (catchedModel != null)
-					transform = catchedModel.transform;
-				else
-					transform = new Transform(scene.ActiveCamera.LookingAt);
+				transform = new Transform(scene.ActiveCamera.LookingAt);
 				OnPropertyChanged();
 				OnPropertyChanged(nameof(ScreenPosX));
 				OnPropertyChanged(nameof(ScreenPosY));

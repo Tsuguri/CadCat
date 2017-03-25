@@ -72,7 +72,7 @@ namespace CadCat.Rendering
 
 			foreach (var packet in scene.GetPackets())
 			{
-				var modelmat = packet.model.transform.CreateTransformMatrix(packet.overrideScale, packet.newScale);
+				var modelmat = packet.model.GetMatrix(packet.overrideScale, packet.newScale);
 				activeLeftMatrix = cameraLeftMatrix * modelmat;
 				activeRightMatrix = cameraRightMatrix * modelmat;
 				stroke = (scene.SelectedModel != null && scene.SelectedModel.ModelID == packet.model.ModelID) ? 2 : 1;

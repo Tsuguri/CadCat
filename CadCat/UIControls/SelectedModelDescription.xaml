@@ -10,24 +10,30 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <ScrollViewer>
-        <StackPanel Grid.Row="0">
+        <StackPanel>
+
             <ContentControl Content="{Binding SelectedModel}">
                 <ContentControl.Resources>
-                    <DataTemplate DataType="{x:Type models:Model}">
+                    <DataTemplate DataType="{x:Type models:PointModel}">
+                        <TextBox TextAlignment="Center" Text="{Binding Name}" Grid.Row="0" Grid.Column="0" />
+
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type models:ParametrizedModel}">
                         <Grid>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="20" />
-                                <RowDefinition Height="20" />
-                                <RowDefinition Height="20" />
-                                <RowDefinition Height="20" />
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height="30" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition Width="60" />
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <TextBox Text="{Binding Name}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" />
+
                             <TextBlock Text="Pos" Grid.Row="1" Grid.Column="0" />
                             <ex:DoubleUpDown Increment="0.1" Grid.Column="1" Grid.Row="1" Value="{Binding TrPosX}" />
                             <ex:DoubleUpDown Increment="0.1" Grid.Column="2" Grid.Row="1" Value="{Binding TrPosY}" />
@@ -41,7 +47,6 @@
                             <ex:DoubleUpDown Increment="0.1" Grid.Column="2" Grid.Row="3" Value="{Binding TrScaleY}" />
                             <ex:DoubleUpDown Increment="0.1" Grid.Column="3" Grid.Row="3" Value="{Binding TrScaleZ}" />
                             <TextBlock Text="Rot" Grid.Row="2" Grid.Column="0" />
-                            <TextBlock Text="Scale" Grid.Row="3" Grid.Column="0" />
                         </Grid>
                     </DataTemplate>
                 </ContentControl.Resources>
@@ -72,6 +77,26 @@
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type models:Cube}">
                         <TextBlock>turbo cube</TextBlock>
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type models:Bezier}" >
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="40" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="60" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <ToggleButton Grid.Column="0" Grid.Row="0" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
+                          ToolTip="MaterialDesignSwitchAccentToggleButton" IsChecked="{Binding ShowPolygon}" />
+                            <TextBlock VerticalAlignment="Center" Grid.Column="1" Grid.Row="0">Polygon Visible</TextBlock>
+                            <ScrollViewer Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2">
+                                <StackPanel>
+                                    <TextBlock>jakieś gówno</TextBlock>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
                     </DataTemplate>
                 </ContentControl.Resources>
             </ContentControl>

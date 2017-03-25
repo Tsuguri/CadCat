@@ -5,20 +5,18 @@ using System.Text;
 using System.Threading.Tasks;
 using CadCat.DataStructures;
 using CadCat.Math;
+using CadCat.ModelInterfaces;
 
 namespace CadCat.GeometryModels
 {
-	class Bezier : Model, IChangeablePointCount
+	class Bezier : PointModel, IChangeablePointCount
 	{
-
-		private List<DataStructures.CatPoint> points;
-
 		public bool ShowPolygon { get; set; }
 
 
 		public Bezier(IEnumerable<DataStructures.CatPoint> pts)
 		{
-			points = pts.ToList();
+			points.AddRange(pts);
 
 		}
 

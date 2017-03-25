@@ -1,0 +1,47 @@
+﻿<UserControl x:Class="CadCat.UIControls.SelectedItemDropDown"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ns="clr-namespace:CadCat"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:local="clr-namespace:CadCat.UIControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="80" d:DesignWidth="80">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.PopupBox.xaml" />
+
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <materialDesign:PopupBox Style="{StaticResource MaterialDesignMultiFloatingActionPopupBox}"
+                                         PlacementMode="TopAndAlignCentres" 
+                                         Margin="10">
+        <materialDesign:PopupBox.Resources>
+            <ns:DropDownMenuSelector x:Key="DropDownSelector"/>
+        </materialDesign:PopupBox.Resources>
+        <ItemsControl ItemsSource="{Binding SelectedModel.Interfaces}" ItemTemplateSelector="{StaticResource DropDownSelector}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.Resources>
+                <DataTemplate x:Key="Test">
+                    <TextBlock>
+                                    super text
+                    </TextBlock>
+                </DataTemplate>
+                <DataTemplate x:Key="ChangeablePointCount">
+                    <Button ToolTip="Add Selected Points">
+                        <materialDesign:PackIcon Kind="CrosshairsGps" />
+                    </Button>
+                </DataTemplate>
+                <DataTemplate x:Key="Default"></DataTemplate>
+            </ItemsControl.Resources>
+        </ItemsControl>
+    </materialDesign:PopupBox>
+</UserControl>
