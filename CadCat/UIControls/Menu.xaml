@@ -13,11 +13,8 @@
             <MenuItem Header="Torus" Command="{Binding CreateTorusCommand}"/>
             <MenuItem Header="Cube" Command="{Binding CreateCubeCommand}"/>
             <Separator />
-            <MenuItem Header="Point" Command="{Binding CreatePointCommand}">
-                <MenuItem.Icon>
-                    <Image Source="Images/point.png"/>
-                </MenuItem.Icon>
-            </MenuItem>
+            <MenuItem Header="Point" Command="{Binding CreatePointCommand}" />
+            <MenuItem Header="Point Group" Command="{Binding CreatePointGroupCommand}" />
 
         </MenuItem>
         <MenuItem Header="Go To Selected" Command="{Binding GoToSelectedCommand}"/>

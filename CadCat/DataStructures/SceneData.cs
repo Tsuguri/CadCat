@@ -129,6 +129,7 @@ namespace CadCat.DataStructures
 		private ICommand createTorusCommand;
 		private ICommand createCubeCommand;
 		private ICommand createPointCommand;
+		private ICommand createPointGroupCommand;
 		private ICommand goToSelectedCommand;
 		private ICommand deselectCommand;
 		private ICommand removeCommand;
@@ -154,6 +155,13 @@ namespace CadCat.DataStructures
 			get
 			{
 				return createPointCommand ?? (createPointCommand = new Utilities.CommandHandler(CreatePoint));
+			}
+		}
+		public ICommand CreatePointGroupCommand
+		{
+			get
+			{
+				return createPointGroupCommand ?? (createPointGroupCommand = new Utilities.CommandHandler(CreatePointGroup));
 			}
 		}
 
@@ -204,6 +212,11 @@ namespace CadCat.DataStructures
 		private void CreatePoint()
 		{
 			AddNewModel(new CatPoint());
+		}
+
+		private void CreatePointGroup()
+		{
+			AddNewModel(new PointGroup());
 		}
 
 		#endregion
