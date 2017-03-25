@@ -9,7 +9,7 @@ namespace CadCat.Rendering
 {
     public class ModelData
     {
-        public Transform transform;
+        public DataStructures.SpatialData.Transform transform;
 		public int ModelID = 0;
 
         public void Clear()

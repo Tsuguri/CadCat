@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CadCat.Math;
 
-namespace CadCat.DataStructures
+namespace CadCat.DataStructures.SpatialData
 {
 	public class Transform
 	{

@@ -16,13 +16,22 @@ using System.Windows.Shapes;
 namespace CadCat.UIControls
 {
 	/// <summary>
-	/// Interaction logic for RightSideMenu.xaml
+	/// Interaction logic for PointList.xaml
 	/// </summary>
-	public partial class RightSideMenu : UserControl
+	public partial class PointList : UserControl
 	{
+		public IEnumerable<CadCat.DataStructures.CatPoint> Points
+		{
+			get
+			{
+				foreach (var item in list.SelectedItems)
+				{
+					yield return (DataStructures.CatPoint)item;
+				}
+			}
+		}
 
-
-		public RightSideMenu()
+		public PointList()
 		{
 			InitializeComponent();
 		}

@@ -39,8 +39,6 @@ namespace CadCat.Rendering
 				OnPropertyChanged();
 			}
 		}
-
-		private ModelData modelData = new ModelData();
 		public WriteableBitmap rightBitmap;
 		private Color leftEye = Color.FromRgb(0, 240, 255);
 		private Color rightEye = Colors.Red;
@@ -72,16 +70,9 @@ namespace CadCat.Rendering
 			Matrix4 activeRightMatrix = cameraRightMatrix;
 			int stroke = 1;
 
-			foreach (var line in scene.GetLines(modelData))
-			{
-				ProcessLine(bufferBitmap, line, activeLeftMatrix, leftEye, stroke);
-				ProcessLine(rightBitmap, line, activeRightMatrix, rightEye, stroke);
-			}
-
-
 			foreach (var packet in scene.GetPackets())
 			{
-				var modelmat = modelData.transform.CreateTransformMatrix(packet.overrideScale, packet.newScale);
+				var modelmat = packet.model.transform.CreateTransformMatrix(packet.overrideScale, packet.newScale);
 				activeLeftMatrix = cameraLeftMatrix * modelmat;
 				activeRightMatrix = cameraRightMatrix * modelmat;
 				stroke = (scene.SelectedModel != null && scene.SelectedModel.ModelID == packet.model.ModelID) ? 2 : 1;

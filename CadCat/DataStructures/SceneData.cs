@@ -11,6 +11,8 @@ using System.Windows.Input;
 using System.Windows.Controls;
 using CadCat.GeometryModels;
 using System.Collections.ObjectModel;
+using MaterialDesignThemes.Wpf;
+using CadCat.UIControls;
 
 namespace CadCat.DataStructures
 {
@@ -21,6 +23,21 @@ namespace CadCat.DataStructures
 	}
 	public class SceneData : Utilities.BindableObject
 	{
+		public delegate IEnumerable<DataStructures.CatPoint> PointListGet();
+		public delegate IEnumerable<Model> ModelListGet();
+
+		private PointListGet getSelectedPoints;
+		private ModelListGet getSelectedModels;
+
+		public void SetSelectedPointsGetter(PointListGet del)
+		{
+			this.getSelectedPoints = del;
+		}
+
+		public void SetSelectedModelsGetter(ModelListGet del)
+		{
+			this.getSelectedModels = del;
+		}
 		#region PropertiesAndFields
 
 		#region Rendering
@@ -58,6 +75,9 @@ namespace CadCat.DataStructures
 		private ObservableCollection<Model> models = new ObservableCollection<Model>();
 		public ObservableCollection<Model> Models { get { return models; } }
 
+		private ObservableCollection<CatPoint> points = new ObservableCollection<CatPoint>();
+		public ObservableCollection<CatPoint> Points { get { return points; } }
+
 		private Model selectedModel = null;
 
 		public Model SelectedModel
@@ -69,6 +89,21 @@ namespace CadCat.DataStructures
 			set
 			{
 				selectedModel = value;
+				OnPropertyChanged();
+			}
+		}
+
+		private CatPoint selectedPoint = null;
+
+		public CatPoint SelectedPoint
+		{
+			get
+			{
+				return selectedPoint;
+			}
+			set
+			{
+				selectedPoint = value;
 				OnPropertyChanged();
 			}
 		}
@@ -128,8 +163,14 @@ namespace CadCat.DataStructures
 
 		private ICommand createTorusCommand;
 		private ICommand createCubeCommand;
+		private ICommand createBezierCommand;
+
 		private ICommand createPointCommand;
 		private ICommand createPointGroupCommand;
+
+		private ICommand addPointsToCurrendIChangeablePointCount;
+
+
 		private ICommand goToSelectedCommand;
 		private ICommand deselectCommand;
 		private ICommand removeCommand;
@@ -147,6 +188,14 @@ namespace CadCat.DataStructures
 			get
 			{
 				return createCubeCommand ?? (createCubeCommand = new Utilities.CommandHandler(CreateCube));
+			}
+		}
+
+		public ICommand CreateBezierCommand
+		{
+			get
+			{
+				return createBezierCommand ?? (createBezierCommand = new Utilities.CommandHandler(CreateBezier));
 			}
 		}
 
@@ -209,9 +258,42 @@ namespace CadCat.DataStructures
 			AddNewModel(new Cube());
 		}
 
+		private void CreateBezier()
+		{
+			var selected = getSelectedPoints.Invoke().ToList();
+			if(selected.Count<1)
+			{
+				var sampleMessageDialog = new MessageHost
+				{
+					Message = { Text = "Not enough points for Bezier Curve (at least 1)." }
+				};
+
+				DialogHost.Show(sampleMessageDialog, "RootDialog");
+			}
+			else
+			{
+				AddNewModel(new Bezier(selected));
+
+			}
+		}
+
 		private void CreatePoint()
 		{
-			AddNewModel(new CatPoint());
+			Vector3 pos;
+			if (Cursor.Visible)
+				pos = Cursor.transform.Position;
+			else
+				pos = ActiveCamera.LookingAt;
+
+			var point = new CatPoint(pos);
+			points.Add(point);
+
+			var selected = getSelectedModels.Invoke().ToList();
+			if(selected.Count>0 && selected[0] is IChangeablePointCount)
+			{
+				var p = selected[0] as IChangeablePointCount;
+				p.AddPoint(point);
+			}
 		}
 
 		private void CreatePointGroup()
@@ -265,6 +347,11 @@ namespace CadCat.DataStructures
 			yield break;
 		}
 
+		public IEnumerable<DataStructures.CatPoint> GetPoints()
+		{
+			return points;
+		}
+
 
 		internal void UpdateFrameData()
 		{
@@ -306,22 +393,19 @@ namespace CadCat.DataStructures
 			Ray cameraRay = ActiveCamera.GetViewRay(position);
 			List<ClickData> clicks = new List<ClickData>();
 			var cameraMatrix = ActiveCamera.ViewProjectionMatrix;
-			foreach (var packet in GetPackets())
+
+
+			foreach (var point in GetPoints())
 			{
-				if (packet.type == Rendering.Packets.PacketType.PointPacket)
-				{
-					var activeMatrix = cameraMatrix * packet.model.transform.CreateTransformMatrix();
-					foreach (var point in packet.model.GetPoints())
-					{
-						var pt = (activeMatrix * new Vector4(point, 1.0)).ToNormalizedVector3();
-						var dt = new Vector2(pt.X, pt.Y) - position;
-						var distance = dt.Length();
-						if (distance < 0.009)
-							clicks.Add(new ClickData(pt.Z, packet.model));
-					}
-				}
+				var pt = (cameraMatrix * new Vector4(point.Position, 1.0)).ToNormalizedVector3();
+				var dt = new Vector2(pt.X, pt.Y) - position;
+				var distance = dt.Length();
+				if (distance < 0.009)
+					clicks.Add(new ClickData(pt.Z, point));
 			}
 
+			ClickData selected;
+			selected.ClickedModel = null;
 			if (clicks.Count > 0)
 			{
 				clicks.Sort((x, y) => y.Distance.CompareTo(x.Distance));
@@ -329,8 +413,21 @@ namespace CadCat.DataStructures
 				var clicked = clicks.First();
 				if (clicked.ClickedModel != null)
 				{
-					SelectedModel = clicked.ClickedModel;
+					selected = clicked;
 				}
+			}
+			if (selected.ClickedModel != null)
+			{
+				if (!Keyboard.IsKeyDown(Key.LeftCtrl))
+				{
+					var list = getSelectedPoints.Invoke().ToList();
+					foreach (var selectedPoint in list)
+					{
+						selectedPoint.IsSelected = false;
+					}
+
+				}
+				selected.ClickedModel.IsSelected =! selected.ClickedModel.IsSelected;
 			}
 
 		}

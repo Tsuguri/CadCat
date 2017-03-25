@@ -9,9 +9,9 @@ namespace CadCat.DataStructures
 	struct ClickData
 	{
 		public double Distance;
-		public GeometryModels.Model ClickedModel;
+		public CatPoint ClickedModel;
 
-		public ClickData(double distance, GeometryModels.Model clicked)
+		public ClickData(double distance, CatPoint clicked)
 		{
 			Distance = distance;
 			ClickedModel = clicked;

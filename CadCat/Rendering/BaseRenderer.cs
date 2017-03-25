@@ -106,7 +106,7 @@ namespace CadCat.Rendering
 
 		protected void DrawPoint(WriteableBitmap bitmap, Vector3 point, Color color)
 		{
-			bitmap.DrawRectangle((int)(point.X * width), (int)(point.Y * height), (int)(point.X * width + 1), (int)(point.Y * height + 1), color);
+			bitmap.DrawRectangle((int)(point.X * width-1), (int)(point.Y * height-1), (int)(point.X * width + 1), (int)(point.Y * height + 1), color);
 		}
 
 		protected void ProcessLine(WriteableBitmap bitmap, Line line, Matrix4 matrix, Color color, int stroke)

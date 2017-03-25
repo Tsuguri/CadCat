@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CadCat.DataStructures;
 using CadCat.Rendering.Packets;
 using System.Windows.Input;
+using CadCat.DataStructures.SpatialData;
 
 namespace CadCat.Tools
 {

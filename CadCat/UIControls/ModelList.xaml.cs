@@ -20,6 +20,17 @@ namespace CadCat.UIControls
 	/// </summary>
 	public partial class ModelList : UserControl
 	{
+
+		public IEnumerable<GeometryModels.Model> Models
+		{
+			get
+			{
+				foreach (var item in models.SelectedItems)
+				{
+					yield return (GeometryModels.Model)item;
+				}
+			}
+		}
 		public ModelList()
 		{
 			InitializeComponent();

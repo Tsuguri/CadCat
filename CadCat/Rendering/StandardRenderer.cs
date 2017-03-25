@@ -29,7 +29,7 @@ namespace CadCat.Rendering
 
 				foreach (var packet in scene.GetPackets())
 				{
-					activeMatrix = cameraMatrix * packet.model.transform.CreateTransformMatrix(packet.overrideScale,packet.newScale);
+					activeMatrix = cameraMatrix * packet.model.GetMatrix(packet.overrideScale,packet.newScale);
 					stroke = (scene.SelectedModel != null && scene.SelectedModel.ModelID == packet.model.ModelID) ? 2 : 1;
 
 					switch (packet.type)
@@ -37,7 +37,7 @@ namespace CadCat.Rendering
 						case Packets.PacketType.LinePacket:
 							foreach (var line in packet.model.GetLines())
 							{
-								ProcessLine(bufferBitmap, line, activeMatrix, Colors.Yellow, stroke);
+								ProcessLine(bufferBitmap, line, activeMatrix, packet.model.IsSelected ? Colors.White : Colors.Yellow, stroke);
 							}
 							break;
 						case Packets.PacketType.PointPacket:
@@ -50,6 +50,11 @@ namespace CadCat.Rendering
 							break;
 					}
 
+				}
+
+				foreach (var point in scene.GetPoints())
+				{
+					ProcessPoint(bufferBitmap, point.Position, cameraMatrix, point.IsSelected ? Colors.Azure : Colors.Yellow);
 				}
 
 			}

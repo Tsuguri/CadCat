@@ -3,28 +3,83 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:controls="clr-namespace:CadCat.UIControls"
+                     xmlns:models="clr-namespace:CadCat.GeometryModels"
         mc:Ignorable="d"
+        
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.FontWeight="Medium"
+        TextElement.FontSize="14"
+        FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto"
         Title="CadCat" Height="650" Width="825" >
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.PopupBox.xaml" />
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="20" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <controls:Menu />
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="auto"/>
-                <ColumnDefinition Width="150"/>
-            </Grid.ColumnDefinitions>
-            <Image Name="image" Grid.Column="0" Stretch="Fill" MouseLeftButtonDown="image_MouseLeftButtonDown" MouseLeftButtonUp="image_MouseLeftButtonUp" />
-            <GridSplitter Grid.Column="1" Margin="2,0,2,0"
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <materialDesign:DialogHost Identifier="RootDialog">
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="45" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <controls:Menu Loaded="Menu_Loaded" />
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="250" MinWidth="200"/>
+                </Grid.ColumnDefinitions>
+                <Image Name="image" Grid.Column="0" Stretch="Fill" MouseLeftButtonDown="image_MouseLeftButtonDown" MouseLeftButtonUp="image_MouseLeftButtonUp" />
+                <GridSplitter Grid.Column="1" Margin="2,0,2,0"
                   Width="3" Background="DarkGray" 
                   VerticalAlignment="Stretch" 
                   HorizontalAlignment="Center"  />
-            <controls:RightSideMenu Grid.Column="2" />
+                <controls:RightSideMenu Grid.Column="2" x:Name="RightSide" />
+                <materialDesign:PopupBox HorizontalAlignment="Left" VerticalAlignment="Bottom" Style="{StaticResource MaterialDesignMultiFloatingActionPopupBox}"
+                                         PlacementMode="TopAndAlignCentres" 
+                                         ToolTipService.Placement="Right"
+                                         ToolTip="PopupBox, Style MaterialDesignMultiFloatingActionPopupBox" Margin="10">
+                    <StackPanel>
+                        <Button ToolTip="Point" Command="{Binding CreatePointCommand}">
+                            <materialDesign:PackIcon Kind="CrosshairsGps" />
+                        </Button>
+                        <Button ToolTip="Bezier Curve" Command="{Binding CreateBezierCommand}">
+                            <materialDesign:PackIcon Kind="AppleKeyboardCommand" />
+                        </Button>
+                        <Button ToolTip="Torus" Command="{Binding CreateTorusCommand}">T</Button>
+                        <Button ToolTip="Cube" Command="{Binding CreateCubeCommand}">
+                            <materialDesign:PackIcon Kind="CubeOutline" />
+                        </Button>
+                    </StackPanel>
+                </materialDesign:PopupBox>
+
+                <materialDesign:PopupBox HorizontalAlignment="Right" VerticalAlignment="Bottom" Style="{StaticResource MaterialDesignMultiFloatingActionPopupBox}"
+                                         PlacementMode="TopAndAlignCentres" 
+                                         Margin="10">
+                    <ContentControl Content="{Binding SelectedModel}">
+                        <ContentControl.Resources>
+                            <DataTemplate DataType="{x:Type models:Bezier}">
+                                <StackPanel>
+                                    <Button ToolTip="Add Selected Points">
+                                        <materialDesign:PackIcon Kind="CrosshairsGps" />
+                                    </Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ContentControl.Resources>
+
+                    </ContentControl>
+
+                </materialDesign:PopupBox>
+
+            </Grid>
         </Grid>
-    </Grid>
+    </materialDesign:DialogHost>
 </Window>

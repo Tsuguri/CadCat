@@ -10,7 +10,7 @@ namespace CadCat.DataStructures
 
 	public class BindableTransform : Utilities.BindableObject
 	{
-		public Transform transform;
+		public SpatialData.Transform transform;
 
 		public Real TrPosX
 		{

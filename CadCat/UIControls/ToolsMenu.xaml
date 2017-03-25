@@ -8,7 +8,7 @@
              xmlns:rend="clr-namespace:CadCat.Rendering"
              xmlns:local="clr-namespace:CadCat.UIControls"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="150">
+             d:DesignHeight="350" d:DesignWidth="250">
     <UserControl.Resources>
         <ResourceDictionary Source="MainWindowResources.xaml" />
     </UserControl.Resources>
@@ -23,11 +23,11 @@
                             <DataTemplate DataType="{x:Type rend:StereoscopicRender}">
                                 <Grid>
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="20"/>
-                                        <RowDefinition Height="20"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
                                     </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="40"/>
+                                        <ColumnDefinition Width="80"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" Grid.Row="0">Eye Distance</TextBlock>

@@ -57,6 +57,8 @@ namespace CadCat
 			data = new SceneData();
 			DataContext = data;
 			InitializeComponent();
+			data.SetSelectedPointsGetter(() => { return RightSide.pointList.Points; });
+			data.SetSelectedModelsGetter(() => { return RightSide.modelList.Models; });
 			ctx = new RenderingContext(data, image);
 			var cam = new Camera();
 			cam.LookingAt = new Math.Vector3(0, 0, 0);
@@ -67,15 +69,8 @@ namespace CadCat
 			image.SizeChanged += Image_SizeChanged;
 			resizeTimer = new DispatcherTimer();
 			resizeTimer.Interval = new TimeSpan(0, 0, 0, 0, 300);
-			RunTimer();
-
-
-
-			var mat = Math.Matrix4.CreateFrustum(Math.Utils.DegToRad(60), 1, 0.1, 100).Inversed();
-			var p1 = (mat * new Math.Vector4(0, 0, 1, 1)).ToNormalizedVector3();
-			var p2 = (mat * new Math.Vector4(1, 1, 1, 1)).ToNormalizedVector3().Normalized();
-			var p3 = (mat * new Math.Vector4(-1, 0, 1, 1)).ToNormalizedVector3();
 			
+			RunTimer();
 
 		}
 
@@ -131,6 +126,11 @@ namespace CadCat
 		private void image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
 		{
 			data.ImageMouse.LeftMouseDownCommand.Execute(sender);
+		}
+
+		private void Menu_Loaded(object sender, RoutedEventArgs e)
+		{
+
 		}
 	}
 }

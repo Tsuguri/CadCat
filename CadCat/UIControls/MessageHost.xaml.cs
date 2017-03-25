@@ -15,14 +15,13 @@ using System.Windows.Shapes;
 
 namespace CadCat.UIControls
 {
+
 	/// <summary>
-	/// Interaction logic for RightSideMenu.xaml
+	/// Interaction logic for MessageHost.xaml
 	/// </summary>
-	public partial class RightSideMenu : UserControl
+	public partial class MessageHost : UserControl
 	{
-
-
-		public RightSideMenu()
+		public MessageHost()
 		{
 			InitializeComponent();
 		}

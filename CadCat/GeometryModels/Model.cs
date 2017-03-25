@@ -42,14 +42,27 @@ namespace CadCat.GeometryModels
 				OnPropertyChanged();
 			}
 		}
+		private bool isSelected = false;
+		public bool IsSelected
+		{
+			get
+			{
+				return isSelected;
+			}
+			set
+			{
+				isSelected = value;
+				OnPropertyChanged();
+			}
+		}
 
-	
+		
 
 		private static int idCounter = 0;
 
 		public Model()
 		{
-			transform = new Transform();
+			transform = new DataStructures.SpatialData.Transform();
 			ModelID = idCounter;
 			name = GetName();
 			idCounter++;
@@ -95,6 +108,11 @@ namespace CadCat.GeometryModels
 		public virtual string GetName()
 		{
 			return ModelID.ToString();
+		}
+
+		public virtual Matrix4 GetMatrix(bool overrideScale, Vector3 newScale)
+		{
+			return transform.CreateTransformMatrix(overrideScale, newScale);
 		}
 	}
 }
