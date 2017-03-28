@@ -175,5 +175,7 @@ namespace CadCat.GeometryModels
 		{
 			return transform.CreateTransformMatrix(overrideScale, newScale);
 		}
+
+
 	}
 }

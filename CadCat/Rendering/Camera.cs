@@ -141,7 +141,7 @@ namespace CadCat.Rendering
 			var trans = CreateTargetTranslation();
 
 			var revRot = CreateReversedRotation();
-			var pos = (revRot * new Vector4(0, 0, -Radius, 1)).ToNormalizedVector3();
+			var pos = LookingAt + (revRot * new Vector4(0, 0, -Radius, 1)).ToNormalizedVector3();
 			cameraPos = new Vector3(pos.X, pos.Y, pos.Z);
 			//Console.WriteLine($"camera: {cameraPos.X}, {cameraPos.Y}, {cameraPos.Z}");
 			viewMatrix = transRadius * rot * trans;
@@ -255,6 +255,28 @@ namespace CadCat.Rendering
 			Vector3 origin = CameraPosition;
 			var normDir = (direction.ToNormalizedVector3() - origin).Normalized();
 			return new Ray(origin, normDir);
+		}
+
+		public Vector3 GetScreenPointOnViewPlane(Vector2 position)
+		{
+			var pos = new Vector3(position.X, position.Y, 0.1);
+			pos *= Radius;
+			var inverseView = ViewMatrix.Inversed();
+			var inverseProjection = ProjectionMatrix.Inversed();
+
+			var afterProjection = inverseProjection * new Vector4(pos, 1.0);
+			var afterView = inverseView * afterProjection;
+
+			Ray ray = GetViewRay(position);
+
+			var plane = new Plane(LookingAt, (LookingAt - CameraPosition).Normalized());
+			double distance;
+			if (plane.RayIntersection(ray, out distance))
+			{
+				return ray.GetPoint(distance);
+			}
+			return new Vector3(-1, -1, -1);
+
 		}
 	}
 }

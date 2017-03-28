@@ -28,5 +28,13 @@ namespace CadCat.Math
 		{
 			return rad / PI * 180.0;
 		}
+
+		public static Real Eps
+		{
+			get
+			{
+				return 0.00001;
+			}
+		}
 	}
 }

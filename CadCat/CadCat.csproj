@@ -101,6 +101,7 @@
     <Compile Include="GeometryModels\Bezier.cs" />
     <Compile Include="GeometryModels\ParametrizedModel.cs" />
     <Compile Include="GeometryModels\PointModel.cs" />
+    <Compile Include="Math\Plane.cs" />
     <Compile Include="ModelInterfaces\IChangeablePointCount.cs" />
     <Compile Include="GeometryModels\Model.cs" />
     <Compile Include="DataStructures\SpatialData\Transform.cs" />
@@ -112,6 +113,7 @@
     <Compile Include="Math\Vector2.cs" />
     <Compile Include="Math\Vector3.cs" />
     <Compile Include="Math\Vector4.cs" />
+    <Compile Include="ModelInterfaces\IConvertibleToPoints.cs" />
     <Compile Include="ModelInterfaces\Test.cs" />
     <Compile Include="Rendering\Camera.cs" />
     <Compile Include="Rendering\ModelData.cs" />
@@ -121,6 +123,9 @@
     <Compile Include="Rendering\StandardRenderer.cs" />
     <Compile Include="Rendering\StereoscopicRender.cs" />
     <Compile Include="Tools\Cursor.cs" />
+    <Compile Include="UIControls\LeftSideMenu.xaml.cs">
+      <DependentUpon>LeftSideMenu.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UIControls\Menu.xaml.cs">
       <DependentUpon>Menu.xaml</DependentUpon>
     </Compile>
@@ -159,6 +164,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="UIControls\LeftSideMenu.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UIControls\MainWindowResources.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

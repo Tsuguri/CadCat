@@ -39,6 +39,23 @@ namespace CadCat.DataStructures
 		{
 			this.getSelectedModels = del;
 		}
+
+		private bool onMousePoint = false;
+		public bool OnMousePoint
+		{
+			get
+			{
+				return onMousePoint;
+			}
+			set
+			{
+				if (!value || (value && SelectedModel != null))
+				{
+					onMousePoint = value;
+					OnPropertyChanged();
+				}
+			}
+		}
 		#region PropertiesAndFields
 
 		#region Rendering
@@ -89,6 +106,8 @@ namespace CadCat.DataStructures
 			}
 			set
 			{
+				if (value == null)
+					OnMousePoint = false;
 				selectedModel = value;
 				OnPropertyChanged();
 			}
@@ -169,6 +188,9 @@ namespace CadCat.DataStructures
 		private ICommand createPointCommand;
 
 		private ICommand addPointsToCurrendIChangeablePointCount;
+		private ICommand removeSelectedPointsCommand;
+		private ICommand selectPointsCommand;
+		private ICommand addSelectedPointToSelectedItemCommand;
 
 
 		private ICommand goToSelectedCommand;
@@ -222,6 +244,30 @@ namespace CadCat.DataStructures
 			}
 		}
 
+		public ICommand RemoveSelectedPointsCommand
+		{
+			get
+			{
+				return removeSelectedPointsCommand ?? (removeSelectedPointsCommand = new Utilities.CommandHandler(RemoveSelectedPoints));
+			}
+		}
+
+		public ICommand SelectPointsCommand
+		{
+			get
+			{
+				return selectPointsCommand ?? (selectPointsCommand = new Utilities.CommandHandler(SelectPoints));
+			}
+		}
+
+		public ICommand AddSelectedPointToSelectedItemCommand
+		{
+			get
+			{
+				return addSelectedPointToSelectedItemCommand ?? (addSelectedPointToSelectedItemCommand = new Utilities.CommandHandler(AddSelectedPointToSelectedItem));
+			} 
+		}
+
 		#endregion
 
 		#region CreatingModels
@@ -250,7 +296,7 @@ namespace CadCat.DataStructures
 		private void CreateBezier()
 		{
 			var selected = getSelectedPoints.Invoke().ToList();
-			if(selected.Count<1)
+			if (selected.Count < 1)
 			{
 				var sampleMessageDialog = new MessageHost
 				{
@@ -273,12 +319,17 @@ namespace CadCat.DataStructures
 				pos = Cursor.transform.Position;
 			else
 				pos = ActiveCamera.LookingAt;
+			CreatePoint(pos);
+		}
+		private void CreatePoint(Vector3 pos)
+		{
+
 
 			var point = new CatPoint(pos);
 			points.Add(point);
 
 			var selected = getSelectedModels.Invoke().ToList();
-			if(selected.Count>0 && selected[0] is IChangeablePointCount)
+			if (selected.Count > 0 && selected[0] is IChangeablePointCount)
 			{
 				var p = selected[0] as IChangeablePointCount;
 				p.AddPoint(point);
@@ -359,12 +410,11 @@ namespace CadCat.DataStructures
 
 		}
 
-		internal void SceneClicked(Vector2 position)
+		private bool SelectClickedModel(Vector2 position, out CatPoint model)
 		{
 			Ray cameraRay = ActiveCamera.GetViewRay(position);
 			List<ClickData> clicks = new List<ClickData>();
 			var cameraMatrix = ActiveCamera.ViewProjectionMatrix;
-
 
 			foreach (var point in GetPoints())
 			{
@@ -389,17 +439,42 @@ namespace CadCat.DataStructures
 			}
 			if (selected.ClickedModel != null)
 			{
-				if (!Keyboard.IsKeyDown(Key.LeftCtrl))
-				{
-					var list = getSelectedPoints.Invoke().ToList();
-					foreach (var selectedPoint in list)
-					{
-						selectedPoint.IsSelected = false;
-					}
-
-				}
-				selected.ClickedModel.IsSelected =! selected.ClickedModel.IsSelected;
+				model = selected.ClickedModel;
+				return true;
 			}
+			model = null;
+			return false;
+		}
+
+		internal void SceneClicked(Vector2 position)
+		{
+
+			var pos = ActiveCamera.GetScreenPointOnViewPlane(position);
+
+			if (!OnMousePoint)
+			{
+				CatPoint clickedPoint;
+				if (SelectClickedModel(position, out clickedPoint))
+				{
+					if (!Keyboard.IsKeyDown(Key.LeftCtrl))
+					{
+						var list = getSelectedPoints.Invoke().ToList();
+						foreach (var selectedPoint in list)
+						{
+							selectedPoint.IsSelected = false;
+						}
+
+					}
+					clickedPoint.IsSelected = !clickedPoint.IsSelected;
+				}
+			}
+			else
+			{
+				var newPointPos = ActiveCamera.GetScreenPointOnViewPlane(position);
+				CreatePoint(newPointPos);
+			}
+
+
 
 		}
 
@@ -417,6 +492,37 @@ namespace CadCat.DataStructures
 			{
 				models.Remove(SelectedModel);
 				SelectedModel = null;
+			}
+		}
+
+		private void RemoveSelectedPoints()
+		{
+			var pointList = Points.Where((x) => x.IsSelected).ToList();
+			foreach (var point in pointList)
+			{
+				point.CleanUp();
+				Points.Remove(point);
+			}
+		}
+
+		private void SelectPoints()
+		{
+			var pointList = Points.Where((x) => x.IsSelected).ToList();
+			pointList.ForEach((x) => { x.IsSelected = false; });
+
+			foreach (var pt in SelectedModel.EnumerateCatPoints())
+				pt.IsSelected = true;
+		}
+
+		private void AddSelectedPointToSelectedItem()
+		{
+			if( (SelectedModel is IChangeablePointCount))
+			{
+				var mod = SelectedModel as IChangeablePointCount;
+				foreach (var point in getSelectedPoints.Invoke())
+				{
+					mod.AddPoint(point);
+				}
 			}
 		}
 	}

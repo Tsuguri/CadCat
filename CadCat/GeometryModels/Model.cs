@@ -21,7 +21,7 @@ namespace CadCat.GeometryModels
 			this.to = to;
 		}
 	}
-	public class Model : Utilities.BindableObject, ModelInterfaces.Test
+	public class Model : Utilities.BindableObject
 	{
 
 		public int ModelID
@@ -108,6 +108,11 @@ namespace CadCat.GeometryModels
 		public virtual IEnumerable<Vector3> GetPoints()
 		{
 			yield return new Vector3(1, 1, 1);
+		}
+
+		public virtual IEnumerable<CatPoint> EnumerateCatPoints()
+		{
+			return Enumerable.Empty<CatPoint>();
 		}
 
 		public virtual string GetName()

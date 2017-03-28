@@ -24,6 +24,11 @@
             <ns:DropDownMenuSelector x:Key="DropDownSelector"/>
         </materialDesign:PopupBox.Resources>
         <ItemsControl ItemsSource="{Binding SelectedModel.Interfaces}" ItemTemplateSelector="{StaticResource DropDownSelector}">
+            <ItemsControl.ItemContainerStyle>
+                <Style>
+                    <Setter Property="FrameworkElement.DataContext" Value="{Binding RelativeSource={RelativeSource Self}}"/>
+                </Style>
+            </ItemsControl.ItemContainerStyle>
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <StackPanel />
@@ -36,9 +41,22 @@
                     </TextBlock>
                 </DataTemplate>
                 <DataTemplate x:Key="ChangeablePointCount">
-                    <Button ToolTip="Add Selected Points">
-                        <materialDesign:PackIcon Kind="CrosshairsGps" />
-                    </Button>
+                    <StackPanel DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorLevel=1, AncestorType=ItemsControl}}">
+
+                        <Button ToolTip="Add Selected Points" Command="{Binding AddSelectedPointToSelectedItemCommand}">
+                            <materialDesign:PackIcon Kind="CrosshairsGps" />
+                        </Button>
+                        <ToggleButton Grid.Column="2" Margin="0 0 0 0" Style="{StaticResource MaterialDesignActionAccentToggleButton}"
+                          IsChecked="{Binding OnMousePoint}" ToolTipService.Placement="Top"
+                          ToolTip="Enable mouse point placing mode at camera LookAt plane.">
+                            <ToggleButton.Content>
+                                <materialDesign:PackIcon Kind="CrosshairsGps" />
+                            </ToggleButton.Content>
+                            <materialDesign:ToggleButtonAssist.OnContent>
+                                X
+                            </materialDesign:ToggleButtonAssist.OnContent>
+                        </ToggleButton>
+                    </StackPanel>
                 </DataTemplate>
                 <DataTemplate x:Key="Default"></DataTemplate>
             </ItemsControl.Resources>

@@ -20,7 +20,6 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.PopupBox.xaml" />
-
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
@@ -44,23 +43,8 @@
                   VerticalAlignment="Stretch" 
                   HorizontalAlignment="Center"  />
                 <controls:RightSideMenu Grid.Column="2" x:Name="RightSide" />
-                <materialDesign:PopupBox HorizontalAlignment="Left" VerticalAlignment="Bottom" Style="{StaticResource MaterialDesignMultiFloatingActionPopupBox}"
-                                         PlacementMode="TopAndAlignCentres" 
-                                         ToolTipService.Placement="Right"
-                                         ToolTip="PopupBox, Style MaterialDesignMultiFloatingActionPopupBox" Margin="10">
-                    <StackPanel>
-                        <Button ToolTip="Point" Command="{Binding CreatePointCommand}">
-                            <materialDesign:PackIcon Kind="CrosshairsGps" />
-                        </Button>
-                        <Button ToolTip="Bezier Curve" Command="{Binding CreateBezierCommand}">
-                            <materialDesign:PackIcon Kind="AppleKeyboardCommand" />
-                        </Button>
-                        <Button ToolTip="Torus" Command="{Binding CreateTorusCommand}">T</Button>
-                        <Button ToolTip="Cube" Command="{Binding CreateCubeCommand}">
-                            <materialDesign:PackIcon Kind="CubeOutline" />
-                        </Button>
-                    </StackPanel>
-                </materialDesign:PopupBox>
+                <controls:LeftSideMenu  HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+
 
                 <controls:SelectedItemDropDown  HorizontalAlignment="Right" VerticalAlignment="Bottom" />
 
