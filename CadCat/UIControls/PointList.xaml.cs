@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 
 namespace CadCat.UIControls
 {
+
 	/// <summary>
 	/// Interaction logic for PointList.xaml
 	/// </summary>

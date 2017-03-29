@@ -77,8 +77,9 @@ namespace CadCat.Rendering
 			set
 			{
 				if (aspectRatio != value)
-					viewProjection = null;
+					MatrixReset = null;
 				aspectRatio = value;
+
 			}
 		}
 

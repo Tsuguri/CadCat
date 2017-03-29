@@ -8,8 +8,8 @@
              mc:Ignorable="d" 
              d:DesignHeight="30" d:DesignWidth="100">
     <DockPanel>
-        <Rectangle DockPanel.Dock="Left" Width="{Binding ScrollWidth, FallbackValue=5}" Fill="{Binding BorderBrush, FallbackValue=LightGray}" MouseEnter="inputBox_MouseEnter" MouseLeave="inputBox_MouseLeave" MouseLeftButtonDown="Border_MouseLeftButtonDown" MouseMove="inputBox_MouseMove" MouseLeftButtonUp="inputBox_MouseLeftButtonUp" />
-        <Rectangle DockPanel.Dock="Right" Width="{Binding ScrollWidth, FallbackValue=5}" Fill="{Binding BorderBrush, FallbackValue=LightGray}" MouseEnter="inputBox_MouseEnter" MouseLeave="inputBox_MouseLeave" MouseLeftButtonDown="Border_MouseLeftButtonDown" MouseMove="inputBox_MouseMove" MouseLeftButtonUp="inputBox_MouseLeftButtonUp" />
+        <Rectangle DockPanel.Dock="Left" Width="{Binding ScrollWidth, FallbackValue=15}" Fill="{Binding BorderBrush, FallbackValue=LightGray}" MouseEnter="inputBox_MouseEnter" MouseLeave="inputBox_MouseLeave" MouseLeftButtonDown="Border_MouseLeftButtonDown" MouseMove="inputBox_MouseMove" MouseLeftButtonUp="inputBox_MouseLeftButtonUp" />
+        <!--<Rectangle DockPanel.Dock="Right" Width="{Binding ScrollWidth, FallbackValue=5}" Fill="{Binding BorderBrush, FallbackValue=LightGray}" MouseEnter="inputBox_MouseEnter" MouseLeave="inputBox_MouseLeave" MouseLeftButtonDown="Border_MouseLeftButtonDown" MouseMove="inputBox_MouseMove" MouseLeftButtonUp="inputBox_MouseLeftButtonUp" />-->
 
         <!--<UniformGrid Rows="2" DockPanel.Dock="Right" Width="15">
             <Button Click="UpClick" />

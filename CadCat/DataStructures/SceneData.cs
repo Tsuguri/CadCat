@@ -115,6 +115,20 @@ namespace CadCat.DataStructures
 
 		private CatPoint selectedPoint = null;
 
+		private bool isAnyPointSelected = false;
+		public bool IsAnyPointSelected
+		{
+			get
+			{
+				return isAnyPointSelected;
+			}
+			set
+			{
+				isAnyPointSelected = value;
+				OnPropertyChanged();
+			}
+		}
+
 		public CatPoint SelectedPoint
 		{
 			get
@@ -124,7 +138,9 @@ namespace CadCat.DataStructures
 			set
 			{
 				selectedPoint = value;
+				IsAnyPointSelected = selectedPoint != null;
 				OnPropertyChanged();
+
 			}
 		}
 
@@ -378,7 +394,7 @@ namespace CadCat.DataStructures
 		internal void UpdateFrameData()
 		{
 			var delta = Delta;
-			if (delta.X != -1 && delta.Length > 0.001 && Mouse.LeftButton == MouseButtonState.Pressed)
+			if (delta.X != -1 && delta.Length > 0.001 && Mouse.LeftButton == MouseButtonState.Pressed && imageMouse.ClickedOnImage)
 			{
 				if (Keyboard.IsKeyDown(Key.A))
 				{

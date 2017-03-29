@@ -36,13 +36,13 @@ namespace CadCat.UIControls
 
 		public static readonly DependencyProperty ValueProperty = DependencyProperty.Register(nameof(Value), typeof(double), typeof(NumericSlider),new FrameworkPropertyMetadata(default(double), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
-		public double Multiplier
+		public double Multiplication
 		{
 			get { return (double)GetValue(MultiplierProperty); }
 			set { SetValue(MultiplierProperty, value); }
 		}
 
-		public static readonly DependencyProperty MultiplierProperty = DependencyProperty.Register(nameof(Multiplier), typeof(double), typeof(UserControl), new PropertyMetadata(1.0));
+		public static readonly DependencyProperty MultiplierProperty = DependencyProperty.Register(nameof(Multiplication), typeof(double), typeof(UserControl), new PropertyMetadata(1.0));
 
 		public double Increment
 		{
@@ -66,7 +66,7 @@ namespace CadCat.UIControls
 			set { SetValue(ScrollWidthProperty, value); }
 		}
 
-		public static readonly DependencyProperty ScrollWidthProperty = DependencyProperty.Register(nameof(ScrollWidth), typeof(double), typeof(NumericSlider), new PropertyMetadata(5.0));
+		public static readonly DependencyProperty ScrollWidthProperty = DependencyProperty.Register(nameof(ScrollWidth), typeof(double), typeof(NumericSlider), new PropertyMetadata(15.0));
 
 
 
@@ -115,7 +115,7 @@ namespace CadCat.UIControls
 
 			int diffValue = (int)(diff.X / (double)Precision);
 
-			Value = startValue + diffValue * Multiplier;
+			Value = startValue + diffValue * Multiplication;
 		}
 
 		private void inputBox_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)

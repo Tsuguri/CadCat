@@ -9,27 +9,35 @@
              xmlns:control="clr-namespace:CadCat.UIControls"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />
-            <RowDefinition Height="40" />
-            <RowDefinition Height="40" />
+            <RowDefinition Height="80" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <Button Grid.Row="0" Grid.ColumnSpan="3" Command="{Binding RemoveSelectedPointsCommand}">
+        <Button Grid.Row="0" Command="{Binding RemoveSelectedPointsCommand}">
             Remove Selected
         </Button>
-        <TextBox TextAlignment="Center" Grid.Row="1" Grid.ColumnSpan="3" DataContext="{Binding SelectedPoint}" Text="{Binding Name}" />
-        <control:NumericSlider Grid.Column="0" Grid.Row="2" DataContext="{Binding SelectedPoint}" Value="{Binding X}" Multiplier="0.1" />
-        <control:NumericSlider Grid.Column="1" Grid.Row="2" DataContext="{Binding SelectedPoint}" Value="{Binding Y}" Multiplier="0.1" />
-        <control:NumericSlider Grid.Column="2" Grid.Row="2" DataContext="{Binding SelectedPoint}" Value="{Binding Z}" Multiplier="0.1" />
+        <Grid Grid.Row="1" Visibility="{Binding IsAnyPointSelected, Converter={StaticResource BoolToVis},Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+                <RowDefinition Height="40" />
+            </Grid.RowDefinitions>
+            <TextBox Grid.ColumnSpan="3" TextAlignment="Center" Grid.Row="0" DataContext="{Binding SelectedPoint}" Text="{Binding Name}" />
+            <control:NumericSlider Grid.Column="0" Grid.Row="1" DataContext="{Binding SelectedPoint}" Value="{Binding X}" Multiplication="0.1" />
+            <control:NumericSlider Grid.Column="1" Grid.Row="1" DataContext="{Binding SelectedPoint}" Value="{Binding Y}" Multiplication="0.1" />
+            <control:NumericSlider Grid.Column="2" Grid.Row="1" DataContext="{Binding SelectedPoint}" Value="{Binding Z}" Multiplication="0.1" />
+        </Grid>
 
-        <ListView Grid.Row="3" Name="list" ItemsSource="{Binding Points}" SelectedItem="{Binding SelectedPoint}">
+        <ListView Grid.Row="2" Name="list" ItemsSource="{Binding Points}" SelectedItem="{Binding SelectedPoint}">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Name}"/>
