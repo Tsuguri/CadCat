@@ -22,6 +22,10 @@ namespace CadCat.GeometryModels
 
 		}
 
+		private List<int> curveSizes;
+
+		SceneData scene;
+
 		private List<Vector3> curvePoints;
 
 		public bool ShowPolygon { get; set; } = true;
@@ -38,13 +42,14 @@ namespace CadCat.GeometryModels
 			}
 		}
 
-		public Bezier(IEnumerable<DataStructures.CatPoint> pts)
+		public Bezier(IEnumerable<DataStructures.CatPoint> pts, SceneData data)
 		{
 			foreach (var p in pts)
 			{
 				AddPoint(p);
 
 			}
+			scene = data;
 		}
 
 		private void CountBezierPoints()
@@ -89,23 +94,34 @@ namespace CadCat.GeometryModels
 
 				curvePoints.Add(tempVec);
 			};
-
+			var cameraMatrix = scene.ActiveCamera.ViewProjectionMatrix;
 			int max = points.Count;
 			int current = 0;
-			while (current+4<=max)
+			while (current + 4 <= max)
 			{
 				bp.p0 = points[current].Point.Position;
-				bp.p1 = points[current+1].Point.Position;
-				bp.p2 = points[current+2].Point.Position;
-				bp.p3 = points[current+3].Point.Position;
+				bp.p1 = points[current + 1].Point.Position;
+				bp.p2 = points[current + 2].Point.Position;
+				bp.p3 = points[current + 3].Point.Position;
+
+				var pts = points.Skip(current).Take(4).Select(x => x.Point.Position).Select(x => (cameraMatrix * new Vector4(x, 1.0)).ToNormalizedVector3()).ToList();
+				var xMin = pts.Select(x => x.X).Min();
+				var yMin = pts.Select(x => x.Y).Min();
+				var xMax = pts.Select(x => x.X).Max();
+				var yMax = pts.Select(x => x.Y).Max();
+				var size = new Vector2(xMax - xMin, yMax - yMin);
+				size.X = size.X * scene.ScreenSize.X;
+				size.Y = size.Y * scene.ScreenSize.Y;
+				curveDivision = (int)(System.Math.Max(size.X, size.Y) / 10);
+				curveDivision = System.Math.Min(curveDivision, 500);
 
 				for (int i = 0; i <= curveDivision; i++)
 					lambda(i / (double)curveDivision);
 				current += 3;
 			}
-			if(current<max - 1)
+			if (current < max - 1)
 			{
-				if(max - 1 - current == 2)
+				if (max - 1 - current == 2)
 				{
 					bp.p0 = points[current].Point.Position;
 					bp.p1 = points[current + 1].Point.Position;
@@ -136,12 +152,13 @@ namespace CadCat.GeometryModels
 					yield return line;
 				}
 
-			if (changed)
-			{
-				changed = false;
-				CountBezierPoints();
-			}
-			for(int i=0;i<curvePoints.Count-1;i++)
+			//if (changed)
+			//{
+			//	changed = false;
+			curveSizes = null;
+			CountBezierPoints();
+			//}
+			for (int i = 0; i < curvePoints.Count - 1; i++)
 			{
 				line.from = curvePoints[i];
 				line.to = curvePoints[i + 1];
@@ -160,6 +177,7 @@ namespace CadCat.GeometryModels
 		public void RemovePoint(CatPoint point)
 		{
 			RemovePoint(point, true);
+
 		}
 
 		private void DeleteSelectedPoints()

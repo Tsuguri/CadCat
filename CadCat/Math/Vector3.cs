@@ -36,6 +36,11 @@ namespace CadCat.Math
 			return new Vector3(vec.X * scalar, vec.Y * scalar, vec.Z * scalar);
 		}
 
+		public static Vector3 operator /(Vector3 vec, double scalar)
+		{
+			return vec * (1 / scalar);
+		}
+
 
 		public static Vector3 operator *(Vector3 vec1, Vector3 vec2)
 		{

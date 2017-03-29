@@ -26,6 +26,7 @@ namespace CadCat.GeometryModels
 			set
 			{
 				transform.Position.X = value;
+				PositionChanged();
 				OnPropertyChanged();
 			}
 		}
@@ -38,6 +39,7 @@ namespace CadCat.GeometryModels
 			set
 			{
 				transform.Position.Y = value;
+				PositionChanged();
 				OnPropertyChanged();
 			}
 		}
@@ -50,6 +52,7 @@ namespace CadCat.GeometryModels
 			set
 			{
 				transform.Position.Z = value;
+				PositionChanged();
 				OnPropertyChanged();
 			}
 		}
@@ -174,6 +177,11 @@ namespace CadCat.GeometryModels
 		public override Matrix4 GetMatrix(bool overrideScale, Vector3 newScale)
 		{
 			return transform.CreateTransformMatrix(overrideScale, newScale);
+		}
+
+		protected virtual void PositionChanged()
+		{
+
 		}
 
 

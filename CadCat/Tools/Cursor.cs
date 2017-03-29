@@ -10,6 +10,20 @@ using CadCat.DataStructures.SpatialData;
 
 namespace CadCat.Tools
 {
+
+	public static class SumExtensions
+	{
+
+		public static Math.Vector3 Sum(this IEnumerable<Math.Vector3> source)
+		{
+			return source.Aggregate((x, y) => x + y);
+		}
+
+		public static Math.Vector3 Sum<T>(this IEnumerable<T> source, Func<T, Math.Vector3> selector)
+		{
+			return source.Select(selector).Aggregate((x, y) => x + y);
+		}
+	}
 	public class Cursor : GeometryModels.ParametrizedModel
 	{
 		SceneData scene;
@@ -59,51 +73,34 @@ namespace CadCat.Tools
 			}
 		}
 
-		private GeometryModels.Model catchedModel = null;
-		public GeometryModels.Model CatchedModel
+		List<Tuple<CatPoint, Math.Vector3>> catchedPoints;
+
+
+		private ICommand catchCommand;
+		private ICommand centerCommand;
+		private ICommand releaseCommand;
+
+		public ICommand CatchCommand
 		{
 			get
 			{
-				return catchedModel;
-			}
-			set
-			{
-				catchedModel = value;
-				transform = new Transform(scene.ActiveCamera.LookingAt);
-				OnPropertyChanged();
-				OnPropertyChanged(nameof(ScreenPosX));
-				OnPropertyChanged(nameof(ScreenPosY));
-				OnPropertyChanged(nameof(TrPosX));
-				OnPropertyChanged(nameof(TrPosY));
-				OnPropertyChanged(nameof(TrPosZ));
+				return catchCommand ?? (catchCommand = new Utilities.CommandHandler(Catch));
 			}
 		}
 
-		private ICommand catchSelectedCommand;
-		private ICommand catchNearestCommand;
-		private ICommand releaseCatchedCommand;
-
-		public ICommand CatchSelectedCommand
+		public ICommand CenterCommand
 		{
 			get
 			{
-				return catchSelectedCommand ?? (catchSelectedCommand = new Utilities.CommandHandler(CatchSelected));
+				return centerCommand ?? (centerCommand = new Utilities.CommandHandler(Center));
 			}
 		}
 
-		public ICommand CatchNearestComman
+		public ICommand ReleaseCommand
 		{
 			get
 			{
-				return catchNearestCommand ?? (catchNearestCommand = new Utilities.CommandHandler(CatchNearest));
-			}
-		}
-
-		public ICommand ReleaseCatchedCommand
-		{
-			get
-			{
-				return releaseCatchedCommand ?? (releaseCatchedCommand = new Utilities.CommandHandler(Release));
+				return releaseCommand ?? (releaseCommand = new Utilities.CommandHandler(Release));
 			}
 		}
 
@@ -130,20 +127,29 @@ namespace CadCat.Tools
 			yield return line;
 		}
 
-		private void CatchSelected()
+		private void Catch()
 		{
-			if (scene.SelectedModel != null)
-				CatchedModel = scene.SelectedModel;
+			if (scene.SelectedPoint != null)
+			{
+				var pts = scene.Points.Where(x => x.IsSelected).ToList();
+				var pos = pts.Select(x => x.Position).Sum();
+				pos = pos / pts.Count();
+				transform.Position = pos;
+				catchedPoints = pts.Select(x => new Tuple<CatPoint, Math.Vector3>(x, x.Position - transform.Position)).ToList();
+
+				InvalidatePosition();
+
+			}
 		}
 
-		private void CatchNearest()
+		private void Center()
 		{
-
+			scene.ActiveCamera.LookingAt = this.transform.Position;
 		}
 
 		private void Release()
 		{
-			CatchedModel = null;
+			catchedPoints = null;
 		}
 		public override RenderingPacket GetRenderingPacket()
 		{
@@ -153,6 +159,20 @@ namespace CadCat.Tools
 
 			pack.newScale = new Math.Vector3(cursorScale, cursorScale, cursorScale);
 			return pack;
+		}
+
+		protected override void PositionChanged()
+		{
+			base.PositionChanged();
+
+			if (catchedPoints != null)
+				foreach (var point in catchedPoints)
+				{
+					var pos = point.Item2 + transform.Position;
+					point.Item1.X = pos.X;
+					point.Item1.Y = pos.Y;
+					point.Item1.Z = pos.Z;
+				}
 		}
 	}
 }

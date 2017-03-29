@@ -323,7 +323,7 @@ namespace CadCat.DataStructures
 			}
 			else
 			{
-				AddNewModel(new Bezier(selected));
+				AddNewModel(new Bezier(selected,this));
 
 			}
 		}

@@ -69,19 +69,20 @@
                     <TextBlock Grid.Column="2"  TextAlignment="Right" Grid.Row="2" Text="{Binding Cursor.ScreenPosX, StringFormat=N2}" />
                     <TextBlock Grid.Column="3" TextAlignment="Right" Grid.Row="2" Text="{Binding Cursor.ScreenPosY, StringFormat=N2}" />
 
-                    <Button  Grid.Row="3" Grid.Column="1" Command="{Binding Cursor.CatchSelectedCommand}">
+                    <Button  Grid.Row="3" Grid.Column="1" Command="{Binding Cursor.CatchCommand}">
                         <TextBlock TextWrapping="Wrap">
-                            Catch Selected
+                            Catch
                         </TextBlock>
                     </Button>
-                    <Button Grid.Row="3" Grid.Column="2" Command="{Binding Cursor.CatchNearestCommand}">
-                        <TextBlock TextWrapping="Wrap">
-                        Catch Nearest
-                        </TextBlock>
-                    </Button>
-                    <Button Grid.Row="3" Grid.Column="3" Command="{Binding Cursor.ReleaseCatchedCommand}">
+                    <Button Padding="0" Grid.Row="3" Grid.Column="2" Command="{Binding Cursor.ReleaseCommand}">
                         Release
                     </Button>
+                    <Button Padding="0" Grid.Row="3" Grid.Column="3" Command="{Binding Cursor.CenterCommand}">
+                        <TextBlock TextWrapping="Wrap">
+                        Center
+                        </TextBlock>
+                    </Button>
+
                 </Grid>
             </Expander>
         </StackPanel>
