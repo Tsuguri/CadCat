@@ -112,7 +112,7 @@ namespace CadCat.GeometryModels
 				var size = new Vector2(xMax - xMin, yMax - yMin);
 				size.X = size.X * scene.ScreenSize.X;
 				size.Y = size.Y * scene.ScreenSize.Y;
-				curveDivision = (int)(System.Math.Max(size.X, size.Y) / 10);
+				curveDivision = (int)(System.Math.Max(size.X, size.Y) / 5);
 				curveDivision = System.Math.Min(curveDivision, 500);
 
 				for (int i = 0; i <= curveDivision; i++)
