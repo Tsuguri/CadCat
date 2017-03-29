@@ -12,7 +12,7 @@ namespace CadCat.DataStructures
 	{
 		SceneData data;
 		Point mousePos;
-		bool clickedOnImage = false;
+		//bool clickedOnImage;
 		private ICommand leftMouseDown;
 		private ICommand leftMouseUp;
 
@@ -41,7 +41,7 @@ namespace CadCat.DataStructures
 
 		private void LeftMouseDown()
 		{
-			clickedOnImage = true;
+			//clickedOnImage = true;
 			mousePos = data.MousePosition;
 		}
 
@@ -53,7 +53,7 @@ namespace CadCat.DataStructures
 			{
 				data.SceneClicked(new Math.Vector2(pos.X/data.ScreenSize.X, pos.Y/data.ScreenSize.Y) *2 -1);
 			}
-			clickedOnImage = false;
+			//clickedOnImage = false;
 		}
 	}
 }

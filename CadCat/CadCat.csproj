@@ -96,7 +96,6 @@
     <Compile Include="DataStructures\ImageMouseController.cs" />
     <Compile Include="DataStructures\SceneData.cs" />
     <Compile Include="DataStructures\CatPoint.cs" />
-    <Compile Include="DataStructures\SpatialData\PosTransform.cs" />
     <Compile Include="DropDownMenuSelector.cs" />
     <Compile Include="GeometryModels\Bezier.cs" />
     <Compile Include="GeometryModels\ParametrizedModel.cs" />

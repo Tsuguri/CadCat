@@ -187,7 +187,7 @@ namespace CadCat.DataStructures
 
 		private ICommand createPointCommand;
 
-		private ICommand addPointsToCurrendIChangeablePointCount;
+		//private ICommand addPointsToCurrendIChangeablePointCount;
 		private ICommand removeSelectedPointsCommand;
 		private ICommand selectPointsCommand;
 		private ICommand addSelectedPointToSelectedItemCommand;
