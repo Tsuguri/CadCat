@@ -7,6 +7,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CadCat.UIControls"
              xmlns:models="clr-namespace:CadCat.GeometryModels"
+             xmlns:control="clr-namespace:CadCat.UIControls"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <ScrollViewer>
@@ -20,19 +21,19 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="20"/>
-                                <RowDefinition Height="20"/>
-                                <RowDefinition Height="20"/>
-                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="25"/>
+                                <RowDefinition Height="25"/>
+                                <RowDefinition Height="25"/>
+                                <RowDefinition Height="25"/>
                             </Grid.RowDefinitions>
                             <TextBlock Grid.Column="0" Grid.Row="0">R</TextBlock>
-                            <ex:DoubleUpDown Grid.Column="1" Grid.Row="0" Value="{Binding R}"/>
+                            <control:NumericSlider Grid.Column="1" Grid.Row="0" Value="{Binding R}" Multiplier="0.1" />
                             <TextBlock Grid.Column="0" Grid.Row="1">r</TextBlock>
-                            <ex:DoubleUpDown Grid.Column="1" Grid.Row="1" Value="{Binding r}"/>
+                            <control:NumericSlider Grid.Column="1" Grid.Row="1" Value="{Binding r}" Multiplier="0.1" />
                             <TextBlock Grid.Column="0" Grid.Row="2">RDensity</TextBlock>
-                            <ex:DoubleUpDown Grid.Column="1" Grid.Row="2" Value="{Binding RDensity}"/>
+                            <control:NumericSlider Grid.Column="1" Grid.Row="2" Value="{Binding RDensity}" />
                             <TextBlock Grid.Column="0" Grid.Row="3">rDensity</TextBlock>
-                            <ex:DoubleUpDown Grid.Column="1" Grid.Row="3" Value="{Binding rDensity}"/>
+                            <control:NumericSlider Grid.Column="1" Grid.Row="3" Value="{Binding rDensity}" />
                         </Grid>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type models:Cube}">
@@ -99,17 +100,17 @@
                             <TextBox Text="{Binding Name}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" />
 
                             <TextBlock Text="Pos" Grid.Row="1" Grid.Column="0" />
-                            <ex:DoubleUpDown Increment="0.1" Grid.Column="1" Grid.Row="1" Value="{Binding TrPosX}" />
-                            <ex:DoubleUpDown Increment="0.1" Grid.Column="2" Grid.Row="1" Value="{Binding TrPosY}" />
-                            <ex:DoubleUpDown Increment="0.1" Grid.Column="3" Grid.Row="1" Value="{Binding TrPosZ}" />
+                            <control:NumericSlider Grid.Column="1" Grid.Row="1" Value="{Binding TrPosX}" Multiplier="0.1" />
+                            <control:NumericSlider Grid.Column="2" Grid.Row="1" Value="{Binding TrPosY}" Multiplier="0.1" />
+                            <control:NumericSlider Grid.Column="3" Grid.Row="1" Value="{Binding TrPosZ}" Multiplier="0.1" />
                             <TextBlock Text="Rot" Grid.Row="2" Grid.Column="0" />
-                            <ex:DoubleUpDown Increment="1" Grid.Column="1" Grid.Row="2" Value="{Binding TrRotX}" />
-                            <ex:DoubleUpDown Increment="1" Grid.Column="2" Grid.Row="2" Value="{Binding TrRotY}" />
-                            <ex:DoubleUpDown Increment="1" Grid.Column="3" Grid.Row="2" Value="{Binding TrRotZ}" />
+                            <control:NumericSlider Grid.Column="1" Grid.Row="2" Value="{Binding TrRotX}"/>
+                            <control:NumericSlider Grid.Column="2" Grid.Row="2" Value="{Binding TrRotY}"/>
+                            <control:NumericSlider Grid.Column="3" Grid.Row="2" Value="{Binding TrRotZ}"/>
                             <TextBlock Text="Scale" Grid.Row="3" Grid.Column="0" />
-                            <ex:DoubleUpDown Increment="0.1" Grid.Column="1" Grid.Row="3" Value="{Binding TrScaleX}" />
-                            <ex:DoubleUpDown Increment="0.1" Grid.Column="2" Grid.Row="3" Value="{Binding TrScaleY}" />
-                            <ex:DoubleUpDown Increment="0.1" Grid.Column="3" Grid.Row="3" Value="{Binding TrScaleZ}" />
+                            <control:NumericSlider Grid.Column="1" Grid.Row="3" Value="{Binding TrScaleX}" Multiplier="0.1" />
+                            <control:NumericSlider Grid.Column="2" Grid.Row="3" Value="{Binding TrScaleY}" Multiplier="0.1" />
+                            <control:NumericSlider Grid.Column="3" Grid.Row="3" Value="{Binding TrScaleZ}" Multiplier="0.1" />
                             <TextBlock Text="Rot" Grid.Row="2" Grid.Column="0" />
                         </Grid>
                     </DataTemplate>

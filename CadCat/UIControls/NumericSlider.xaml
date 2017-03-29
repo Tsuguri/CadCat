@@ -1,0 +1,22 @@
+﻿<UserControl x:Class="CadCat.UIControls.NumericSlider"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:System="clr-namespace:System;assembly=mscorlib"
+             
+             mc:Ignorable="d" 
+             d:DesignHeight="30" d:DesignWidth="100">
+    <DockPanel>
+        <Rectangle DockPanel.Dock="Left" Width="{Binding ScrollWidth, FallbackValue=5}" Fill="{Binding BorderBrush, FallbackValue=LightGray}" MouseEnter="inputBox_MouseEnter" MouseLeave="inputBox_MouseLeave" MouseLeftButtonDown="Border_MouseLeftButtonDown" MouseMove="inputBox_MouseMove" MouseLeftButtonUp="inputBox_MouseLeftButtonUp" />
+        <Rectangle DockPanel.Dock="Right" Width="{Binding ScrollWidth, FallbackValue=5}" Fill="{Binding BorderBrush, FallbackValue=LightGray}" MouseEnter="inputBox_MouseEnter" MouseLeave="inputBox_MouseLeave" MouseLeftButtonDown="Border_MouseLeftButtonDown" MouseMove="inputBox_MouseMove" MouseLeftButtonUp="inputBox_MouseLeftButtonUp" />
+
+        <!--<UniformGrid Rows="2" DockPanel.Dock="Right" Width="15">
+            <Button Click="UpClick" />
+            <Button Click="DownClick" />
+        </UniformGrid>-->
+
+        <TextBox DockPanel.Dock="Top" Name="textBox" BorderBrush="{Binding BorderBrush, FallbackValue=LightGray}" Text="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, StringFormat=0.#####}" VerticalContentAlignment="Center" TextAlignment="Center" />
+    </DockPanel>
+
+</UserControl>

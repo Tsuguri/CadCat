@@ -134,6 +134,9 @@
     <Compile Include="UIControls\ModelList.xaml.cs">
       <DependentUpon>ModelList.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UIControls\NumericSlider.xaml.cs">
+      <DependentUpon>NumericSlider.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UIControls\PointList.xaml.cs">
       <DependentUpon>PointList.xaml</DependentUpon>
     </Compile>
@@ -180,6 +183,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UIControls\ModelList.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UIControls\NumericSlider.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

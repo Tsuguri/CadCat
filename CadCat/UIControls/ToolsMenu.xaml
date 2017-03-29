@@ -43,13 +43,13 @@
             <Expander Header="Cursor Options">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="20" />
-                        <RowDefinition Height="20" />
-                        <RowDefinition Height="20" />
-                        <RowDefinition Height="50" />
+                        <RowDefinition Height="25" />
+                        <RowDefinition Height="25" />
+                        <RowDefinition Height="25" />
+                        <RowDefinition Height="80" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="30" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
@@ -58,9 +58,12 @@
                     <TextBlock Grid.Row="0" Grid.Column="1" >Visible</TextBlock>
                     <!--<TextBox Text="{Binding Name}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" />-->
                     <TextBlock Text="Pos" Grid.Row="1" Grid.Column="0" />
-                    <ex:DoubleUpDown Increment="0.1" Grid.Column="1" Grid.Row="1" Value="{Binding Cursor.TrPosX}" />
+                    <local:NumericSlider Grid.Column="1" Grid.Row="1" Value="{Binding Cursor.TrPosX}" Multiplier="0.1" />
+                    <local:NumericSlider Grid.Column="2" Grid.Row="1" Value="{Binding Cursor.TrPosY}" Multiplier="0.1" />
+                    <local:NumericSlider Grid.Column="3" Grid.Row="1" Value="{Binding Cursor.TrPosZ}" Multiplier="0.1" />
+                    <!--<ex:DoubleUpDown Increment="0.1" Grid.Column="1" Grid.Row="1" Value="{Binding Cursor.TrPosX}" />
                     <ex:DoubleUpDown Increment="0.1" Grid.Column="2"  Grid.Row="1" Value="{Binding Cursor.TrPosY}" />
-                    <ex:DoubleUpDown Increment="0.1" Grid.Column="3" Grid.Row="1" Value="{Binding Cursor.TrPosZ}" />
+                    <ex:DoubleUpDown Increment="0.1" Grid.Column="3" Grid.Row="1" Value="{Binding Cursor.TrPosZ}" />-->
 
                     <TextBlock Text="Screen Position" Grid.ColumnSpan="2" Grid.Row="2" Grid.Column="0" />
                     <TextBlock Grid.Column="2"  TextAlignment="Right" Grid.Row="2" Text="{Binding Cursor.ScreenPosX, StringFormat=N2}" />

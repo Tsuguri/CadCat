@@ -5,17 +5,31 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CadCat.UIControls"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:data="clr-namespace:CadCat.DataStructures"
+             xmlns:control="clr-namespace:CadCat.UIControls"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="40" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Button Grid.Row="0" Command="{Binding RemoveSelectedPointsCommand}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Button Grid.Row="0" Grid.ColumnSpan="3" Command="{Binding RemoveSelectedPointsCommand}">
             Remove Selected
         </Button>
-        <ListView Grid.Row="1" Name="list" ItemsSource="{Binding Points}">
+        <TextBox TextAlignment="Center" Grid.Row="1" Grid.ColumnSpan="3" DataContext="{Binding SelectedPoint}" Text="{Binding Name}" />
+        <control:NumericSlider Grid.Column="0" Grid.Row="2" DataContext="{Binding SelectedPoint}" Value="{Binding X}" Multiplier="0.1" />
+        <control:NumericSlider Grid.Column="1" Grid.Row="2" DataContext="{Binding SelectedPoint}" Value="{Binding Y}" Multiplier="0.1" />
+        <control:NumericSlider Grid.Column="2" Grid.Row="2" DataContext="{Binding SelectedPoint}" Value="{Binding Z}" Multiplier="0.1" />
+
+        <ListView Grid.Row="3" Name="list" ItemsSource="{Binding Points}" SelectedItem="{Binding SelectedPoint}">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Name}"/>

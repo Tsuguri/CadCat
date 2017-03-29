@@ -12,8 +12,11 @@ namespace CadCat.DataStructures
 	public class CatPoint : Utilities.BindableObject
 	{
 		public delegate void DeletedHandler(CatPoint sender);
+		public delegate void ChangedHandler(CatPoint sender);
 
 		public event DeletedHandler OnDeleted;
+		public event ChangedHandler OnChanged;
+
 		private static int id = 0;
 
 		Vector3 position;
@@ -56,7 +59,10 @@ namespace CadCat.DataStructures
 			}
 			set
 			{
+				var tmp = position.X;
 				position.X = value;
+				if (tmp != value)
+					OnChanged?.Invoke(this);
 				OnPropertyChanged();
 			}
 		}
@@ -69,7 +75,10 @@ namespace CadCat.DataStructures
 			}
 			set
 			{
+				var tmp = position.Y;
 				position.Y = value;
+				if (tmp != value)
+					OnChanged?.Invoke(this);
 				OnPropertyChanged();
 			}
 		}
@@ -82,7 +91,10 @@ namespace CadCat.DataStructures
 			}
 			set
 			{
+				var tmp = position.Z;
 				position.Z = value;
+				if (tmp != value)
+					OnChanged?.Invoke(this);
 				OnPropertyChanged();
 			}
 		}

@@ -99,6 +99,12 @@ namespace CadCat.Rendering
 
 			}
 
+			foreach (var point in scene.GetPoints())
+			{
+				ProcessPoint(bufferBitmap, point.Position, activeLeftMatrix, leftEye);
+				ProcessPoint(rightBitmap, point.Position, activeRightMatrix, rightEye);
+			}
+
 
 
 

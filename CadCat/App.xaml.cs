@@ -13,5 +13,10 @@ namespace CadCat
 	/// </summary>
 	public partial class App : Application
 	{
+
+		public App()
+		{
+			FrameworkCompatibilityPreferences.KeepTextBoxDisplaySynchronizedWithTextProperty = false;
+		}
 	}
 }
