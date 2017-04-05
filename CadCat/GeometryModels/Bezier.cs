@@ -7,6 +7,7 @@ using CadCat.DataStructures;
 using CadCat.Math;
 using CadCat.ModelInterfaces;
 using System.Windows.Input;
+using CadCat.Rendering;
 
 namespace CadCat.GeometryModels
 {
@@ -141,29 +142,25 @@ namespace CadCat.GeometryModels
 
 		}
 
-		public override IEnumerable<Line> GetLines()
+		public override void Render(BaseRenderer renderer)
 		{
-			var line = new Line();
-			if (ShowPolygon)
-				for (int i = 0; i < points.Count - 1; i++)
-				{
-					line.from = points[i].Point.Position;
-					line.to = points[i + 1].Point.Position;
-					yield return line;
-				}
+			base.Render(renderer);
+			renderer.ModelMatrix = Matrix4.CreateIdentity();
+			renderer.UseIndices = false;
+			if(ShowPolygon)
+			{
+				renderer.Points = points.Select(x => x.Point.Position).ToList();
+				renderer.Transform();
+				renderer.DrawLines();
+			}
 
-			//if (changed)
-			//{
-			//	changed = false;
 			curveSizes = null;
 			CountBezierPoints();
-			//}
-			for (int i = 0; i < curvePoints.Count - 1; i++)
-			{
-				line.from = curvePoints[i];
-				line.to = curvePoints[i + 1];
-				yield return line;
-			}
+
+			renderer.Points = curvePoints;
+			renderer.Transform();
+			renderer.DrawLines();
+
 		}
 
 		public void AddPoint(CatPoint point)

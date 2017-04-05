@@ -4,68 +4,79 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CadCat.DataStructures;
+using CadCat.Rendering;
 
 namespace CadCat.GeometryModels
 {
 	class Cube : ParametrizedModel
 	{
-		public override IEnumerable<Line> GetLines()
+		private List<Math.Vector3> points;
+		private List<int> indices;
+
+		public Cube()
 		{
-			var line = new Line();
-			line.from.X = 0;
-			line.from.Y = 0;
-			line.from.Z = 0;
-			line.to.X = 2;
-			line.to.Y = 0;
-			line.to.Z = 0;
-			yield return line;
-			line.to.X = 0;
-			line.to.Y = 3;
-			yield return line;
-			line.to.Y = 0;
-			line.to.Z = 0.5;
-			yield return line;
-			line.from.X = 1;
-			line.from.Y = 1;
-			line.to.X = 1;
-			line.to.Y = 0;
-			line.to.Z = 0;
-			yield return line;
-			line.to.X = 0;
-			line.to.Y = 1;
-			yield return line;
-			line.to.Y = 0;
-			line.to.Z = 1;
-			line.to.X = 1;
-			yield return line;
-			line.from.X = 0;
-			line.from.Y = 1;
-			line.from.Z = 1;
-			line.to.X = 0;
-			line.to.Y = 0;
-			line.to.Z = 1;
-			yield return line;
-			line.to.Y = 1;
-			line.to.Z = 0;
-			yield return line;
-			line.to.X = 1;
-			line.to.Z = 1;
-			yield return line;
+			points = new List<Math.Vector3>();
+			points.Add(new Math.Vector3(0, 0, 0));
+			points.Add(new Math.Vector3(1, 0, 0));
+			points.Add(new Math.Vector3(1, 0, 1));
+			points.Add(new Math.Vector3(0, 0, 1));
 
+			points.Add(new Math.Vector3(0, 1, 0));
+			points.Add(new Math.Vector3(1, 1, 0));
+			points.Add(new Math.Vector3(1, 1, 1));
+			points.Add(new Math.Vector3(0, 1, 1));
 
-			line.from.X = 1;
-			line.from.Z = 1;
-			line.from.Y = 0;
-			line.to.X = 1;
-			line.to.Y = 0;
-			line.to.Z = 0;
-			yield return line;
-			line.to.X = 0;
-			line.to.Z = 1;
-			yield return line;
-			line.to.X = 1;
-			line.to.Y = 1;
-			yield return line;
+			indices = new List<int>();
+			//floor
+			indices.Add(0);
+			indices.Add(1);
+
+			indices.Add(1);
+			indices.Add(2);
+
+			indices.Add(2);
+			indices.Add(3);
+
+			indices.Add(3);
+			indices.Add(0);
+
+			//ceiling
+			indices.Add(4);
+			indices.Add(5);
+
+			indices.Add(5);
+			indices.Add(6);
+
+			indices.Add(6);
+			indices.Add(7);
+
+			indices.Add(7);
+			indices.Add(4);
+			
+			//walls
+			indices.Add(0);
+			indices.Add(4);
+
+			indices.Add(1);
+			indices.Add(5);
+
+			indices.Add(2);
+			indices.Add(6);
+
+			indices.Add(3);
+			indices.Add(7);
+
+		}
+
+		public override void Render(BaseRenderer renderer)
+		{
+			base.Render(renderer);
+			renderer.UseIndices = true;
+			renderer.Points = points;
+			renderer.Indices = indices;
+			renderer.ModelMatrix = transform.CreateTransformMatrix();
+			renderer.Transform();
+			renderer.DrawLines();
 		}
 	}
 }

@@ -15,7 +15,7 @@ namespace CadCat.Rendering
 	{
 		public WriteableBitmap bufferBitmap;
 		private Image targetImage;
-		private Line tmpLine = new Line();
+		protected Line tmpLine = new Line();
 
 		protected int width, height;
 
@@ -31,7 +31,77 @@ namespace CadCat.Rendering
 			targetImage = img;
 			img.Source = bufferBitmap;
 		}
-		public virtual void Render(SceneData scene)
+
+		public enum RenderingType
+		{
+			Points,
+			Lines
+		}
+
+		protected List<Vector3> points;
+		protected List<Vector3> transformedPoints = new List<Vector3>();
+
+		public List<Vector3> Points
+		{
+			set
+			{
+				points = value;
+			}
+		}
+
+		protected List<int> indices;
+
+		public List<int> Indices
+		{
+			set
+			{
+				indices = value;
+			}
+		}
+
+		protected Matrix4 modelMatrix;
+
+		public Matrix4 ModelMatrix
+		{
+			set
+			{
+				modelMatrix = value;
+			}
+		}
+
+		protected Matrix4 cameraMatrix;
+
+		public Matrix4 CameraMatrix
+		{
+			set
+			{
+				cameraMatrix = value;
+			}
+		}
+
+		protected Color selectedColor;
+
+		public Color SelectedColor
+		{
+			set
+			{
+				selectedColor = value;
+			}
+		}
+
+		public bool UseIndices
+		{
+			protected get; set;
+		}
+
+		public int LineStroke
+		{
+			protected get; set;
+		}
+
+		public RenderingType RenderingMode = RenderingType.Points;
+
+		public virtual void BeforeRendering(SceneData scene)
 		{
 			if (bufferBitmap == null) //stupid hack
 			{
@@ -41,8 +111,61 @@ namespace CadCat.Rendering
 
 			width = bufferBitmap.PixelWidth;
 			height = bufferBitmap.PixelHeight;
+		}
+
+		public abstract void AfterRendering(SceneData scene);
+
+
+		public virtual void Transform()
+		{
+			var activeMatrix = cameraMatrix * modelMatrix;
+			transformedPoints = TransformVertexBuffer(activeMatrix);
 
 		}
+
+		protected List<Vector3> TransformVertexBuffer(Matrix4 mat)
+		{
+			var pts = new List<Vector3>();
+
+			for (int i = 0; i < points.Count; i++)
+			{
+				pts.Insert(i, NormalizeToBitmapSpace((mat * new Vector4(points[i], 1)).ToNormalizedVector3()));
+			}
+			return pts;
+		}
+
+		protected virtual void RenderLine(int index1, int index2)
+		{
+			tmpLine.from = transformedPoints[index1];
+			tmpLine.to = transformedPoints[index2];
+			if (Clip(tmpLine, 0.99, 0.01))
+				DrawLine(bufferBitmap, tmpLine, selectedColor, LineStroke);
+		}
+
+		protected virtual void RenderPoint(int index)
+		{
+			if (ClipPoint(transformedPoints[index]))
+				DrawPoint(bufferBitmap, transformedPoints[index], selectedColor);
+		}
+
+		public void DrawLines()
+		{
+			if (UseIndices)
+				for (int i = 0; i < indices.Count - 1; i += 2)
+				{
+					RenderLine(indices[i], indices[i + 1]);
+				}
+			else
+				for (int i = 0; i < transformedPoints.Count - 1; i++)
+					RenderLine(i, i + 1);
+		}
+
+		public void DrawPoints()
+		{
+			Enumerable.Range(0, transformedPoints.Count).ToList().ForEach(x => RenderPoint(x));
+		}
+
+
 
 		private double CountClipParameter(double from, double to, double margin)
 		{
@@ -101,9 +224,8 @@ namespace CadCat.Rendering
 
 		protected void DrawLine(WriteableBitmap bitmap, Line line, Color color, int stroke)
 		{
-			//bitmap.DrawLineAa((int)(line.from.X * width), (int)(line.from.Y * height), (int)(line.to.X * width), (int)(line.to.Y * height), color, stroke);
 			bitmap.DrawLineDDA((int)(line.from.X * width), (int)(line.from.Y * height), (int)(line.to.X * width), (int)(line.to.Y * height), color);
-			
+
 		}
 
 		protected void DrawPoint(WriteableBitmap bitmap, Vector3 point, Color color)

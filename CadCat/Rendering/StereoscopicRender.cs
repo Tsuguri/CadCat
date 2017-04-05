@@ -12,7 +12,7 @@ namespace CadCat.Rendering
 {
 	class StereoscopicRender : BaseRenderer
 	{
-		private double eyeDistance=0.1;
+		private double eyeDistance = 0.1;
 		public double EyeDistance
 		{
 			get
@@ -42,77 +42,49 @@ namespace CadCat.Rendering
 		public WriteableBitmap rightBitmap;
 		private Color leftEye = Color.FromRgb(0, 240, 255);
 		private Color rightEye = Colors.Red;
+		protected List<Vector3> transformedRightPoints = new List<Vector3>();
+		BitmapContext leftContext;
+		BitmapContext rightContext;
+		SceneData data;
+
 
 		public override void Resize(double width, double height)
 		{
 			base.Resize(width, height);
 			rightBitmap = new WriteableBitmap((int)width, (int)height, 96, 96, PixelFormats.Pbgra32, null);
 		}
-		public override void Render(SceneData scene)
+
+		public override void Transform()
 		{
-			base.Render(scene);
+			var activeMatrix = data.ActiveCamera.GetLeftEyeMatrix(EyeDistance / 2.0, DepthMultiplier) * modelMatrix;
+			transformedPoints = TransformVertexBuffer(activeMatrix);
+			activeMatrix = data.ActiveCamera.GetRightEyeMatrix(EyeDistance / 2.0, DepthMultiplier) * modelMatrix;
+			transformedRightPoints = TransformVertexBuffer(activeMatrix);
+		}
+		protected override void RenderLine(int index1, int index2)
+		{
+			base.RenderLine(index1, index2);
+			tmpLine.from = transformedRightPoints[index1];
+			tmpLine.to = transformedRightPoints[index2];
+			if (Clip(tmpLine, 0.99, 0.01))
+				DrawLine(rightBitmap, tmpLine, rightEye, LineStroke);
+		}
 
-			var tmpLine = new Line();
-
-			#region GetContextAndClear
-
+		public override void BeforeRendering(SceneData scene)
+		{
+			base.BeforeRendering(scene);
 			var rightContext = rightBitmap.GetBitmapContext();
 			rightBitmap.Clear(Colors.Black);
 			var leftContext = bufferBitmap.GetBitmapContext();
 			bufferBitmap.Clear(Colors.Black);
+			this.data = scene;
 
-			#endregion
-
-			var cameraLeftMatrix = scene.ActiveCamera.GetLeftEyeMatrix(EyeDistance / 2.0,  DepthMultiplier);
-			var cameraRightMatrix = scene.ActiveCamera.GetRightEyeMatrix(EyeDistance / 2.0,  DepthMultiplier);
-
-			Matrix4 activeLeftMatrix = cameraLeftMatrix;
-			Matrix4 activeRightMatrix = cameraRightMatrix;
-			int stroke = 1;
-
-			foreach (var packet in scene.GetPackets())
-			{
-				var modelmat = packet.model.GetMatrix(packet.overrideScale, packet.newScale);
-				activeLeftMatrix = cameraLeftMatrix * modelmat;
-				activeRightMatrix = cameraRightMatrix * modelmat;
-				stroke = (scene.SelectedModel != null && scene.SelectedModel.ModelID == packet.model.ModelID) ? 2 : 1;
-
-				switch (packet.type)
-				{
-					case Packets.PacketType.LinePacket:
-						foreach (var line in packet.model.GetLines())
-						{
-							ProcessLine(bufferBitmap, line, activeLeftMatrix, leftEye, stroke);
-							ProcessLine(rightBitmap, line, activeRightMatrix, rightEye, stroke);
-						}
-						break;
-					case Packets.PacketType.PointPacket:
-						foreach (var point in packet.model.GetPoints())
-						{
-							ProcessPoint(bufferBitmap, point, activeLeftMatrix, leftEye);
-							ProcessPoint(rightBitmap, point, activeRightMatrix, rightEye);
-						}
-						break;
-					default:
-						break;
-				}
-
-			}
-
-			foreach (var point in scene.GetPoints())
-			{
-				ProcessPoint(bufferBitmap, point.Position, activeLeftMatrix, leftEye);
-				ProcessPoint(rightBitmap, point.Position, activeRightMatrix, rightEye);
-			}
-
-
-
-
-			#region BlitAndDispose
+		}
+		public override void AfterRendering(SceneData scene)
+		{
 			bufferBitmap.Blit(new System.Windows.Rect(0, 0, bufferBitmap.Width, bufferBitmap.Height), rightBitmap, new System.Windows.Rect(0, 0, rightBitmap.Width, rightBitmap.Height), WriteableBitmapExtensions.BlendMode.Additive);
 			rightContext.Dispose();
 			leftContext.Dispose();
-			#endregion
 		}
 	}
 }

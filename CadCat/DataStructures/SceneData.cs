@@ -405,28 +405,18 @@ namespace CadCat.DataStructures
 			cursor = new Tools.Cursor(this);
 		}
 
-		public IEnumerable<Model> GetModels()
-		{
-			foreach (var model in models)
-				yield return model;
-		}
-
-		public IEnumerable<Rendering.Packets.RenderingPacket> GetPackets()
-		{
-			foreach (var model in models)
-			{
-				yield return model.GetRenderingPacket();
-			}
-
-			yield return cursor.GetRenderingPacket();
-			yield break;
-		}
-
 		public IEnumerable<DataStructures.CatPoint> GetPoints()
 		{
 			return points;
 		}
 
+		public void Render(BaseRenderer renderer)
+		{
+			foreach (var model in models)
+			{
+				model.Render(renderer);
+			}
+		}
 
 		internal void UpdateFrameData()
 		{
