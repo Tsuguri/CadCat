@@ -200,6 +200,7 @@ namespace CadCat.DataStructures
 		private ICommand createTorusCommand;
 		private ICommand createCubeCommand;
 		private ICommand createBezierCommand;
+		private ICommand createBezierC2Command;
 
 		private ICommand createPointCommand;
 
@@ -207,6 +208,7 @@ namespace CadCat.DataStructures
 		private ICommand removeSelectedPointsCommand;
 		private ICommand selectPointsCommand;
 		private ICommand addSelectedPointToSelectedItemCommand;
+		private ICommand changeObjectTypeCommand;
 
 
 		private ICommand goToSelectedCommand;
@@ -233,6 +235,14 @@ namespace CadCat.DataStructures
 			get
 			{
 				return createBezierCommand ?? (createBezierCommand = new Utilities.CommandHandler(CreateBezier));
+			}
+		}
+
+		public ICommand CreateBezierC2Command
+		{
+			get
+			{
+				return createBezierC2Command ?? (createBezierC2Command = new Utilities.CommandHandler(CreateBezierC2));
 			}
 		}
 
@@ -284,6 +294,14 @@ namespace CadCat.DataStructures
 			} 
 		}
 
+		public ICommand ChangeObjectTypeCommand
+		{
+			get
+			{
+				return changeObjectTypeCommand ?? (changeObjectTypeCommand = new Utilities.CommandHandler(ChangeObjectType));
+			}
+		}
+
 		#endregion
 
 		#region CreatingModels
@@ -324,6 +342,25 @@ namespace CadCat.DataStructures
 			else
 			{
 				AddNewModel(new Bezier(selected,this));
+
+			}
+		}
+
+		private void CreateBezierC2()
+		{
+			var selected = getSelectedPoints.Invoke().ToList();
+			if (selected.Count < 1)
+			{
+				var sampleMessageDialog = new MessageHost
+				{
+					Message = { Text = "Not enough points for C2 Bezier Curve (at least 1)." }
+				};
+
+				DialogHost.Show(sampleMessageDialog, "RootDialog");
+			}
+			else
+			{
+				AddNewModel(new BezierC2(selected, this));
 
 			}
 		}
@@ -431,13 +468,14 @@ namespace CadCat.DataStructures
 			Ray cameraRay = ActiveCamera.GetViewRay(position);
 			List<ClickData> clicks = new List<ClickData>();
 			var cameraMatrix = ActiveCamera.ViewProjectionMatrix;
+			var pos = ScreenSize * position;
 
 			foreach (var point in GetPoints())
 			{
 				var pt = (cameraMatrix * new Vector4(point.Position, 1.0)).ToNormalizedVector3();
-				var dt = new Vector2(pt.X, pt.Y) - position;
+				var dt = new Vector2(pt.X, pt.Y) * ScreenSize - pos;
 				var distance = dt.Length();
-				if (distance < 0.009)
+				if (distance < 8)
 					clicks.Add(new ClickData(pt.Z, point));
 			}
 
@@ -540,6 +578,12 @@ namespace CadCat.DataStructures
 					mod.AddPoint(point);
 				}
 			}
+		}
+
+		private void ChangeObjectType()
+		{
+			var mod = SelectedModel as ITypeChangeable;
+			mod?.ChangeType();
 		}
 	}
 }

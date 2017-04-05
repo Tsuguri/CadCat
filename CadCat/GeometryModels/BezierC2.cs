@@ -1,16 +1,16 @@
-﻿using System;
+﻿using CadCat.ModelInterfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CadCat.DataStructures;
 using CadCat.Math;
-using CadCat.ModelInterfaces;
 using System.Windows.Input;
 
 namespace CadCat.GeometryModels
 {
-	class Bezier : PointModel, IChangeablePointCount
+	class BezierC2 : PointModel, IChangeablePointCount, ITypeChangeable
 	{
 		private class BezierPoints
 		{
@@ -22,7 +22,13 @@ namespace CadCat.GeometryModels
 
 		}
 
-		private List<int> curveSizes;
+		private enum BezierType
+		{
+			Berenstein,
+			BSpline
+		}
+
+		private BezierType currentType = BezierType.BSpline;
 
 		SceneData scene;
 
@@ -30,19 +36,7 @@ namespace CadCat.GeometryModels
 
 		public bool ShowPolygon { get; set; } = true;
 
-		//private bool changed = false;
-
-		//private ICommand deletePointsCommand;
-
-		//public ICommand DeletePointsCommand
-		//{
-		//	get
-		//	{
-		//		return deletePointsCommand ?? (deletePointsCommand = new Utilities.CommandHandler(DeleteSelectedPoints));
-		//	}
-		//}
-
-		public Bezier(IEnumerable<DataStructures.CatPoint> pts, SceneData data)
+		public BezierC2(IEnumerable<DataStructures.CatPoint> pts, SceneData data)
 		{
 			foreach (var p in pts)
 			{
@@ -151,13 +145,7 @@ namespace CadCat.GeometryModels
 					line.to = points[i + 1].Point.Position;
 					yield return line;
 				}
-
-			//if (changed)
-			//{
-			//	changed = false;
-			curveSizes = null;
 			CountBezierPoints();
-			//}
 			for (int i = 0; i < curvePoints.Count - 1; i++)
 			{
 				line.from = curvePoints[i];
@@ -171,13 +159,17 @@ namespace CadCat.GeometryModels
 			point.OnDeleted += OnPointDeleted;
 			point.OnChanged += OnPointChanged;
 			points.Add(new PointWrapper(point));
-		//	changed = true;
 		}
 
 		public void RemovePoint(CatPoint point)
 		{
 			RemovePoint(point, true);
 
+		}
+
+		public void ChangeType()
+		{
+			
 		}
 
 		private void DeleteSelectedPoints()
@@ -195,7 +187,6 @@ namespace CadCat.GeometryModels
 			}
 			wrapper.Point.OnChanged -= OnPointChanged;
 			points.Remove(wrapper);
-			//changed = true;
 		}
 
 		public void RemovePoint(CatPoint point, bool removeDelegate)
@@ -214,7 +205,6 @@ namespace CadCat.GeometryModels
 
 		private void OnPointChanged(CatPoint point)
 		{
-			//changed = true;
 		}
 
 		public override Matrix4 GetMatrix(bool overrideScale, Vector3 newScale)
@@ -224,8 +214,7 @@ namespace CadCat.GeometryModels
 
 		public override string GetName()
 		{
-			return "Bezier " + base.GetName();
+			return "Bezier C2 " + base.GetName();
 		}
-
 	}
 }

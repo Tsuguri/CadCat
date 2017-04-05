@@ -23,6 +23,8 @@ namespace CadCat
 						return (DataTemplate)frameworkElement.FindResource("Test");
 					case "CadCat.ModelInterfaces.IChangeablePointCount":
 						return (DataTemplate)frameworkElement.FindResource("ChangeablePointCount");
+					case "CadCat.ModelInterfaces.ITypeChangeable":
+						return (DataTemplate)frameworkElement.FindResource("TypeChangeable");
 					default:
 						return (DataTemplate)frameworkElement.FindResource("Default");
 				}

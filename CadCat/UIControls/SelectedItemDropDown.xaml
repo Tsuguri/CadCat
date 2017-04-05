@@ -58,6 +58,11 @@
                         </ToggleButton>
                     </StackPanel>
                 </DataTemplate>
+                <DataTemplate x:Key="TypeChangeable" >
+                    <Button  DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorLevel=1, AncestorType=ItemsControl}}" Command="{Binding ChangeObjectTypeCommand}">
+                        <materialDesign:PackIcon Kind="AccountConvert" />
+                    </Button>
+                </DataTemplate>
                 <DataTemplate x:Key="Default"></DataTemplate>
             </ItemsControl.Resources>
         </ItemsControl>

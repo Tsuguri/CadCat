@@ -30,6 +30,9 @@
                 <Button ToolTip="Bezier Curve" Command="{Binding CreateBezierCommand}">
                     <materialDesign:PackIcon Kind="AppleKeyboardCommand" />
                 </Button>
+                <Button ToolTip="C2 Bezier Curve" Command="{Binding CreateBezierC2Command}">
+                    B
+                </Button>
                 <Button ToolTip="Torus" Command="{Binding CreateTorusCommand}">T</Button>
                 <Button ToolTip="Cube" Command="{Binding CreateCubeCommand}">
                     <materialDesign:PackIcon Kind="CubeOutline" />

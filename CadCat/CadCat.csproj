@@ -98,6 +98,7 @@
     <Compile Include="DataStructures\CatPoint.cs" />
     <Compile Include="DropDownMenuSelector.cs" />
     <Compile Include="GeometryModels\Bezier.cs" />
+    <Compile Include="GeometryModels\BezierC2.cs" />
     <Compile Include="GeometryModels\ParametrizedModel.cs" />
     <Compile Include="GeometryModels\PointModel.cs" />
     <Compile Include="Math\Plane.cs" />
@@ -113,6 +114,7 @@
     <Compile Include="Math\Vector3.cs" />
     <Compile Include="Math\Vector4.cs" />
     <Compile Include="ModelInterfaces\IConvertibleToPoints.cs" />
+    <Compile Include="ModelInterfaces\ITypeChangeable.cs" />
     <Compile Include="ModelInterfaces\Test.cs" />
     <Compile Include="Rendering\Camera.cs" />
     <Compile Include="Rendering\ModelData.cs" />
