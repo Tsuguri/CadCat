@@ -28,11 +28,12 @@ namespace CadCat.GeometryModels
 			BSpline
 		}
 
-		private BezierType currentType = BezierType.BSpline;
+		private BezierType currentType = BezierType.Berenstein;
 
 		SceneData scene;
 
 		private List<Vector3> curvePoints;
+		private List<Vector3> berensteinPoints;
 
 		public bool ShowPolygon { get; set; } = true;
 
@@ -41,7 +42,6 @@ namespace CadCat.GeometryModels
 			foreach (var p in pts)
 			{
 				AddPoint(p);
-
 			}
 			scene = data;
 		}
@@ -135,9 +135,9 @@ namespace CadCat.GeometryModels
 
 		}
 
-		private List<Vector3> GenerateBerensteinPoints()
+		private void GenerateBerensteinPoints()
 		{
-			var berensteinPoints = new List<Vector3>();
+			berensteinPoints = new List<Vector3>();
 
 			for (int i = 0; i < points.Count - 3; i++)
 			{
@@ -157,29 +157,50 @@ namespace CadCat.GeometryModels
 				berensteinPoints.Add(point4);
 
 			}
-
-
-			return berensteinPoints;
 		}
 		public override IEnumerable<Line> GetLines()
 		{
 			var line = new Line();
+			GenerateBerensteinPoints();
+			CountBezierPoints(berensteinPoints);
 			if (ShowPolygon)
+			{
 				for (int i = 0; i < points.Count - 1; i++)
 				{
 					line.from = points[i].Point.Position;
 					line.to = points[i + 1].Point.Position;
 					yield return line;
 				}
+				if (currentType == BezierType.Berenstein)
+				{
+					for (int i = 0; i < berensteinPoints.Count - 1; i++)
+					{
+						line.from = berensteinPoints[i];
+						line.to = berensteinPoints[i + 1];
+						yield return line;
+					}
+				}
+			}
 
 
 
-			CountBezierPoints(GenerateBerensteinPoints());
 			for (int i = 0; i < curvePoints.Count - 1; i++)
 			{
 				line.from = curvePoints[i];
 				line.to = curvePoints[i + 1];
 				yield return line;
+			}
+		}
+		public override IEnumerable<Vector3> GetPoints()
+		{
+			if (currentType != BezierType.Berenstein)
+				yield break;
+			else
+			{
+				foreach (var point in berensteinPoints)
+				{
+					yield return point;
+				}
 			}
 		}
 
@@ -198,7 +219,17 @@ namespace CadCat.GeometryModels
 
 		public void ChangeType()
 		{
-
+			switch (currentType)
+			{
+				case BezierType.Berenstein:
+					currentType = BezierType.BSpline;
+					break;
+				case BezierType.BSpline:
+					currentType = BezierType.Berenstein;
+					break;
+				default:
+					break;
+			}
 		}
 
 		private void DeleteSelectedPoints()

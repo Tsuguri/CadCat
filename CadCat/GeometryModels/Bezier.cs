@@ -32,15 +32,15 @@ namespace CadCat.GeometryModels
 
 		//private bool changed = false;
 
-		//private ICommand deletePointsCommand;
+		private ICommand deletePointsCommand;
 
-		//public ICommand DeletePointsCommand
-		//{
-		//	get
-		//	{
-		//		return deletePointsCommand ?? (deletePointsCommand = new Utilities.CommandHandler(DeleteSelectedPoints));
-		//	}
-		//}
+		public ICommand DeletePointsCommand
+		{
+			get
+			{
+				return deletePointsCommand ?? (deletePointsCommand = new Utilities.CommandHandler(DeleteSelectedPoints));
+			}
+		}
 
 		public Bezier(IEnumerable<DataStructures.CatPoint> pts, SceneData data)
 		{

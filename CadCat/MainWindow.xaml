@@ -31,6 +31,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <controls:Menu Loaded="Menu_Loaded" />
+            
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>

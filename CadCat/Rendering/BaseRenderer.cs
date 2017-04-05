@@ -103,12 +103,12 @@ namespace CadCat.Rendering
 		{
 			//bitmap.DrawLineAa((int)(line.from.X * width), (int)(line.from.Y * height), (int)(line.to.X * width), (int)(line.to.Y * height), color, stroke);
 			bitmap.DrawLineDDA((int)(line.from.X * width), (int)(line.from.Y * height), (int)(line.to.X * width), (int)(line.to.Y * height), color);
+			
 		}
 
 		protected void DrawPoint(WriteableBitmap bitmap, Vector3 point, Color color)
 		{
 			bitmap.FillEllipse((int)(point.X * width - 4), (int)(point.Y * height - 4), (int)(point.X * width + 4), (int)(point.Y * height + 4), color);
-			//bitmap.FillRectangle((int)(point.X * width-1), (int)(point.Y * height-1), (int)(point.X * width + 1), (int)(point.Y * height + 1), color);
 		}
 
 		protected void ProcessLine(WriteableBitmap bitmap, Line line, Matrix4 matrix, Color color, int stroke)
