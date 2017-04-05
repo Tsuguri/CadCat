@@ -8,7 +8,7 @@
         xmlns:models="clr-namespace:CadCat.GeometryModels"
         xmlns:interfaces="clr-namespace:CadCat.ModelInterfaces"
         mc:Ignorable="d"
-        
+        Icon="cat_s4T_icon.ico"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.FontWeight="Medium"

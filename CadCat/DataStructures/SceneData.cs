@@ -349,11 +349,11 @@ namespace CadCat.DataStructures
 		private void CreateBezierC2()
 		{
 			var selected = getSelectedPoints.Invoke().ToList();
-			if (selected.Count < 1)
+			if (selected.Count < 4)
 			{
 				var sampleMessageDialog = new MessageHost
 				{
-					Message = { Text = "Not enough points for C2 Bezier Curve (at least 1)." }
+					Message = { Text = "Not enough points for C2 Bezier Curve (at least 4)." }
 				};
 
 				DialogHost.Show(sampleMessageDialog, "RootDialog");

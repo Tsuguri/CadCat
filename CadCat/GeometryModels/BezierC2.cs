@@ -46,7 +46,7 @@ namespace CadCat.GeometryModels
 			scene = data;
 		}
 
-		private void CountBezierPoints()
+		private void CountBezierPoints(List<Vector3> pts)
 		{
 			int curveDivision = 10;
 			curvePoints = new List<Vector3>();
@@ -89,20 +89,20 @@ namespace CadCat.GeometryModels
 				curvePoints.Add(tempVec);
 			};
 			var cameraMatrix = scene.ActiveCamera.ViewProjectionMatrix;
-			int max = points.Count;
+			int max = pts.Count;
 			int current = 0;
 			while (current + 4 <= max)
 			{
-				bp.p0 = points[current].Point.Position;
-				bp.p1 = points[current + 1].Point.Position;
-				bp.p2 = points[current + 2].Point.Position;
-				bp.p3 = points[current + 3].Point.Position;
+				bp.p0 = pts[current];
+				bp.p1 = pts[current + 1];
+				bp.p2 = pts[current + 2];
+				bp.p3 = pts[current + 3];
 
-				var pts = points.Skip(current).Take(4).Select(x => x.Point.Position).Select(x => (cameraMatrix * new Vector4(x, 1.0)).ToNormalizedVector3()).ToList();
-				var xMin = pts.Select(x => x.X).Min();
-				var yMin = pts.Select(x => x.Y).Min();
-				var xMax = pts.Select(x => x.X).Max();
-				var yMax = pts.Select(x => x.Y).Max();
+				var rectPts = pts.Skip(current).Take(4).Select(x => (cameraMatrix * new Vector4(x, 1.0)).ToNormalizedVector3()).ToList();
+				var xMin = rectPts.Select(x => x.X).Min();
+				var yMin = rectPts.Select(x => x.Y).Min();
+				var xMax = rectPts.Select(x => x.X).Max();
+				var yMax = rectPts.Select(x => x.Y).Max();
 				var size = new Vector2(xMax - xMin, yMax - yMin);
 				size.X = size.X * scene.ScreenSize.X;
 				size.Y = size.Y * scene.ScreenSize.Y;
@@ -117,17 +117,17 @@ namespace CadCat.GeometryModels
 			{
 				if (max - 1 - current == 2)
 				{
-					bp.p0 = points[current].Point.Position;
-					bp.p1 = points[current + 1].Point.Position;
-					bp.p2 = points[current + 2].Point.Position;
+					bp.p0 = pts[current];
+					bp.p1 = pts[current + 1];
+					bp.p2 = pts[current + 2];
 
 					for (int i = 0; i <= curveDivision; i++)
 						lambda2(i / (double)curveDivision);
 				}
 				else
 				{
-					curvePoints.Add(points[current].Point.Position);
-					curvePoints.Add(points[current + 1].Point.Position);
+					curvePoints.Add(pts[current]);
+					curvePoints.Add(pts[current + 1]);
 				}
 
 			}
@@ -135,6 +135,32 @@ namespace CadCat.GeometryModels
 
 		}
 
+		private List<Vector3> GenerateBerensteinPoints()
+		{
+			var berensteinPoints = new List<Vector3>();
+
+			for (int i = 0; i < points.Count - 3; i++)
+			{
+				var ptLeft = Vector3.Lerp(points[i].Point.Position, points[i + 1].Point.Position, 2 / 3.0);
+				var point2 = Vector3.Lerp(points[i + 1].Point.Position, points[i + 2].Point.Position, 1 / 3.0);
+				var point3 = Vector3.Lerp(points[i + 1].Point.Position, points[i + 2].Point.Position, 2 / 3.0);
+				var ptRight = Vector3.Lerp(points[i + 2].Point.Position, points[i + 3].Point.Position, 1 / 3.0);
+				var point4 = (point3 + ptRight) / 2;
+
+				if (i == 0)
+				{
+					var point1 = (ptLeft + point2) / 2;
+					berensteinPoints.Add(point1);
+				}
+				berensteinPoints.Add(point2);
+				berensteinPoints.Add(point3);
+				berensteinPoints.Add(point4);
+
+			}
+
+
+			return berensteinPoints;
+		}
 		public override IEnumerable<Line> GetLines()
 		{
 			var line = new Line();
@@ -145,7 +171,10 @@ namespace CadCat.GeometryModels
 					line.to = points[i + 1].Point.Position;
 					yield return line;
 				}
-			CountBezierPoints();
+
+
+
+			CountBezierPoints(GenerateBerensteinPoints());
 			for (int i = 0; i < curvePoints.Count - 1; i++)
 			{
 				line.from = curvePoints[i];
@@ -169,7 +198,7 @@ namespace CadCat.GeometryModels
 
 		public void ChangeType()
 		{
-			
+
 		}
 
 		private void DeleteSelectedPoints()

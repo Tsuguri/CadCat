@@ -15,9 +15,10 @@
             <MenuItem Header="Cube" Command="{Binding CreateCubeCommand}"/>
             <Separator />
             <MenuItem Header="Point" Command="{Binding CreatePointCommand}" />
-            <MenuItem Header="Point Group" Command="{Binding CreatePointGroupCommand}" />
+            <Separator />
+            <MenuItem Header="Bezier" Command="{Binding CreateBezierCommand}" />
+            <MenuItem Header="Bezier C2" Command="{Binding CreateBezierC2Command}" />
 
         </MenuItem>
-        <MenuItem Header="Go To Selected" Command="{Binding GoToSelectedCommand}"/>
     </Menu>
 </UserControl>

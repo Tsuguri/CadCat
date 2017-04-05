@@ -83,5 +83,10 @@ namespace CadCat.Math
 		{
 			return (first * second).Sum();
 		}
+
+		public static Vector3 Lerp(Vector3 vec1, Vector3 vec2, double point)
+		{
+			return vec1 * (1 - point) + vec2 * point;
+		}
 	}
 }
