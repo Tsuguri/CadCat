@@ -97,5 +97,10 @@ namespace CadCat.GeometryModels
 		{
 			return Matrix4.CreateIdentity();
 		}
+
+		public virtual void CleanUp()
+		{
+
+		}
 	}
 }

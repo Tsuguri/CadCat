@@ -623,7 +623,9 @@ namespace CadCat.DataStructures
 		{
 			if (SelectedModel != null)
 			{
+				SelectedModel.CleanUp();
 				models.Remove(SelectedModel);
+				
 				SelectedModel = null;
 			}
 		}

@@ -198,7 +198,6 @@ namespace CadCat.GeometryModels
 						default:
 							break;
 					}
-					pt.Visible = false;
 				}
 
 
@@ -239,20 +238,20 @@ namespace CadCat.GeometryModels
 			renderer.UseIndices = false;
 			if (ShowPolygon)
 			{
-				renderer.Points = points.Select(x => x.Point.Position).ToList();
+				switch (currentType)
+				{
+					case BezierType.Berenstein:
+						renderer.Points = berensteinPoints.Select(x=>x.Position).ToList();
+						break;
+					case BezierType.BSpline:
+						renderer.Points = points.Select(x => x.Point.Position).ToList();
+
+						break;
+					default:
+						break;
+				}
 				renderer.Transform();
 				renderer.DrawLines();
-
-				//if (currentType == BezierType.Berenstein)
-				//{
-				//	renderer.Points = berensteinPoints;
-				//	renderer.Transform();
-				//	renderer.DrawLines();
-				//	renderer.SelectedColor = Colors.SkyBlue;
-				//	renderer.DrawPoints();
-				//}
-
-
 			}
 			renderer.SelectedColor = !IsSelected ? Colors.White : Colors.LightGreen;
 
@@ -419,6 +418,13 @@ namespace CadCat.GeometryModels
 		public override string GetName()
 		{
 			return "Bezier C2 " + base.GetName();
+		}
+
+		public override void CleanUp()
+		{
+			base.CleanUp();
+			foreach (var pt in berensteinPoints)
+				scene.RemovePoint(pt);
 		}
 
 

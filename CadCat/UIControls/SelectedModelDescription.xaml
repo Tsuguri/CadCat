@@ -67,7 +67,6 @@
                                 <RowDefinition Height="40" />
                                 <RowDefinition Height="40" />
                                 <RowDefinition Height="40" />
-                                <RowDefinition Height="40" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="60" />
@@ -81,9 +80,6 @@
                             </Button>
                             <Button Grid.Row="2" Grid.ColumnSpan="2" Grid.Column="0" Command="{Binding SelectPointsCommand}" DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorLevel=1, AncestorType=ContentControl}}" >
                                 Select All Points
-                            </Button>
-                            <Button Grid.Row="3" Grid.ColumnSpan="2" Grid.Column="0" Command="{Binding ChangeTypeCommand}" >
-                                ChangeType
                             </Button>
                         </Grid>
                     </DataTemplate>
