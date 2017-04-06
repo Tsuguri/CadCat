@@ -63,6 +63,7 @@ namespace CadCat.Rendering
 		}
 		protected override void RenderLine(int index1, int index2)
 		{
+			SelectedColor = leftEye;
 			base.RenderLine(index1, index2);
 			tmpLine.from = transformedRightPoints[index1];
 			tmpLine.to = transformedRightPoints[index2];
@@ -70,15 +71,23 @@ namespace CadCat.Rendering
 				DrawLine(rightBitmap, tmpLine, rightEye, LineStroke);
 		}
 
+		protected override void RenderPoint(int index)
+		{
+			SelectedColor = leftEye;
+			base.RenderPoint(index);
+			if (ClipPoint(transformedRightPoints[index]))
+				DrawPoint(rightBitmap, transformedRightPoints[index], rightEye);
+
+		}
+
 		public override void BeforeRendering(SceneData scene)
 		{
 			base.BeforeRendering(scene);
-			var rightContext = rightBitmap.GetBitmapContext();
+			rightContext = rightBitmap.GetBitmapContext();
 			rightBitmap.Clear(Colors.Black);
-			var leftContext = bufferBitmap.GetBitmapContext();
+			leftContext = bufferBitmap.GetBitmapContext();
 			bufferBitmap.Clear(Colors.Black);
 			this.data = scene;
-
 		}
 		public override void AfterRendering(SceneData scene)
 		{

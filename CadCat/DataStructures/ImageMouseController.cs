@@ -45,6 +45,7 @@ namespace CadCat.DataStructures
 		{
 			ClickedOnImage = true;
 			mousePos = data.MousePosition;
+			data.OnLeftMousePressed(new Math.Vector2(mousePos.X / data.ScreenSize.X, mousePos.Y / data.ScreenSize.Y) * 2 - 1);
 		}
 
 		private void LeftMouseUp()
@@ -56,6 +57,7 @@ namespace CadCat.DataStructures
 				data.SceneClicked(new Math.Vector2(pos.X/data.ScreenSize.X, pos.Y/data.ScreenSize.Y) *2 -1);
 			}
 			ClickedOnImage = false;
+			data.OnLeftMouseReleased();
 		}
 	}
 }
