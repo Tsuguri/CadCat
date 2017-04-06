@@ -152,12 +152,15 @@ namespace CadCat.Tools
 
 		public override void Render(BaseRenderer renderer)
 		{
+			if (!Visible)
+				return;
 			base.Render(renderer);
 			var cursorScale = (transform.Position - scene.ActiveCamera.CameraPosition).Length() / 10;
 
 			renderer.ModelMatrix = transform.CreateTransformMatrix(true, new Math.Vector3(cursorScale, cursorScale, cursorScale));
 			renderer.Points = points;
 			renderer.Indices = indices;
+			renderer.UseIndices = true;
 			renderer.Transform();
 			renderer.DrawLines();
 		}

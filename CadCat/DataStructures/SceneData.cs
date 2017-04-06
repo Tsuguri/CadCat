@@ -14,6 +14,7 @@ using System.Collections.ObjectModel;
 using MaterialDesignThemes.Wpf;
 using CadCat.UIControls;
 using CadCat.ModelInterfaces;
+using System.Windows.Media;
 
 namespace CadCat.DataStructures
 {
@@ -291,7 +292,7 @@ namespace CadCat.DataStructures
 			get
 			{
 				return addSelectedPointToSelectedItemCommand ?? (addSelectedPointToSelectedItemCommand = new Utilities.CommandHandler(AddSelectedPointToSelectedItem));
-			} 
+			}
 		}
 
 		public ICommand ChangeObjectTypeCommand
@@ -341,7 +342,7 @@ namespace CadCat.DataStructures
 			}
 			else
 			{
-				AddNewModel(new Bezier(selected,this));
+				AddNewModel(new Bezier(selected, this));
 
 			}
 		}
@@ -412,10 +413,25 @@ namespace CadCat.DataStructures
 
 		public void Render(BaseRenderer renderer)
 		{
+			renderer.SelectedColor = Colors.White;
 			foreach (var model in models)
 			{
 				model.Render(renderer);
 			}
+			renderer.UseIndices = false;
+			renderer.ModelMatrix = Matrix4.CreateIdentity();
+			var points = new List<Vector3>(1);
+			points.Insert(0, new Vector3());
+			foreach (var point in Points)
+			{
+				points[0] = point.Position;
+				renderer.Points = points;
+				renderer.SelectedColor = point.IsSelected ? Colors.LimeGreen : Colors.White;
+				renderer.Transform();
+				renderer.DrawPoints();
+			}
+
+			Cursor.Render(renderer);
 		}
 
 		internal void UpdateFrameData()
@@ -560,7 +576,7 @@ namespace CadCat.DataStructures
 
 		private void AddSelectedPointToSelectedItem()
 		{
-			if( (SelectedModel is IChangeablePointCount))
+			if ((SelectedModel is IChangeablePointCount))
 			{
 				var mod = SelectedModel as IChangeablePointCount;
 				foreach (var point in getSelectedPoints.Invoke())

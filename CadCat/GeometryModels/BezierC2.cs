@@ -164,11 +164,11 @@ namespace CadCat.GeometryModels
 		public override void Render(BaseRenderer renderer)
 		{
 			base.Render(renderer);
-			renderer.ModelMatrix = Matrix4.CreateIdentity();
 
 			GenerateBerensteinPoints();
 			CountBezierPoints(berensteinPoints);
 
+			renderer.ModelMatrix = Matrix4.CreateIdentity();
 			renderer.UseIndices = false;
 			if (ShowPolygon)
 			{
