@@ -7,6 +7,7 @@ using CadCat.DataStructures;
 using CadCat.Rendering.Packets;
 using System.Windows.Input;
 using CadCat.DataStructures.SpatialData;
+using CadCat.Rendering;
 
 namespace CadCat.Tools
 {
@@ -27,6 +28,8 @@ namespace CadCat.Tools
 	public class Cursor : GeometryModels.ParametrizedModel
 	{
 		SceneData scene;
+		private List<Math.Vector3> points;
+		private List<int> indices;
 		private bool visible = false;
 		public bool Visible
 		{
@@ -109,22 +112,17 @@ namespace CadCat.Tools
 		public Cursor(SceneData data)
 		{
 			scene = data;
-		}
-
-		public override IEnumerable<Line> GetLines()
-		{
-			if (!Visible)
-				yield break;
-			var line = new Line();
-			line.from = new Math.Vector3(0, 0, -0.25);
-			line.to = new Math.Vector3(0, 0, 0.25);
-			yield return line;
-			line.from = new Math.Vector3(0, -0.25, 0);
-			line.to = new Math.Vector3(0, 0.25, 0);
-			yield return line;
-			line.from = new Math.Vector3(-0.25, 0, 0);
-			line.to = new Math.Vector3(0.25, 0, 0);
-			yield return line;
+			points = new List<Math.Vector3>(6);
+			indices = new List<int>(6)
+			{
+				0,1,2,3,4,5
+			};
+			points.Add(new Math.Vector3(0, 0, -0.25));
+			points.Add(new Math.Vector3(0, 0, 0.25));
+			points.Add(new Math.Vector3(0, -0.25, 0));
+			points.Add(new Math.Vector3(0, 0.25, 0));
+			points.Add(new Math.Vector3(-0.25, 0, 0));
+			points.Add(new Math.Vector3(0.25, 0, 0));
 		}
 
 		private void Catch()
@@ -151,14 +149,20 @@ namespace CadCat.Tools
 		{
 			catchedPoints = null;
 		}
-		public override RenderingPacket GetRenderingPacket()
+
+		public override void Render(BaseRenderer renderer)
 		{
-			var pack = base.GetRenderingPacket();
-			pack.overrideScale = true;
+			if (!Visible)
+				return;
+			base.Render(renderer);
 			var cursorScale = (transform.Position - scene.ActiveCamera.CameraPosition).Length() / 10;
 
-			pack.newScale = new Math.Vector3(cursorScale, cursorScale, cursorScale);
-			return pack;
+			renderer.ModelMatrix = transform.CreateTransformMatrix(true, new Math.Vector3(cursorScale, cursorScale, cursorScale));
+			renderer.Points = points;
+			renderer.Indices = indices;
+			renderer.UseIndices = true;
+			renderer.Transform();
+			renderer.DrawLines();
 		}
 
 		protected override void PositionChanged()

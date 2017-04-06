@@ -74,7 +74,11 @@ namespace CadCat.Rendering
 				Scene.Renderer = renderer;
 			}
 
-			renderer.Render(Scene);
+			renderer.BeforeRendering(Scene);
+
+			Scene.Render(renderer);
+
+			renderer.AfterRendering(Scene);
 			
 		}
 

@@ -7,11 +7,13 @@ using CadCat.DataStructures;
 
 namespace CadCat.GeometryModels
 {
+	using Rendering;
 	using Real = System.Double;
 	class Torus : ParametrizedModel
 	{
-		private List<ModelLine> lines;
-		private Math.Vector3[] points;
+		//private List<ModelLine> lines;
+		private List<int> indices;
+		private List<Math.Vector3> points;
 
 		private bool modelReady = false;
 
@@ -96,34 +98,37 @@ namespace CadCat.GeometryModels
 		{
 			Real bigStep = Math.Utils.PI * 2 / bigAngleDensity;
 			Real smallStep = Math.Utils.PI * 2 / smallAngleDensity;
-			lines = new List<ModelLine>(bigAngleDensity * smallAngleDensity * 2);
-			points = new Math.Vector3[bigAngleDensity * smallAngleDensity];
+			points = new List<Math.Vector3>(bigAngleDensity * smallAngleDensity);
 			for (int i=0; i<bigAngleDensity;  i++)
 			{
 				Real bigAngle = bigStep * i;
 				for (int j=0; j<smallAngleDensity; j++)
 				{
 					Real smallAngle = j * smallStep;
-					points[i * smallAngleDensity + j] = CalculatePoint(bigAngle, smallAngle, bigRadius, smallRadius);
+					points.Insert(i * smallAngleDensity + j, CalculatePoint(bigAngle, smallAngle, bigRadius, smallRadius));
 				}
 			}
-
+			indices = new List<int>(bigAngleDensity * smallAngleDensity * 2);
 			for (int i = 0; i < bigAngleDensity; i++)
 			{
 				int circleStart = i * smallAngleDensity;
 				for (int j = 0; j < smallAngleDensity - 1; j++)
 				{
-					lines.Add(new ModelLine(circleStart + j, circleStart + j + 1));
+					indices.Add(circleStart + j);
+					indices.Add(circleStart + j + 1);
 				}
-				lines.Add(new ModelLine(circleStart + smallAngleDensity-1, circleStart));
+				indices.Add(circleStart + smallAngleDensity - 1);
+				indices.Add(circleStart);
 			}
-			int vertexCount = points.Length;
+
+			int vertexCount = points.Count;
 			for (int i = 0; i < bigAngleDensity; i++)
 			{
 				int circleStart = i * smallAngleDensity;
 				for (int j = 0; j < smallAngleDensity; j++)
 				{
-					lines.Add(new ModelLine(circleStart + j, (circleStart + j + smallAngleDensity) % vertexCount));
+					indices.Add(circleStart + j);
+					indices.Add((circleStart + j + smallAngleDensity) % vertexCount);
 				}
 			}
 			modelReady = true;
@@ -137,17 +142,18 @@ namespace CadCat.GeometryModels
 			ret.Z = smallRadius * System.Math.Sin(smallAngle);
 			return ret;
 		}
-		public override IEnumerable<Line> GetLines()
+
+		public override void Render(BaseRenderer renderer)
 		{
+			base.Render(renderer);
 			if (!modelReady)
-				GenerateModel(bigRadius,smallRadius,bigAngleDensity,smallAngleDensity);
-			var resultLine = new Line();
-			foreach (var line in lines)
-			{
-				resultLine.from = points[line.from];
-				resultLine.to = points[line.to];
-				yield return resultLine;
-			}
+				GenerateModel(bigRadius, smallRadius, bigAngleDensity, smallAngleDensity);
+			renderer.UseIndices = true;
+			renderer.Points = points;
+			renderer.Indices = indices;
+			renderer.ModelMatrix = transform.CreateTransformMatrix();
+			renderer.Transform();
+			renderer.DrawLines();
 		}
 		public override string GetName()
 		{

@@ -158,6 +158,7 @@ namespace CadCat.GeometryModels
 			OnPropertyChanged(nameof(TrPosX));
 			OnPropertyChanged(nameof(TrPosY));
 			OnPropertyChanged(nameof(TrPosZ));
+			PositionChanged();
 		}
 
 		public void InvalidateRotation()

@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using CadCat.DataStructures;
 using CadCat.Math;
 using System.Windows.Input;
+using CadCat.Rendering;
+using System.Windows.Media;
 
 namespace CadCat.GeometryModels
 {
@@ -158,50 +160,38 @@ namespace CadCat.GeometryModels
 
 			}
 		}
-		public override IEnumerable<Line> GetLines()
+
+		public override void Render(BaseRenderer renderer)
 		{
-			var line = new Line();
+			base.Render(renderer);
+
 			GenerateBerensteinPoints();
 			CountBezierPoints(berensteinPoints);
+
+			renderer.ModelMatrix = Matrix4.CreateIdentity();
+			renderer.UseIndices = false;
 			if (ShowPolygon)
 			{
-				for (int i = 0; i < points.Count - 1; i++)
-				{
-					line.from = points[i].Point.Position;
-					line.to = points[i + 1].Point.Position;
-					yield return line;
-				}
+				renderer.Points = points.Select(x => x.Point.Position).ToList();
+				renderer.Transform();
+				renderer.DrawLines();
+
 				if (currentType == BezierType.Berenstein)
 				{
-					for (int i = 0; i < berensteinPoints.Count - 1; i++)
-					{
-						line.from = berensteinPoints[i];
-						line.to = berensteinPoints[i + 1];
-						yield return line;
-					}
+					renderer.Points = berensteinPoints;
+					renderer.Transform();
+					renderer.DrawLines();
+					renderer.SelectedColor = Colors.SkyBlue;
+					renderer.DrawPoints();
 				}
-			}
 
 
+			}
+			renderer.SelectedColor = !IsSelected ? Colors.White : Colors.LightGreen;
 
-			for (int i = 0; i < curvePoints.Count - 1; i++)
-			{
-				line.from = curvePoints[i];
-				line.to = curvePoints[i + 1];
-				yield return line;
-			}
-		}
-		public override IEnumerable<Vector3> GetPoints()
-		{
-			if (currentType != BezierType.Berenstein)
-				yield break;
-			else
-			{
-				foreach (var point in berensteinPoints)
-				{
-					yield return point;
-				}
-			}
+			renderer.Points = curvePoints;
+			renderer.Transform();
+			renderer.DrawLines();
 		}
 
 		public void AddPoint(CatPoint point)

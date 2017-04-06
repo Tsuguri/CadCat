@@ -14,6 +14,7 @@ using System.Collections.ObjectModel;
 using MaterialDesignThemes.Wpf;
 using CadCat.UIControls;
 using CadCat.ModelInterfaces;
+using System.Windows.Media;
 
 namespace CadCat.DataStructures
 {
@@ -291,7 +292,7 @@ namespace CadCat.DataStructures
 			get
 			{
 				return addSelectedPointToSelectedItemCommand ?? (addSelectedPointToSelectedItemCommand = new Utilities.CommandHandler(AddSelectedPointToSelectedItem));
-			} 
+			}
 		}
 
 		public ICommand ChangeObjectTypeCommand
@@ -341,7 +342,7 @@ namespace CadCat.DataStructures
 			}
 			else
 			{
-				AddNewModel(new Bezier(selected,this));
+				AddNewModel(new Bezier(selected, this));
 
 			}
 		}
@@ -405,56 +406,75 @@ namespace CadCat.DataStructures
 			cursor = new Tools.Cursor(this);
 		}
 
-		public IEnumerable<Model> GetModels()
-		{
-			foreach (var model in models)
-				yield return model;
-		}
-
-		public IEnumerable<Rendering.Packets.RenderingPacket> GetPackets()
-		{
-			foreach (var model in models)
-			{
-				yield return model.GetRenderingPacket();
-			}
-
-			yield return cursor.GetRenderingPacket();
-			yield break;
-		}
-
 		public IEnumerable<DataStructures.CatPoint> GetPoints()
 		{
 			return points;
 		}
 
+		public void Render(BaseRenderer renderer)
+		{
+			renderer.SelectedColor = Colors.White;
+			foreach (var model in models)
+			{
+				model.Render(renderer);
+			}
+			renderer.UseIndices = false;
+			renderer.ModelMatrix = Matrix4.CreateIdentity();
+			var points = new List<Vector3>(1);
+			points.Insert(0, new Vector3());
+			foreach (var point in Points)
+			{
+				points[0] = point.Position;
+				renderer.Points = points;
+				renderer.SelectedColor = point.IsSelected ? Colors.LimeGreen : Colors.White;
+				renderer.Transform();
+				renderer.DrawPoints();
+			}
+
+			Cursor.Render(renderer);
+		}
 
 		internal void UpdateFrameData()
 		{
 			var delta = Delta;
 			if (delta.X != -1 && delta.Length > 0.001 && Mouse.LeftButton == MouseButtonState.Pressed && imageMouse.ClickedOnImage)
 			{
-				if (Keyboard.IsKeyDown(Key.A))
+				switch (dragMode)
 				{
-					ActiveCamera.Radius = ActiveCamera.Radius + delta.Y * 0.05;
-				}
-				else if (Keyboard.IsKeyDown(Key.LeftCtrl))
-				{
-					ActiveCamera.Rotate(delta.Y * rotateSpeed, delta.X * rotateSpeed);
+					case MouseDragMode.CameraRadiusChange:
+						ActiveCamera.Radius = ActiveCamera.Radius + delta.Y * 0.05;
 
-				}
-				else if (Keyboard.IsKeyDown(Key.LeftAlt))
-				{
-					ActiveCamera.Move(0, 0, delta.Y);
-				}
-				else if (Keyboard.IsKeyDown(Key.C))
-				{
-					Cursor.transform.Position += (ActiveCamera.UpVector * delta.Y * 0.05 + ActiveCamera.RightVector * delta.X * 0.05);
-					Cursor.InvalidateAll();
-					//Cursor.CatchedModel?.InvalidateAll(); TODO
-				}
-				else
-				{
-					ActiveCamera.Move(delta.X, delta.Y);
+						break;
+					case MouseDragMode.CameraRotate:
+						ActiveCamera.Rotate(delta.Y * rotateSpeed, delta.X * rotateSpeed);
+
+						break;
+					case MouseDragMode.CameraMove:
+						ActiveCamera.Move(0, 0, delta.Y);
+
+						break;
+					case MouseDragMode.CursorMove:
+						Cursor.transform.Position += (ActiveCamera.UpVector * delta.Y * 0.05 + ActiveCamera.RightVector * delta.X * 0.05);
+						Cursor.InvalidateAll();
+						break;
+					case MouseDragMode.PointMove:
+
+						var cameraRay = ActiveCamera.GetViewRay(new Math.Vector2(mousePosition.X / ScreenSize.X, mousePosition.Y / ScreenSize.Y) * 2 - 1);
+						double distance;
+						if (pointPlane != null && pointPlane.RayIntersection(cameraRay, out distance))
+						{
+							var newPointPosition = cameraRay.GetPoint(distance);
+							draggedPoint.X = newPointPosition.X;
+							draggedPoint.Y = newPointPosition.Y;
+							draggedPoint.Z = newPointPosition.Z;
+						}
+
+						break;
+					case MouseDragMode.None:
+						ActiveCamera.Move(delta.X, delta.Y);
+						break;
+					default:
+						break;
 				}
 			}
 			var pos = (ActiveCamera.ViewProjectionMatrix * new Vector4(Cursor.transform.Position, 1.0)).ToNormalizedVector3();
@@ -463,9 +483,52 @@ namespace CadCat.DataStructures
 
 		}
 
-		private bool SelectClickedModel(Vector2 position, out CatPoint model)
+		private enum MouseDragMode
 		{
-			Ray cameraRay = ActiveCamera.GetViewRay(position);
+			CameraRadiusChange,
+			CameraRotate,
+			CameraMove,
+			CursorMove,
+			PointMove,
+			None
+
+		}
+		private MouseDragMode dragMode = MouseDragMode.None;
+		private CatPoint draggedPoint = null;
+		private Plane pointPlane = null;
+
+
+		public void OnLeftMousePressed(Vector2 mousePos)
+		{
+			if (Keyboard.IsKeyDown(Key.A))
+				dragMode = MouseDragMode.CameraRadiusChange;
+			else if (Keyboard.IsKeyDown(Key.LeftCtrl))
+				dragMode = MouseDragMode.CameraRotate;
+			else if (Keyboard.IsKeyDown(Key.LeftAlt))
+				dragMode = MouseDragMode.CameraMove;
+			else if (Keyboard.IsKeyDown(Key.C))
+				dragMode = MouseDragMode.CursorMove;
+			else // dragging point
+			{
+				CatPoint clicked;
+				if (SelectClickedPoint(mousePos, out clicked))
+				{
+					dragMode = MouseDragMode.PointMove;
+					draggedPoint = clicked;
+					pointPlane = new Plane(draggedPoint.Position, (draggedPoint.Position - ActiveCamera.CameraPosition).Normalized());
+				}
+			}
+		}
+
+		public void OnLeftMouseReleased()
+		{
+			dragMode = MouseDragMode.None;
+			draggedPoint = null;
+		}
+
+		private bool SelectClickedPoint(Vector2 position, out CatPoint model)
+		{
+			//Ray cameraRay = ActiveCamera.GetViewRay(position);
 			List<ClickData> clicks = new List<ClickData>();
 			var cameraMatrix = ActiveCamera.ViewProjectionMatrix;
 			var pos = ScreenSize * position;
@@ -508,7 +571,7 @@ namespace CadCat.DataStructures
 			if (!OnMousePoint)
 			{
 				CatPoint clickedPoint;
-				if (SelectClickedModel(position, out clickedPoint))
+				if (SelectClickedPoint(position, out clickedPoint))
 				{
 					if (!Keyboard.IsKeyDown(Key.LeftCtrl))
 					{
@@ -570,7 +633,7 @@ namespace CadCat.DataStructures
 
 		private void AddSelectedPointToSelectedItem()
 		{
-			if( (SelectedModel is IChangeablePointCount))
+			if ((SelectedModel is IChangeablePointCount))
 			{
 				var mod = SelectedModel as IChangeablePointCount;
 				foreach (var point in getSelectedPoints.Invoke())
