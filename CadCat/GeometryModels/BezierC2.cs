@@ -30,25 +30,47 @@ namespace CadCat.GeometryModels
 			BSpline
 		}
 
-		private BezierType currentType = BezierType.Berenstein;
+		private BezierType currentType = BezierType.BSpline;
 
 		SceneData scene;
 
 		private List<Vector3> curvePoints;
-		private List<Vector3> berensteinPoints;
-
+		private List<CatPoint> berensteinPoints = new List<CatPoint>();
+		private bool listenToBerensteinChanges = true;
 		public bool ShowPolygon { get; set; } = true;
 
 		public BezierC2(IEnumerable<DataStructures.CatPoint> pts, SceneData data)
 		{
+			scene = data;
 			foreach (var p in pts)
 			{
-				AddPoint(p);
+
+				AddPoint(p, true);
 			}
-			scene = data;
+			GenerateBerensteinPoints();
+
 		}
 
-		private void CountBezierPoints(List<Vector3> pts)
+		private ICommand deletePointsCommand;
+		private ICommand changeTypeCommand;
+
+		public ICommand DeletePointsCommand
+		{
+			get
+			{
+				return deletePointsCommand ?? (deletePointsCommand = new Utilities.CommandHandler(DeleteSelectedPoints));
+			}
+		}
+
+		public ICommand ChangeTypeCommand
+		{
+			get
+			{
+				return changeTypeCommand ?? (changeTypeCommand = new Utilities.CommandHandler(ChangeType));
+			}
+		}
+
+		private void CountBezierPoints(List<CatPoint> pts)
 		{
 			int curveDivision = 10;
 			curvePoints = new List<Vector3>();
@@ -95,12 +117,12 @@ namespace CadCat.GeometryModels
 			int current = 0;
 			while (current + 4 <= max)
 			{
-				bp.p0 = pts[current];
-				bp.p1 = pts[current + 1];
-				bp.p2 = pts[current + 2];
-				bp.p3 = pts[current + 3];
+				bp.p0 = pts[current].Position;
+				bp.p1 = pts[current + 1].Position;
+				bp.p2 = pts[current + 2].Position;
+				bp.p3 = pts[current + 3].Position;
 
-				var rectPts = pts.Skip(current).Take(4).Select(x => (cameraMatrix * new Vector4(x, 1.0)).ToNormalizedVector3()).ToList();
+				var rectPts = pts.Skip(current).Take(4).Select(x => (cameraMatrix * new Vector4(x.Position, 1.0)).ToNormalizedVector3()).ToList();
 				var xMin = rectPts.Select(x => x.X).Min();
 				var yMin = rectPts.Select(x => x.Y).Min();
 				var xMax = rectPts.Select(x => x.X).Max();
@@ -119,17 +141,17 @@ namespace CadCat.GeometryModels
 			{
 				if (max - 1 - current == 2)
 				{
-					bp.p0 = pts[current];
-					bp.p1 = pts[current + 1];
-					bp.p2 = pts[current + 2];
+					bp.p0 = pts[current].Position;
+					bp.p1 = pts[current + 1].Position;
+					bp.p2 = pts[current + 2].Position;
 
 					for (int i = 0; i <= curveDivision; i++)
 						lambda2(i / (double)curveDivision);
 				}
 				else
 				{
-					curvePoints.Add(pts[current]);
-					curvePoints.Add(pts[current + 1]);
+					curvePoints.Add(pts[current].Position);
+					curvePoints.Add(pts[current + 1].Position);
 				}
 
 			}
@@ -137,10 +159,55 @@ namespace CadCat.GeometryModels
 
 		}
 
+		private void ClearBerensteinPoints()
+		{
+			foreach (var point in berensteinPoints)
+			{
+				scene.RemovePoint(point);
+
+			}
+			berensteinPoints.Clear();
+		}
+
 		private void GenerateBerensteinPoints()
 		{
-			berensteinPoints = new List<Vector3>();
+			//ClearBerensteinPoints();
 
+			int actAmount = berensteinPoints.Count;
+			int desiredAmount = (points.Count - 3) * 3 + 1;
+			if (actAmount > desiredAmount)
+			{
+				for (int i = desiredAmount; i < actAmount; i++)
+					scene.RemovePoint(berensteinPoints[i]);
+				berensteinPoints.RemoveRange(desiredAmount, actAmount - desiredAmount);
+			}
+			else if (actAmount < desiredAmount)
+				for (int i = 0; i < desiredAmount - actAmount; i++)
+				{
+					var pt = scene.CreateCatPoint(new Vector3(), false);
+					pt.OnChanged += OnBerensteinPointChanged;
+					berensteinPoints.Add(pt);
+					switch (currentType)
+					{
+						case BezierType.Berenstein:
+							pt.Visible = true;
+							break;
+						case BezierType.BSpline:
+							pt.Visible = false;
+							break;
+						default:
+							break;
+					}
+					pt.Visible = false;
+				}
+
+
+			UpdateBerensteinPoints();
+		}
+
+		private void UpdateBerensteinPoints()
+		{
+			listenToBerensteinChanges = false;
 			for (int i = 0; i < points.Count - 3; i++)
 			{
 				var ptLeft = Vector3.Lerp(points[i].Point.Position, points[i + 1].Point.Position, 2 / 3.0);
@@ -152,20 +219,20 @@ namespace CadCat.GeometryModels
 				if (i == 0)
 				{
 					var point1 = (ptLeft + point2) / 2;
-					berensteinPoints.Add(point1);
+					berensteinPoints[i].Position = point1;
 				}
-				berensteinPoints.Add(point2);
-				berensteinPoints.Add(point3);
-				berensteinPoints.Add(point4);
+				berensteinPoints[3 * i + 1].Position = point2;
+				berensteinPoints[3 * i + 2].Position = point3;
+				berensteinPoints[3 * i + 3].Position = point4;
 
 			}
+			listenToBerensteinChanges = true;
 		}
 
 		public override void Render(BaseRenderer renderer)
 		{
 			base.Render(renderer);
 
-			GenerateBerensteinPoints();
 			CountBezierPoints(berensteinPoints);
 
 			renderer.ModelMatrix = Matrix4.CreateIdentity();
@@ -176,14 +243,14 @@ namespace CadCat.GeometryModels
 				renderer.Transform();
 				renderer.DrawLines();
 
-				if (currentType == BezierType.Berenstein)
-				{
-					renderer.Points = berensteinPoints;
-					renderer.Transform();
-					renderer.DrawLines();
-					renderer.SelectedColor = Colors.SkyBlue;
-					renderer.DrawPoints();
-				}
+				//if (currentType == BezierType.Berenstein)
+				//{
+				//	renderer.Points = berensteinPoints;
+				//	renderer.Transform();
+				//	renderer.DrawLines();
+				//	renderer.SelectedColor = Colors.SkyBlue;
+				//	renderer.DrawPoints();
+				//}
 
 
 			}
@@ -194,11 +261,30 @@ namespace CadCat.GeometryModels
 			renderer.DrawLines();
 		}
 
-		public void AddPoint(CatPoint point)
+		public void AddPoint(CatPoint point, bool generateLater = true)
 		{
 			point.OnDeleted += OnPointDeleted;
 			point.OnChanged += OnPointChanged;
 			points.Add(new PointWrapper(point));
+			switch (currentType)
+			{
+				case BezierType.Berenstein:
+					point.Visible = false;
+					break;
+				case BezierType.BSpline:
+					point.Visible = true;
+					break;
+				default:
+					break;
+			}
+			if (!generateLater)
+				GenerateBerensteinPoints();
+
+		}
+
+		public void AddPoint(CatPoint point)
+		{
+			AddPoint(point, false);
 		}
 
 		public void RemovePoint(CatPoint point)
@@ -213,9 +299,25 @@ namespace CadCat.GeometryModels
 			{
 				case BezierType.Berenstein:
 					currentType = BezierType.BSpline;
+					foreach (var pt in berensteinPoints)
+					{
+						pt.Visible = false;
+					}
+					foreach (var pt in points)
+					{
+						pt.Point.Visible = true;
+					}
 					break;
 				case BezierType.BSpline:
 					currentType = BezierType.Berenstein;
+					foreach (var pt in berensteinPoints)
+					{
+						pt.Visible = true;
+					}
+					foreach (var pt in points)
+					{
+						pt.Point.Visible = false;
+					}
 					break;
 				default:
 					break;
@@ -226,10 +328,10 @@ namespace CadCat.GeometryModels
 		{
 			var list = points.Where((x) => x.IsSelected).ToList();
 			foreach (var point in list)
-				RemovePoint(point, true);
+				RemovePoint(point, true, true);
 		}
 
-		private void RemovePoint(PointWrapper wrapper, bool removeDelegate)
+		private void RemovePoint(PointWrapper wrapper, bool removeDelegate, bool generateLater = false)
 		{
 			if (removeDelegate)
 			{
@@ -237,6 +339,9 @@ namespace CadCat.GeometryModels
 			}
 			wrapper.Point.OnChanged -= OnPointChanged;
 			points.Remove(wrapper);
+			if (!generateLater)
+				GenerateBerensteinPoints();
+
 		}
 
 		public void RemovePoint(CatPoint point, bool removeDelegate)
@@ -255,6 +360,55 @@ namespace CadCat.GeometryModels
 
 		private void OnPointChanged(CatPoint point)
 		{
+			UpdateBerensteinPoints();
+		}
+
+		private void OnBerensteinPointChanged(CatPoint point)
+		{
+			if (listenToBerensteinChanges)
+			{
+				listenToBerensteinChanges = false;
+
+				int berensteinPtNumber = berensteinPoints.IndexOf(point);
+				if (berensteinPtNumber < 0 || berensteinPtNumber >= berensteinPoints.Count)
+					throw new InvalidOperationException("Invalid berenstein point index");
+
+				if (berensteinPtNumber % 3 == 0)
+				{
+					var A = berensteinPtNumber / 3;
+					var B = A + 1;
+					var C = A + 2;
+					var Apt = points[A];
+					var Bpt = points[B];
+					var Cpt = points[C];
+
+					Bpt.Point.Position = (point.Position * 6 - Apt.Point.Position - Cpt.Point.Position)/4;
+
+					UpdateBerensteinPoints();
+				}
+				else
+				{
+					int ber = berensteinPtNumber / 3; // number of berenstein polygon
+					int prev = ber + 1;
+					int next = ber + 2;
+
+					if(berensteinPtNumber % 3 ==1)
+					{
+						var tmp = prev;
+						prev = next;
+						next = tmp;
+					}
+
+					var prevPt = points[prev];
+					var nextPt = points[next];
+
+					nextPt.Point.Position = prevPt.Point.Position + (point.Position - prevPt.Point.Position) * (3/2.0f);
+
+				}
+
+
+				listenToBerensteinChanges = true;
+			}
 		}
 
 		public override Matrix4 GetMatrix(bool overrideScale, Vector3 newScale)
@@ -266,5 +420,7 @@ namespace CadCat.GeometryModels
 		{
 			return "Bezier C2 " + base.GetName();
 		}
+
+
 	}
 }

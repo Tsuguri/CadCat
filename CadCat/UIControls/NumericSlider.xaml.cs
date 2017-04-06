@@ -36,13 +36,13 @@ namespace CadCat.UIControls
 
 		public static readonly DependencyProperty ValueProperty = DependencyProperty.Register(nameof(Value), typeof(double), typeof(NumericSlider),new FrameworkPropertyMetadata(default(double), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
-		public double Multiplication
+		public double IncrementMultiplier
 		{
 			get { return (double)GetValue(MultiplierProperty); }
 			set { SetValue(MultiplierProperty, value); }
 		}
 
-		public static readonly DependencyProperty MultiplierProperty = DependencyProperty.Register(nameof(Multiplication), typeof(double), typeof(UserControl), new PropertyMetadata(1.0));
+		public static readonly DependencyProperty MultiplierProperty = DependencyProperty.Register(nameof(IncrementMultiplier), typeof(double), typeof(UserControl), new PropertyMetadata(1.0));
 
 		public double Increment
 		{
@@ -115,7 +115,7 @@ namespace CadCat.UIControls
 
 			int diffValue = (int)(diff.X / (double)Precision);
 
-			Value = startValue + diffValue * Multiplication;
+			Value = startValue + diffValue * IncrementMultiplier;
 		}
 
 		private void inputBox_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)

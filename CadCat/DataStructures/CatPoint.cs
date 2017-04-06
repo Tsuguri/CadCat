@@ -49,6 +49,12 @@ namespace CadCat.DataStructures
 			{
 				return position;
 			}
+			set
+			{
+				X = value.X;
+				Y = value.Y;
+				Z = value.Z;
+			}
 		}
 
 		public double X
@@ -111,6 +117,21 @@ namespace CadCat.DataStructures
 				OnPropertyChanged();
 			}
 		}
+		private bool visible = true;
+		public bool Visible
+		{
+			get
+			{
+				return visible;
+			}
+			set
+			{
+				visible = value;
+				OnPropertyChanged();
+			}
+		}
+
+		public bool AddAble { get; set; }
 
 		public void CleanUp()
 		{

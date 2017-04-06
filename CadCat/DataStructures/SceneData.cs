@@ -375,19 +375,33 @@ namespace CadCat.DataStructures
 				pos = ActiveCamera.LookingAt;
 			CreatePoint(pos);
 		}
-		private void CreatePoint(Vector3 pos)
+
+		internal CatPoint CreateCatPoint(Vector3 pos, bool addToSelected = true)
 		{
-
-
 			var point = new CatPoint(pos);
 			points.Add(point);
 
-			var selected = getSelectedModels.Invoke().ToList();
-			if (selected.Count > 0 && selected[0] is IChangeablePointCount)
+			if (addToSelected)
 			{
-				var p = selected[0] as IChangeablePointCount;
-				p.AddPoint(point);
+				var selected = getSelectedModels.Invoke().ToList();
+				if (selected.Count > 0 && selected[0] is IChangeablePointCount)
+				{
+					var p = selected[0] as IChangeablePointCount;
+					p.AddPoint(point);
+				}
 			}
+			return point;
+		}
+
+		internal void RemovePoint(CatPoint point)
+		{
+			point.CleanUp();
+			Points.Remove(point);
+		}
+
+		private void CreatePoint(Vector3 pos)
+		{
+			CreateCatPoint(pos);
 		}
 
 		#endregion
@@ -424,6 +438,8 @@ namespace CadCat.DataStructures
 			points.Insert(0, new Vector3());
 			foreach (var point in Points)
 			{
+				if (!point.Visible)
+					continue;
 				points[0] = point.Position;
 				renderer.Points = points;
 				renderer.SelectedColor = point.IsSelected ? Colors.LimeGreen : Colors.White;
@@ -464,9 +480,7 @@ namespace CadCat.DataStructures
 						if (pointPlane != null && pointPlane.RayIntersection(cameraRay, out distance))
 						{
 							var newPointPosition = cameraRay.GetPoint(distance);
-							draggedPoint.X = newPointPosition.X;
-							draggedPoint.Y = newPointPosition.Y;
-							draggedPoint.Z = newPointPosition.Z;
+							draggedPoint.Position = newPointPosition;
 						}
 
 						break;
@@ -535,6 +549,8 @@ namespace CadCat.DataStructures
 
 			foreach (var point in GetPoints())
 			{
+				if (!point.Visible)
+					continue;
 				var pt = (cameraMatrix * new Vector4(point.Position, 1.0)).ToNormalizedVector3();
 				var dt = new Vector2(pt.X, pt.Y) * ScreenSize - pos;
 				var distance = dt.Length();
@@ -617,10 +633,10 @@ namespace CadCat.DataStructures
 			var pointList = Points.Where((x) => x.IsSelected).ToList();
 			foreach (var point in pointList)
 			{
-				point.CleanUp();
-				Points.Remove(point);
+				RemovePoint(point);
 			}
 		}
+
 
 		private void SelectPoints()
 		{

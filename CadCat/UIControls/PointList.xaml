@@ -21,6 +21,7 @@
         <Button Grid.Row="0" Command="{Binding RemoveSelectedPointsCommand}">
             Remove Selected
         </Button>
+
         <Grid Grid.Row="1" Visibility="{Binding IsAnyPointSelected, Converter={StaticResource BoolToVis},Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -32,9 +33,9 @@
                 <RowDefinition Height="40" />
             </Grid.RowDefinitions>
             <TextBox Grid.ColumnSpan="3" TextAlignment="Center" Grid.Row="0" DataContext="{Binding SelectedPoint}" Text="{Binding Name}" />
-            <control:NumericSlider Grid.Column="0" Grid.Row="1" DataContext="{Binding SelectedPoint}" Value="{Binding X}" Multiplication="0.1" />
-            <control:NumericSlider Grid.Column="1" Grid.Row="1" DataContext="{Binding SelectedPoint}" Value="{Binding Y}" Multiplication="0.1" />
-            <control:NumericSlider Grid.Column="2" Grid.Row="1" DataContext="{Binding SelectedPoint}" Value="{Binding Z}" Multiplication="0.1" />
+            <control:NumericSlider Grid.Column="0" Grid.Row="1" DataContext="{Binding SelectedPoint}" Value="{Binding X}" IncrementMultiplier="0.1" IsEnabled="{Binding Visible}" />
+            <control:NumericSlider Grid.Column="1" Grid.Row="1" DataContext="{Binding SelectedPoint}" Value="{Binding Y}" IncrementMultiplier="0.1" IsEnabled="{Binding Visible}"  />
+            <control:NumericSlider Grid.Column="2" Grid.Row="1" DataContext="{Binding SelectedPoint}" Value="{Binding Z}" IncrementMultiplier="0.1" IsEnabled="{Binding Visible}"  />
         </Grid>
 
         <ListView Grid.Row="2" Name="list" ItemsSource="{Binding Points}" SelectedItem="{Binding SelectedPoint}">

@@ -120,7 +120,6 @@
     <Compile Include="ModelInterfaces\ITypeChangeable.cs" />
     <Compile Include="ModelInterfaces\Test.cs" />
     <Compile Include="Rendering\Camera.cs" />
-    <Compile Include="Rendering\ModelData.cs" />
     <Compile Include="Rendering\BaseRenderer.cs" />
     <Compile Include="Rendering\Packets\RenderingPacket.cs" />
     <Compile Include="Rendering\RenderingContext.cs" />

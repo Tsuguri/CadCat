@@ -27,9 +27,9 @@
                                 <RowDefinition Height="25"/>
                             </Grid.RowDefinitions>
                             <TextBlock Grid.Column="0" Grid.Row="0">R</TextBlock>
-                            <control:NumericSlider Grid.Column="1" Grid.Row="0" Value="{Binding R}" Multiplication="0.1" />
+                            <control:NumericSlider Grid.Column="1" Grid.Row="0" Value="{Binding R}" IncrementMultiplier="0.1" />
                             <TextBlock Grid.Column="0" Grid.Row="1">r</TextBlock>
-                            <control:NumericSlider Grid.Column="1" Grid.Row="1" Value="{Binding r}" Multiplication="0.1" />
+                            <control:NumericSlider Grid.Column="1" Grid.Row="1" Value="{Binding r}" IncrementMultiplier="0.1" />
                             <TextBlock Grid.Column="0" Grid.Row="2">RDensity</TextBlock>
                             <control:NumericSlider Grid.Column="1" Grid.Row="2" Value="{Binding RDensity}" />
                             <TextBlock Grid.Column="0" Grid.Row="3">rDensity</TextBlock>
@@ -67,6 +67,7 @@
                                 <RowDefinition Height="40" />
                                 <RowDefinition Height="40" />
                                 <RowDefinition Height="40" />
+                                <RowDefinition Height="40" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="60" />
@@ -80,6 +81,9 @@
                             </Button>
                             <Button Grid.Row="2" Grid.ColumnSpan="2" Grid.Column="0" Command="{Binding SelectPointsCommand}" DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorLevel=1, AncestorType=ContentControl}}" >
                                 Select All Points
+                            </Button>
+                            <Button Grid.Row="3" Grid.ColumnSpan="2" Grid.Column="0" Command="{Binding ChangeTypeCommand}" >
+                                ChangeType
                             </Button>
                         </Grid>
                     </DataTemplate>
@@ -122,17 +126,17 @@
                             <TextBox Text="{Binding Name}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" />
 
                             <TextBlock Text="Pos" Grid.Row="1" Grid.Column="0" />
-                            <control:NumericSlider Grid.Column="1" Grid.Row="1" Value="{Binding TrPosX}" Multiplication="0.1" />
-                            <control:NumericSlider Grid.Column="2" Grid.Row="1" Value="{Binding TrPosY}" Multiplication="0.1" />
-                            <control:NumericSlider Grid.Column="3" Grid.Row="1" Value="{Binding TrPosZ}" Multiplication="0.1" />
+                            <control:NumericSlider Grid.Column="1" Grid.Row="1" Value="{Binding TrPosX}" IncrementMultiplier="0.1" />
+                            <control:NumericSlider Grid.Column="2" Grid.Row="1" Value="{Binding TrPosY}" IncrementMultiplier="0.1" />
+                            <control:NumericSlider Grid.Column="3" Grid.Row="1" Value="{Binding TrPosZ}" IncrementMultiplier="0.1" />
                             <TextBlock Text="Rot" Grid.Row="2" Grid.Column="0" />
                             <control:NumericSlider Grid.Column="1" Grid.Row="2" Value="{Binding TrRotX}"/>
                             <control:NumericSlider Grid.Column="2" Grid.Row="2" Value="{Binding TrRotY}"/>
                             <control:NumericSlider Grid.Column="3" Grid.Row="2" Value="{Binding TrRotZ}"/>
                             <TextBlock Text="Scale" Grid.Row="3" Grid.Column="0" />
-                            <control:NumericSlider Grid.Column="1" Grid.Row="3" Value="{Binding TrScaleX}" Multiplication="0.1" />
-                            <control:NumericSlider Grid.Column="2" Grid.Row="3" Value="{Binding TrScaleY}" Multiplication="0.1" />
-                            <control:NumericSlider Grid.Column="3" Grid.Row="3" Value="{Binding TrScaleZ}" Multiplication="0.1" />
+                            <control:NumericSlider Grid.Column="1" Grid.Row="3" Value="{Binding TrScaleX}" IncrementMultiplier="0.1" />
+                            <control:NumericSlider Grid.Column="2" Grid.Row="3" Value="{Binding TrScaleY}" IncrementMultiplier="0.1" />
+                            <control:NumericSlider Grid.Column="3" Grid.Row="3" Value="{Binding TrScaleZ}" IncrementMultiplier="0.1" />
                             <TextBlock Text="Rot" Grid.Row="2" Grid.Column="0" />
                         </Grid>
                     </DataTemplate>
