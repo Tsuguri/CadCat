@@ -175,6 +175,7 @@ namespace CadCat.GeometryModels
 
 			int actAmount = berensteinPoints.Count;
 			int desiredAmount = (points.Count - 3) * 3 + 1;
+			desiredAmount = System.Math.Max(0, desiredAmount);
 			if (actAmount > desiredAmount)
 			{
 				for (int i = desiredAmount; i < actAmount; i++)
@@ -241,7 +242,7 @@ namespace CadCat.GeometryModels
 				switch (currentType)
 				{
 					case BezierType.Berenstein:
-						renderer.Points = berensteinPoints.Select(x=>x.Position).ToList();
+						renderer.Points = berensteinPoints.Select(x => x.Position).ToList();
 						break;
 					case BezierType.BSpline:
 						renderer.Points = points.Select(x => x.Point.Position).ToList();
@@ -328,6 +329,7 @@ namespace CadCat.GeometryModels
 			var list = points.Where((x) => x.IsSelected).ToList();
 			foreach (var point in list)
 				RemovePoint(point, true, true);
+			GenerateBerensteinPoints();
 		}
 
 		private void RemovePoint(PointWrapper wrapper, bool removeDelegate, bool generateLater = false)
@@ -381,7 +383,7 @@ namespace CadCat.GeometryModels
 					var Bpt = points[B];
 					var Cpt = points[C];
 
-					Bpt.Point.Position = (point.Position * 6 - Apt.Point.Position - Cpt.Point.Position)/4;
+					Bpt.Point.Position = (point.Position * 6 - Apt.Point.Position - Cpt.Point.Position) / 4;
 
 					UpdateBerensteinPoints();
 				}
@@ -391,7 +393,7 @@ namespace CadCat.GeometryModels
 					int prev = ber + 1;
 					int next = ber + 2;
 
-					if(berensteinPtNumber % 3 ==1)
+					if (berensteinPtNumber % 3 == 1)
 					{
 						var tmp = prev;
 						prev = next;
@@ -401,7 +403,7 @@ namespace CadCat.GeometryModels
 					var prevPt = points[prev];
 					var nextPt = points[next];
 
-					nextPt.Point.Position = prevPt.Point.Position + (point.Position - prevPt.Point.Position) * (3/2.0f);
+					nextPt.Point.Position = prevPt.Point.Position + (point.Position - prevPt.Point.Position) * (3 / 2.0f);
 
 				}
 

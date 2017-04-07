@@ -230,7 +230,7 @@ namespace CadCat.Rendering
 
 		protected void DrawPoint(WriteableBitmap bitmap, Vector3 point, Color color)
 		{
-			bitmap.FillEllipse((int)(point.X * width - 4), (int)(point.Y * height - 4), (int)(point.X * width + 4), (int)(point.Y * height + 4), color);
+			bitmap.FillEllipse((int)(point.X * width - 3), (int)(point.Y * height - 3), (int)(point.X * width + 3), (int)(point.Y * height + 3), color);
 		}
 
 		protected void ProcessLine(WriteableBitmap bitmap, Line line, Matrix4 matrix, Color color, int stroke)
