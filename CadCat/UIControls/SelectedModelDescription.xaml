@@ -83,6 +83,20 @@
                             </Button>
                         </Grid>
                     </DataTemplate>
+                    <DataTemplate DataType="{x:Type models:BsplineInterpolator}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="40" />
+                                <RowDefinition Height="40" />
+                            </Grid.RowDefinitions>
+                            <Button Grid.Row="0" Command="{Binding DeletePointsCommand}" >
+                                Remove Selected
+                            </Button>
+                            <Button Grid.Row="1" Command="{Binding SelectPointsCommand}" DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorLevel=1, AncestorType=ContentControl}}" >
+                                Select All Points
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
                 </ContentControl.Resources>
             </ContentControl>
             <ContentControl Content="{Binding SelectedModel}">

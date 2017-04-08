@@ -21,16 +21,6 @@ namespace CadCat.UIControls
 	/// </summary>
 	public partial class PointList : UserControl
 	{
-		public IEnumerable<CadCat.DataStructures.CatPoint> Points
-		{
-			get
-			{
-				foreach (var item in list.SelectedItems)
-				{
-					yield return (DataStructures.CatPoint)item;
-				}
-			}
-		}
 
 		public PointList()
 		{

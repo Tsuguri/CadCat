@@ -28,13 +28,7 @@ namespace CadCat.DataStructures
 		public delegate IEnumerable<DataStructures.CatPoint> PointListGet();
 		public delegate IEnumerable<Model> ModelListGet();
 
-		private PointListGet getSelectedPoints;
 		private ModelListGet getSelectedModels;
-
-		public void SetSelectedPointsGetter(PointListGet del)
-		{
-			this.getSelectedPoints = del;
-		}
 
 		public void SetSelectedModelsGetter(ModelListGet del)
 		{
@@ -202,6 +196,7 @@ namespace CadCat.DataStructures
 		private ICommand createCubeCommand;
 		private ICommand createBezierCommand;
 		private ICommand createBezierC2Command;
+		private ICommand createBSplineInterpolatorCommand;
 
 		private ICommand createPointCommand;
 
@@ -244,6 +239,14 @@ namespace CadCat.DataStructures
 			get
 			{
 				return createBezierC2Command ?? (createBezierC2Command = new Utilities.CommandHandler(CreateBezierC2));
+			}
+		}
+
+		public ICommand CreateBSplineInterpolatorCommand
+		{
+			get
+			{
+				return createBSplineInterpolatorCommand ?? (createBSplineInterpolatorCommand = new Utilities.CommandHandler(CreateBSplineInterpolator));
 			}
 		}
 
@@ -330,7 +333,7 @@ namespace CadCat.DataStructures
 
 		private void CreateBezier()
 		{
-			var selected = getSelectedPoints.Invoke().ToList();
+			var selected = GetFilteredSelected();
 			if (selected.Count < 1)
 			{
 				var sampleMessageDialog = new MessageHost
@@ -349,7 +352,7 @@ namespace CadCat.DataStructures
 
 		private void CreateBezierC2()
 		{
-			var selected = getSelectedPoints.Invoke().ToList();
+			var selected = GetFilteredSelected();
 			if (selected.Count < 4)
 			{
 				var sampleMessageDialog = new MessageHost
@@ -363,6 +366,24 @@ namespace CadCat.DataStructures
 			{
 				AddNewModel(new BezierC2(selected, this));
 
+			}
+		}
+
+		private void CreateBSplineInterpolator()
+		{
+			var selected = GetFilteredSelected();
+			if(selected.Count<2)
+			{
+				var sampleMessageDialog = new MessageHost
+				{
+					Message = { Text = "Not enough points for BSpline interpolation (at least 2)." }
+				};
+
+				DialogHost.Show(sampleMessageDialog, "RootDialog");
+			}
+			else
+			{
+				AddNewModel(new BsplineInterpolator(selected));
 			}
 		}
 
@@ -591,7 +612,7 @@ namespace CadCat.DataStructures
 				{
 					if (!Keyboard.IsKeyDown(Key.LeftCtrl))
 					{
-						var list = getSelectedPoints.Invoke().ToList();
+						var list = Points.Where(x=>x.IsSelected).ToList();
 						foreach (var selectedPoint in list)
 						{
 							selectedPoint.IsSelected = false;
@@ -632,7 +653,7 @@ namespace CadCat.DataStructures
 
 		private void RemoveSelectedPoints()
 		{
-			var pointList = Points.Where((x) => x.IsSelected).ToList();
+			var pointList = GetFilteredSelected();
 			foreach (var point in pointList)
 			{
 				RemovePoint(point);
@@ -649,12 +670,17 @@ namespace CadCat.DataStructures
 				pt.IsSelected = true;
 		}
 
+		private List<CatPoint> GetFilteredSelected()
+		{
+			return Points.Where(x=>(x.IsSelected && !x.AddAble)).ToList();
+		}
+
 		private void AddSelectedPointToSelectedItem()
 		{
 			if ((SelectedModel is IChangeablePointCount))
 			{
 				var mod = SelectedModel as IChangeablePointCount;
-				foreach (var point in getSelectedPoints.Invoke())
+				foreach (var point in GetFilteredSelected())
 				{
 					mod.AddPoint(point);
 				}

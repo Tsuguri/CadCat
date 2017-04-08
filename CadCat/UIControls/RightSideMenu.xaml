@@ -67,7 +67,7 @@
             </Grid>
         </TabItem>
         <TabItem Header="Points" BorderThickness="0" >
-            <controls:PointList x:Name="pointList"/>
+            <controls:PointList/>
         </TabItem>
     </TabControl>
 </UserControl>

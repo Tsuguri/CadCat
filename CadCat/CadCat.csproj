@@ -102,6 +102,7 @@
     <Compile Include="DropDownMenuSelector.cs" />
     <Compile Include="GeometryModels\Bezier.cs" />
     <Compile Include="GeometryModels\BezierC2.cs" />
+    <Compile Include="GeometryModels\BsplineInterpolator.cs" />
     <Compile Include="GeometryModels\ParametrizedModel.cs" />
     <Compile Include="GeometryModels\PointModel.cs" />
     <Compile Include="Math\Plane.cs" />
