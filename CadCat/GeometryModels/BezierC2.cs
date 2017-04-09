@@ -34,24 +34,11 @@ namespace CadCat.GeometryModels
 
 		private bool listenToBerensteinChanges = true;
 
+		private ICommand changeTypeCommand;
+
 		#endregion
 
 		#region Properties
-
-		public bool ShowPolygon { get; set; } = true;
-
-		#endregion
-
-
-		public BezierC2(IEnumerable<DataStructures.CatPoint> pts, SceneData data) : base(pts,data)
-		{
-
-			GenerateBerensteinPoints();
-
-		}
-
-		private ICommand changeTypeCommand;
-
 
 		public ICommand ChangeTypeCommand
 		{
@@ -61,7 +48,16 @@ namespace CadCat.GeometryModels
 			}
 		}
 
-		
+		#endregion
+
+		public BezierC2(IEnumerable<DataStructures.CatPoint> pts, SceneData data) : base(pts,data)
+		{
+
+			GenerateBerensteinPoints();
+
+		}
+
+		#region BerensteinPointsManipulation
 
 		private void ClearBerensteinPoints()
 		{
@@ -75,8 +71,6 @@ namespace CadCat.GeometryModels
 
 		private void GenerateBerensteinPoints()
 		{
-			//ClearBerensteinPoints();
-
 			int actAmount = berensteinPoints.Count;
 			int desiredAmount = (points.Count - 3) * 3 + 1;
 			desiredAmount = System.Math.Max(0, desiredAmount);
@@ -134,14 +128,14 @@ namespace CadCat.GeometryModels
 			listenToBerensteinChanges = true;
 		}
 
+		#endregion
+
 		public override void Render(BaseRenderer renderer)
 		{
-			base.Render(renderer);
 
 			CountBezierPoints(berensteinPoints);
+			base.Render(renderer);
 
-			renderer.ModelMatrix = Matrix4.CreateIdentity();
-			renderer.UseIndices = false;
 			if (ShowPolygon)
 			{
 				switch (currentType)
@@ -159,18 +153,12 @@ namespace CadCat.GeometryModels
 				renderer.Transform();
 				renderer.DrawLines();
 			}
-			renderer.SelectedColor = !IsSelected ? Colors.White : Colors.LightGreen;
 
-			renderer.Points = curvePoints;
-			renderer.Transform();
-			renderer.DrawLines();
 		}
 
 		protected override void AddPoint(CatPoint point, bool generateLater = true)
 		{
-			point.OnDeleted += OnPointDeleted;
-			point.OnChanged += OnPointChanged;
-			points.Add(new PointWrapper(point));
+			base.AddPoint(point, generateLater);
 			switch (currentType)
 			{
 				case BezierType.Berenstein:
@@ -186,11 +174,6 @@ namespace CadCat.GeometryModels
 				GenerateBerensteinPoints();
 
 		}
-
-		//public override void AddPoint(CatPoint point)
-		//{
-		//	AddPoint(point, false);
-		//}
 
 		public void ChangeType()
 		{
@@ -225,9 +208,7 @@ namespace CadCat.GeometryModels
 
 		protected override void DeleteSelectedPoints()
 		{
-			var list = points.Where((x) => x.IsSelected).ToList();
-			foreach (var point in list)
-				RemovePoint(point, true, true);
+			base.DeleteSelectedPoints();
 			GenerateBerensteinPoints();
 		}
 

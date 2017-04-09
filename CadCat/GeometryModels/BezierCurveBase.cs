@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using CadCat.DataStructures;
 using CadCat.Math;
 using System.Windows.Input;
+using CadCat.Rendering;
+using System.Windows.Media;
 
 namespace CadCat.GeometryModels
 {
@@ -34,6 +36,12 @@ namespace CadCat.GeometryModels
 
 		private ICommand deletePointsCommand;
 
+
+		#endregion
+
+		#region Properties
+
+		public bool ShowPolygon { get; set; } = true;
 
 		#endregion
 
@@ -79,7 +87,12 @@ namespace CadCat.GeometryModels
 
 		#region DeleteSelected
 
-		protected abstract void DeleteSelectedPoints();
+		protected virtual void DeleteSelectedPoints()
+		{
+			var list = points.Where((x) => x.IsSelected).ToList();
+			foreach (var point in list)
+				RemovePoint(point, true, true);
+		}
 
 		#endregion
 
@@ -178,7 +191,12 @@ namespace CadCat.GeometryModels
 
 		#region PointsManipulation
 
-		protected abstract void AddPoint(CatPoint point, bool generateLater = true);
+		protected virtual void AddPoint(CatPoint point, bool generateLater = true)
+		{
+			point.OnDeleted += OnPointDeleted;
+			point.OnChanged += OnPointChanged;
+			points.Add(new PointWrapper(point));
+		}
 
 		protected virtual void RemovePoint(PointWrapper wrapper, bool removeDelegate, bool generateLater = false)
 		{
@@ -202,6 +220,23 @@ namespace CadCat.GeometryModels
 
 		#endregion
 
+		#region Render
+
+		public override void Render(BaseRenderer renderer)
+		{
+			base.Render(renderer);
+			renderer.ModelMatrix = Matrix4.CreateIdentity();
+			renderer.UseIndices = false;
+
+			renderer.SelectedColor = !IsSelected ? Colors.White : Colors.LightGreen;
+
+			renderer.Points = curvePoints;
+			renderer.Transform();
+			renderer.DrawLines();
+		}
+
+		#endregion
+
 		#region DelegateMethods
 
 		protected virtual void OnPointDeleted(CatPoint point)
@@ -210,7 +245,10 @@ namespace CadCat.GeometryModels
 
 		}
 
-		protected abstract void OnPointChanged(CatPoint point);
+		protected virtual void OnPointChanged(CatPoint point)
+		{
+
+		}
 
 		#endregion
 
