@@ -88,9 +88,7 @@ namespace CadCat.GeometryModels
 
 			for (int i = 0; i < d.Length; i++)
 			{
-				var del = c[i + 1] - c[i];
-				var dist = (3 * distances[i]);
-				d[i] = (del) / dist;
+				d[i] = (c[i + 1] - c[i]) / (3 * distances[i]);
 			}
 
 			for (int i = 0; i < b.Length; i++)
@@ -101,31 +99,20 @@ namespace CadCat.GeometryModels
 			double travelled = 0;
 			int interval = 0;
 			renderPoints = new List<Vector3>();
-			//renderPoints.Add(pts[0]);
-			for (int i = 0; i < 3; i++)
+			renderPoints.Add(pts[0]);
+			for (int i = 0; i < 100; i++)
 			{
-				//travelled += step;
-				//while (interval < distances.Length && distances[interval] < travelled)
-				//{
-				//	interval += 1;
-				//	if (interval < distances.Length)
-				//		travelled -= distances[interval];
-				//}
-
-				//if (interval >= distances.Length)
-				//	break;
-				for(int k = 0; k<10; k++)
+				travelled += step;
+				while (interval < distances.Length && distances[interval] < travelled)
 				{
-					travelled = k*distances[interval] / 10;
-					var pos = a[interval] + (b[interval] + (c[interval] + d[interval] * travelled) * travelled) * travelled;
-					renderPoints.Add(pos);
-
+					interval += 1;
+					travelled -= distances[interval - 1];
 				}
-				//travelled = distances[interval];
-				//pos = a[interval] + (b[interval] + (c[interval] + d[interval] * travelled) * travelled) * travelled;
-				//renderPoints.Add(pos);
 
-				interval += 1;
+				if (interval >= distances.Length)
+					break;
+				var pos = a[interval] + (b[interval] + (c[interval] + d[interval] * travelled) * travelled) * travelled;
+				renderPoints.Add(pos);
 			}
 			renderPoints.Add(pts[pts.Count - 1]);
 
