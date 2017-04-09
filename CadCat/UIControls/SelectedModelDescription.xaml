@@ -88,11 +88,19 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="40" />
                                 <RowDefinition Height="40" />
+                                <RowDefinition Height="40" />
                             </Grid.RowDefinitions>
-                            <Button Grid.Row="0" Command="{Binding DeletePointsCommand}" >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="60" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <ToggleButton Grid.Column="0" Grid.Row="0" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
+                          ToolTip="MaterialDesignSwitchAccentToggleButton" IsChecked="{Binding ShowPolygon}" />
+                            <TextBlock VerticalAlignment="Center" Grid.Column="1" Grid.Row="0">Polygon Visible</TextBlock>
+                            <Button Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Command="{Binding DeletePointsCommand}" >
                                 Remove Selected
                             </Button>
-                            <Button Grid.Row="1" Command="{Binding SelectPointsCommand}" DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorLevel=1, AncestorType=ContentControl}}" >
+                            <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Command="{Binding SelectPointsCommand}" DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorLevel=1, AncestorType=ContentControl}}" >
                                 Select All Points
                             </Button>
                         </Grid>

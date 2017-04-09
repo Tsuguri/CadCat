@@ -20,7 +20,7 @@ namespace CadCat.GeometryModels
 
 		public override void Render(BaseRenderer renderer)
 		{
-			CountBezierPoints(points.Select(x => x.Point).ToList());
+			CountBezierPoints(points.Select(x => x.Point.Position).ToList());
 			base.Render(renderer);
 
 			var pointList = points.Select(x => x.Point.Position).ToList();
@@ -31,14 +31,6 @@ namespace CadCat.GeometryModels
 				renderer.DrawLines();
 			}
 
-		}
-
-		protected override void AddPoint(CatPoint point, bool generateLater=true)//bool param is stub
-		{
-			point.OnDeleted += OnPointDeleted;
-			point.OnChanged += OnPointChanged;
-			points.Add(new PointWrapper(point));
-		//	changed = true;
 		}
 
 		public override string GetName()

@@ -383,7 +383,7 @@ namespace CadCat.DataStructures
 			}
 			else
 			{
-				AddNewModel(new BsplineInterpolator(selected));
+				AddNewModel(new BsplineInterpolator(selected,this));
 			}
 		}
 

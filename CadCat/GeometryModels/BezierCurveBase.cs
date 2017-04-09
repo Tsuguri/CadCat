@@ -98,7 +98,7 @@ namespace CadCat.GeometryModels
 
 		#region BezierComputations
 
-		protected void CountBezierPoints(List<CatPoint> pts)
+		protected void CountBezierPoints(List<Vector3> pts)
 		{
 			int curveDivision = 10;
 			curvePoints = new List<Vector3>();
@@ -145,12 +145,12 @@ namespace CadCat.GeometryModels
 			int current = 0;
 			while (current + 4 <= max)
 			{
-				bp.p0 = pts[current].Position;
-				bp.p1 = pts[current + 1].Position;
-				bp.p2 = pts[current + 2].Position;
-				bp.p3 = pts[current + 3].Position;
+				bp.p0 = pts[current];
+				bp.p1 = pts[current + 1];
+				bp.p2 = pts[current + 2];
+				bp.p3 = pts[current + 3];
 
-				var rectPts = pts.Skip(current).Take(4).Select(x => (cameraMatrix * new Vector4(x.Position, 1.0)).ToNormalizedVector3()).ToList();
+				var rectPts = pts.Skip(current).Take(4).Select(x => (cameraMatrix * new Vector4(x, 1.0)).ToNormalizedVector3()).ToList();
 				var xMin = rectPts.Select(x => x.X).Min();
 				var yMin = rectPts.Select(x => x.Y).Min();
 				var xMax = rectPts.Select(x => x.X).Max();
@@ -169,17 +169,17 @@ namespace CadCat.GeometryModels
 			{
 				if (max - 1 - current == 2)
 				{
-					bp.p0 = pts[current].Position;
-					bp.p1 = pts[current + 1].Position;
-					bp.p2 = pts[current + 2].Position;
+					bp.p0 = pts[current];
+					bp.p1 = pts[current + 1];
+					bp.p2 = pts[current + 2];
 
 					for (int i = 0; i <= curveDivision; i++)
 						lambda2(i / (double)curveDivision);
 				}
 				else
 				{
-					curvePoints.Add(pts[current].Position);
-					curvePoints.Add(pts[current + 1].Position);
+					curvePoints.Add(pts[current]);
+					curvePoints.Add(pts[current + 1]);
 				}
 
 			}

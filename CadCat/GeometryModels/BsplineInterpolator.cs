@@ -11,41 +11,23 @@ using CadCat.Math;
 
 namespace CadCat.GeometryModels
 {
-	class BsplineInterpolator : PointModel, IChangeablePointCount, ITypeChangeable
+	class BsplineInterpolator : BezierCurveBase
 	{
 		bool changed = false;
 
-
+		private List<Vector3> berensteinPoints;
 		private List<Vector3> renderPoints;
-		public BsplineInterpolator(List<CatPoint> points)
+		public BsplineInterpolator(IEnumerable<CatPoint> points, SceneData scene) : base(points, scene)
 		{
-			changed = false;
-			foreach (var point in points)
-			{
-				AddPoint(point);
-			}
+			changed = true;
+			ShowPolygon = true;
 		}
-
-		private ICommand deletePointsCommand;
-
-		public ICommand DeletePointsCommand
-		{
-			get
-			{
-				return deletePointsCommand ?? (deletePointsCommand = new Utilities.CommandHandler(DeleteSelectedPoints));
-			}
-		}
-
-		private void DeleteSelectedPoints()
-		{
-			var list = points.Where((x) => x.IsSelected).ToList();
-			foreach (var point in list)
-				RemovePoint(point, true);
-		}
-
 
 		private void CalculateWhatever()
 		{
+			if (!changed)
+				return;
+			changed = false;
 			var pts = points.Select(pt => pt.Point.Position).ToList();
 			var distances = new double[pts.Count - 1];
 			var knots = new double[pts.Count];
@@ -58,6 +40,18 @@ namespace CadCat.GeometryModels
 				sum += distances[i];
 			}
 			knots[knots.Length - 1] = sum;
+
+			if(pts.Count<4)
+			{
+				berensteinPoints = new List<Vector3>();
+				foreach (var pt in pts)
+				{
+					berensteinPoints.Add(pt);
+
+				}
+
+				return;
+			}
 
 			var alphas = new double[pts.Count - 3];
 			var betas = new double[pts.Count - 3];
@@ -88,79 +82,82 @@ namespace CadCat.GeometryModels
 
 			for (int i = 0; i < d.Length; i++)
 			{
-				d[i] = (c[i + 1] - c[i]) / (3 * distances[i]);
+				d[i] = (c[i + 1] - c[i]) / (3.0 );
 			}
 
 			for (int i = 0; i < b.Length; i++)
-				b[i] = (a[i + 1] - a[i]) / distances[i] - (c[i] + d[i] * distances[i]) * distances[i];
+				b[i] = (a[i + 1] - a[i]) / distances[i] - (c[i] + d[i]) * distances[i];
 
-
-			double step = sum / 100;
-			double travelled = 0;
-			int interval = 0;
-			renderPoints = new List<Vector3>();
-			renderPoints.Add(pts[0]);
-			for (int i = 0; i < 100; i++)
+			berensteinPoints = new List<Vector3>();
+			for (int i = 0; i < Points.Count - 1; i++)
 			{
-				travelled += step;
-				while (interval < distances.Length && distances[interval] < travelled)
-				{
-					interval += 1;
-					travelled -= distances[interval - 1];
-				}
+				var ptA = a[i];
+				var ptB = b[i] * distances[i];
+				var ptC = c[i] * distances[i] * distances[i];
+				var ptD = d[i] * distances[i] * distances[i];
 
-				if (interval >= distances.Length)
-					break;
-				var pos = a[interval] + (b[interval] + (c[interval] + d[interval] * travelled) * travelled) * travelled;
-				renderPoints.Add(pos);
+				PowerToBerenStein(ptA, ptB, ptC, ptD, out ptA, out ptB, out ptC, out ptD);
+
+				if (i == 0)
+					berensteinPoints.Add(ptA);
+				berensteinPoints.Add(ptB);
+				berensteinPoints.Add(ptC);
+				berensteinPoints.Add(ptD);
 			}
-			renderPoints.Add(pts[pts.Count - 1]);
+
+
+
 
 			int x = 0;
 
 		}
 
-		public void AddPoint(CatPoint point)
+		private void PowerToBerenStein(Vector3 a, Vector3 b, Vector3 c, Vector3 d, out Vector3 newA, out Vector3 newB, out Vector3 newC, out Vector3 newD)
 		{
-			points.Add(new PointWrapper(point));
-			point.OnDeleted += OnPointDelete;
-			point.OnChanged += OnPointChanged;
+			newA = a;
+			newB = a + b * (1 / 3.0);
+			newC = a + b * (2 / 3.0) + c * (1 / 3.0);
+			newD = a + b + c + d;
+		}
+
+		protected override void AddPoint(CatPoint point, bool generateLater = true)
+		{
+			base.AddPoint(point, generateLater);
 			changed = true;
 		}
 
-		private void OnPointDelete(CatPoint point)
+		protected override void OnPointChanged(CatPoint point)
 		{
-			RemovePoint(point, false);
+			changed = true;
 		}
 
-		private void OnPointChanged(CatPoint point)
+		protected override void OnPointDeleted(CatPoint point)
 		{
+			base.OnPointDeleted(point);
 			changed = true;
 		}
 
 		private void RemovePoint(PointWrapper point, bool removeDelegate)
 		{
-			points.Remove(point);
-			if (removeDelegate)
-			{
-				point.Point.OnDeleted -= OnPointDelete;
-				point.Point.OnChanged -= OnPointChanged;
-			}
+			base.RemovePoint(point, removeDelegate);
 			changed = true;
 		}
 
-		public void RemovePoint(CatPoint point)
+		public override void RemovePoint(CatPoint point)
 		{
-			RemovePoint(point, true);
+			base.RemovePoint(point);
+			changed = true;
+		}
+		protected override void RemovePoint(PointWrapper wrapper, bool removeDelegate, bool generateLater = false)
+		{
+			base.RemovePoint(wrapper, removeDelegate, generateLater);
+			changed = true;
 		}
 
-		private void RemovePoint(CatPoint point, bool removeDelegate)
+		public override void RemovePoint(CatPoint point, bool removeDelegate)
 		{
-			var pt = points.FirstOrDefault(x => x.Point == point);
-			if (pt != null)
-			{
-				RemovePoint(pt, removeDelegate);
-			}
+			base.RemovePoint(point, removeDelegate);
+			changed = true;
 		}
 
 		public override string GetName()
@@ -170,19 +167,23 @@ namespace CadCat.GeometryModels
 
 		public override void Render(BaseRenderer renderer)
 		{
+			CalculateWhatever();
+			CountBezierPoints(berensteinPoints);
 			base.Render(renderer);
 
-			CalculateWhatever();
-			renderer.Points = renderPoints;
-			renderer.UseIndices = false;
-			renderer.Transform();
-			renderer.DrawLines();
 
-		}
+			if (ShowPolygon)
+			{
+				renderer.Points = berensteinPoints;
+				renderer.Transform();
+				renderer.DrawLines();
+			}
+			//renderer.Points = renderPoints;
+			//renderer.UseIndices = false;
+			//renderer.Transform();
+			//renderer.DrawLines();
 
-		public void ChangeType()
-		{
-			CalculateWhatever();
+
 		}
 	}
 }

@@ -132,8 +132,8 @@ namespace CadCat.GeometryModels
 
 		public override void Render(BaseRenderer renderer)
 		{
-
-			CountBezierPoints(berensteinPoints);
+			var berPtsList= berensteinPoints.Select(x => x.Position).ToList();
+			CountBezierPoints(berPtsList);
 			base.Render(renderer);
 
 			if (ShowPolygon)
@@ -141,7 +141,7 @@ namespace CadCat.GeometryModels
 				switch (currentType)
 				{
 					case BezierType.Berenstein:
-						renderer.Points = berensteinPoints.Select(x => x.Position).ToList();
+						renderer.Points = berPtsList;
 						break;
 					case BezierType.BSpline:
 						renderer.Points = points.Select(x => x.Point.Position).ToList();
