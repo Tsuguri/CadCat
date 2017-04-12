@@ -83,7 +83,7 @@ namespace CadCat.GeometryModels
 			else if (actAmount < desiredAmount)
 				for (int i = 0; i < desiredAmount - actAmount; i++)
 				{
-					var pt = scene.CreateCatPoint(new Vector3(), false);
+					var pt = scene.CreateHiddenCatPoint(new Vector3());
 					pt.OnChanged += OnBerensteinPointChanged;
 					pt.AddAble = false;
 					berensteinPoints.Add(pt);

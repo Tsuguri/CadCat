@@ -91,6 +91,8 @@ namespace CadCat.DataStructures
 		private ObservableCollection<CatPoint> points = new ObservableCollection<CatPoint>();
 		public ObservableCollection<CatPoint> Points { get { return points; } }
 
+
+		private List<CatPoint> hiddenPoints = new List<CatPoint>();
 		private Model selectedModel = null;
 
 		public Model SelectedModel
@@ -372,7 +374,7 @@ namespace CadCat.DataStructures
 		private void CreateBSplineInterpolator()
 		{
 			var selected = GetFilteredSelected();
-			if(selected.Count<2)
+			if (selected.Count < 2)
 			{
 				var sampleMessageDialog = new MessageHost
 				{
@@ -383,7 +385,7 @@ namespace CadCat.DataStructures
 			}
 			else
 			{
-				AddNewModel(new BsplineInterpolator(selected,this));
+				AddNewModel(new BsplineInterpolator(selected, this));
 			}
 		}
 
@@ -414,6 +416,14 @@ namespace CadCat.DataStructures
 			return point;
 		}
 
+		internal CatPoint CreateHiddenCatPoint(Vector3 pos)
+		{
+			var point = new CatPoint(pos);
+			hiddenPoints.Add(point);
+
+			return point;
+		}
+
 		internal void RemovePoint(CatPoint point)
 		{
 			point.CleanUp();
@@ -441,9 +451,9 @@ namespace CadCat.DataStructures
 			cursor = new Tools.Cursor(this);
 		}
 
-		public IEnumerable<DataStructures.CatPoint> GetPoints()
+		public IEnumerable<CatPoint> GetPoints()
 		{
-			return points;
+			return points.Concat(hiddenPoints);
 		}
 
 		public void Render(BaseRenderer renderer)
@@ -457,16 +467,28 @@ namespace CadCat.DataStructures
 			renderer.ModelMatrix = Matrix4.CreateIdentity();
 			var points = new List<Vector3>(1);
 			points.Insert(0, new Vector3());
+			renderer.Points = points;
 			foreach (var point in Points)
 			{
 				if (!point.Visible)
 					continue;
 				points[0] = point.Position;
-				renderer.Points = points;
 				renderer.SelectedColor = point.IsSelected ? Colors.LimeGreen : Colors.White;
 				renderer.Transform();
 				renderer.DrawPoints();
 			}
+
+			if (hiddenPoints != null)
+				foreach (var point in hiddenPoints)
+				{
+					if (!point.Visible)
+						continue;
+					points[0] = point.Position;
+					renderer.SelectedColor = point.IsSelected ? Colors.LimeGreen : Colors.White;
+					renderer.Transform();
+					renderer.DrawPoints();
+
+				}
 
 			Cursor.Render(renderer);
 		}
@@ -608,11 +630,11 @@ namespace CadCat.DataStructures
 			if (!OnMousePoint)
 			{
 				CatPoint clickedPoint;
-				if (SelectClickedPoint(position, out clickedPoint))
+				if (SelectClickedPoint(position, out clickedPoint) && !hiddenPoints.Contains(clickedPoint))
 				{
 					if (!Keyboard.IsKeyDown(Key.LeftCtrl))
 					{
-						var list = Points.Where(x=>x.IsSelected).ToList();
+						var list = Points.Where(x => x.IsSelected).ToList();
 						foreach (var selectedPoint in list)
 						{
 							selectedPoint.IsSelected = false;
@@ -646,7 +668,7 @@ namespace CadCat.DataStructures
 			{
 				SelectedModel.CleanUp();
 				models.Remove(SelectedModel);
-				
+
 				SelectedModel = null;
 			}
 		}
@@ -672,7 +694,7 @@ namespace CadCat.DataStructures
 
 		private List<CatPoint> GetFilteredSelected()
 		{
-			return Points.Where(x=>(x.IsSelected && !x.AddAble)).ToList();
+			return Points.Where(x => (x.IsSelected && !x.AddAble)).ToList();
 		}
 
 		private void AddSelectedPointToSelectedItem()
