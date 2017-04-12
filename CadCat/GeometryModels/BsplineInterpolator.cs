@@ -28,6 +28,11 @@ namespace CadCat.GeometryModels
 			if (!changed)
 				return;
 			changed = false;
+			if (points.Count < 3)
+			{
+				berensteinPoints?.Clear();
+				return;
+			}
 			var pts = points.Select(pt => pt.Point.Position).ToList();
 			var distances = new double[pts.Count - 1];
 			var knots = new double[pts.Count];
@@ -41,15 +46,21 @@ namespace CadCat.GeometryModels
 			}
 			knots[knots.Length - 1] = sum;
 
-			if(pts.Count<4)
+			if (pts.Count < 4)
 			{
 				berensteinPoints = new List<Vector3>();
-				foreach (var pt in pts)
+				if (pts.Count == 3)
 				{
-					berensteinPoints.Add(pt);
-
+					berensteinPoints.Add(pts[0]);
+					berensteinPoints.Add(pts[1]);
+					berensteinPoints.Add(pts[1]);
+					berensteinPoints.Add(pts[2]);
 				}
-
+				else if (pts.Count == 2)
+				{
+					berensteinPoints.Add(pts[0]);
+					berensteinPoints.Add(pts[1]);
+				}
 				return;
 			}
 
@@ -82,7 +93,7 @@ namespace CadCat.GeometryModels
 
 			for (int i = 0; i < d.Length; i++)
 			{
-				d[i] = (c[i + 1] - c[i]) / (3.0 );
+				d[i] = (c[i + 1] - c[i]) / (3.0);
 			}
 
 			for (int i = 0; i < b.Length; i++)
@@ -168,12 +179,17 @@ namespace CadCat.GeometryModels
 		public override void Render(BaseRenderer renderer)
 		{
 			CalculateWhatever();
-			CountBezierPoints(berensteinPoints);
-			base.Render(renderer);
-
-
-			if (ShowPolygon)
+			if (berensteinPoints != null && berensteinPoints.Count > 1)
 			{
+				CountBezierPoints(berensteinPoints);
+				base.Render(renderer);
+
+			}
+
+
+			if (ShowPolygon && berensteinPoints != null && berensteinPoints.Count > 1)
+			{
+
 				renderer.Points = berensteinPoints;
 				renderer.Transform();
 				renderer.DrawLines();

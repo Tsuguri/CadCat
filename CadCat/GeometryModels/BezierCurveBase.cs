@@ -104,7 +104,24 @@ namespace CadCat.GeometryModels
 			curvePoints = new List<Vector3>();
 			var bp = new BezierPoints();
 			Vector3 tempVec = new Vector3();
-			Action<double> lambda = (x) =>
+			int current = 0;
+			var cameraMatrix = scene.ActiveCamera.ViewProjectionMatrix;
+
+			Action<int> GetSize = (y) =>
+			 {
+				 var rectPts = pts.Skip(current).Take(y).Select(x => (cameraMatrix * new Vector4(x, 1.0)).ToNormalizedVector3()).ToList();
+				 var xMin = rectPts.Select(x => x.X).Min();
+				 var yMin = rectPts.Select(x => x.Y).Min();
+				 var xMax = rectPts.Select(x => x.X).Max();
+				 var yMax = rectPts.Select(x => x.Y).Max();
+				 var size = new Vector2(xMax - xMin, yMax - yMin);
+				 size.X = size.X * scene.ScreenSize.X;
+				 size.Y = size.Y * scene.ScreenSize.Y;
+				 curveDivision = (int)(System.Math.Max(size.X, size.Y) / 5);
+				 curveDivision = System.Math.Min(curveDivision, 500);
+			 };
+
+			Action<double> Berenstein4Points = (x) =>
 			{
 				double x2 = x * x;
 				double x3 = x2 * x;
@@ -123,7 +140,7 @@ namespace CadCat.GeometryModels
 
 				curvePoints.Add(tempVec);
 			};
-			Action<double> lambda2 = (x) =>
+			Action<double> Berenstein3Points = (x) =>
 			{
 				double x2 = x * x;
 				double x11 = (1 - x);
@@ -140,9 +157,7 @@ namespace CadCat.GeometryModels
 
 				curvePoints.Add(tempVec);
 			};
-			var cameraMatrix = scene.ActiveCamera.ViewProjectionMatrix;
 			int max = pts.Count;
-			int current = 0;
 			while (current + 4 <= max)
 			{
 				bp.p0 = pts[current];
@@ -150,19 +165,10 @@ namespace CadCat.GeometryModels
 				bp.p2 = pts[current + 2];
 				bp.p3 = pts[current + 3];
 
-				var rectPts = pts.Skip(current).Take(4).Select(x => (cameraMatrix * new Vector4(x, 1.0)).ToNormalizedVector3()).ToList();
-				var xMin = rectPts.Select(x => x.X).Min();
-				var yMin = rectPts.Select(x => x.Y).Min();
-				var xMax = rectPts.Select(x => x.X).Max();
-				var yMax = rectPts.Select(x => x.Y).Max();
-				var size = new Vector2(xMax - xMin, yMax - yMin);
-				size.X = size.X * scene.ScreenSize.X;
-				size.Y = size.Y * scene.ScreenSize.Y;
-				curveDivision = (int)(System.Math.Max(size.X, size.Y) / 5);
-				curveDivision = System.Math.Min(curveDivision, 500);
+				GetSize(4);
 
 				for (int i = 0; i <= curveDivision; i++)
-					lambda(i / (double)curveDivision);
+					Berenstein4Points(i / (double)curveDivision);
 				current += 3;
 			}
 			if (current < max - 1)
@@ -173,8 +179,10 @@ namespace CadCat.GeometryModels
 					bp.p1 = pts[current + 1];
 					bp.p2 = pts[current + 2];
 
+					GetSize(3);
+
 					for (int i = 0; i <= curveDivision; i++)
-						lambda2(i / (double)curveDivision);
+						Berenstein3Points(i / (double)curveDivision);
 				}
 				else
 				{
