@@ -428,6 +428,7 @@ namespace CadCat.DataStructures
 		{
 			point.CleanUp();
 			Points.Remove(point);
+			hiddenPoints.Remove(point);
 		}
 
 		private void CreatePoint(Vector3 pos)
@@ -449,6 +450,7 @@ namespace CadCat.DataStructures
 		{
 			imageMouse = new ImageMouseController(this);
 			cursor = new Tools.Cursor(this);
+			AddNewModel(new BezierPatch(this));
 		}
 
 		public IEnumerable<CatPoint> GetPoints()
