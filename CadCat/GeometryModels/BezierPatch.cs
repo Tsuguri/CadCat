@@ -19,6 +19,7 @@ namespace CadCat.GeometryModels
 		private SceneData scene;
 
 		private bool changed = false;
+		private bool owner = false;
 
 		public bool ShowPolygon
 		{
@@ -78,6 +79,7 @@ namespace CadCat.GeometryModels
 					pt.OnChanged += OnBezierPointChanged;
 				}
 			changed = true;
+			owner = true;
 		}
 
 		public BezierPatch(CatPoint[,] points)
@@ -210,6 +212,18 @@ namespace CadCat.GeometryModels
 				+ points[startPoint + step * 2].Position * x2 * x11 * 3 + points[startPoint + step * 3].Position * x3;
 
 			return tempVec;
+		}
+
+		public override void CleanUp()
+		{
+			base.CleanUp();
+			if(owner)
+			{
+				foreach (var pt in points)
+				{
+					scene.RemovePoint(pt);
+				}
+			}
 		}
 	}
 }

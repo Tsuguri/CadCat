@@ -18,24 +18,18 @@ using System.Windows.Media;
 
 namespace CadCat.DataStructures
 {
-	public class Line
-	{
-		public Vector3 from;
-		public Vector3 to;
-	}
+
 	public class SceneData : Utilities.BindableObject
 	{
-		public delegate IEnumerable<DataStructures.CatPoint> PointListGet();
+		#region Types
+
+		public delegate IEnumerable<CatPoint> PointListGet();
 		public delegate IEnumerable<Model> ModelListGet();
 
-		private ModelListGet getSelectedModels;
-
-		public void SetSelectedModelsGetter(ModelListGet del)
-		{
-			this.getSelectedModels = del;
-		}
+		#endregion
 
 		private bool onMousePoint = false;
+
 		public bool OnMousePoint
 		{
 			get
@@ -113,6 +107,10 @@ namespace CadCat.DataStructures
 		private CatPoint selectedPoint = null;
 
 		private bool isAnyPointSelected = false;
+
+		/// <summary>
+		/// For Point List View
+		/// </summary>
 		public bool IsAnyPointSelected
 		{
 			get
@@ -153,6 +151,7 @@ namespace CadCat.DataStructures
 
 		#endregion
 
+		//to change
 		#region MouseData
 
 		public Point MousePosition
@@ -199,10 +198,10 @@ namespace CadCat.DataStructures
 		private ICommand createBezierCommand;
 		private ICommand createBezierC2Command;
 		private ICommand createBSplineInterpolatorCommand;
+		private ICommand createBezierPatchCommand;
 
 		private ICommand createPointCommand;
-
-		//private ICommand addPointsToCurrendIChangeablePointCount;
+		
 		private ICommand removeSelectedPointsCommand;
 		private ICommand selectPointsCommand;
 		private ICommand addSelectedPointToSelectedItemCommand;
@@ -249,6 +248,14 @@ namespace CadCat.DataStructures
 			get
 			{
 				return createBSplineInterpolatorCommand ?? (createBSplineInterpolatorCommand = new Utilities.CommandHandler(CreateBSplineInterpolator));
+			}
+		}
+
+		public ICommand CreateBezierPatchCommand
+		{
+			get
+			{
+				return createBezierPatchCommand ?? (createBezierPatchCommand = new Utilities.CommandHandler(CreateBezierPatch));
 			}
 		}
 
@@ -342,6 +349,7 @@ namespace CadCat.DataStructures
 				{
 					Message = { Text = "Not enough points for Bezier Curve (at least 1)." }
 				};
+				
 
 				DialogHost.Show(sampleMessageDialog, "RootDialog");
 			}
@@ -389,6 +397,24 @@ namespace CadCat.DataStructures
 			}
 		}
 
+		private void CreateBezierPatch()
+		{
+			MainWindow window = new MainWindow();
+			window.Closed += Window_Closed;//to change
+			window.WindowStyle = WindowStyle.ToolWindow;
+			window.ResizeMode = ResizeMode.NoResize;
+			window.Title = "New Patch";
+			window.Width = 200;
+			window.Height = 300;
+			window.Content = new BezierPatchMessage();
+			window.Show();
+		}
+
+		private void Window_Closed(object sender, EventArgs e)
+		{
+			throw new NotImplementedException();
+		}
+
 		private void CreatePoint()
 		{
 			Vector3 pos;
@@ -406,7 +432,7 @@ namespace CadCat.DataStructures
 
 			if (addToSelected)
 			{
-				var selected = getSelectedModels.Invoke().ToList();
+				var selected = Models.Where(x => x.IsSelected).ToList();
 				if (selected.Count > 0 && selected[0] is IChangeablePointCount)
 				{
 					var p = selected[0] as IChangeablePointCount;

@@ -13,6 +13,12 @@ namespace CadCat.Rendering
 {
 	public abstract class BaseRenderer : Utilities.BindableObject
 	{
+		protected class Line
+		{
+			public Vector3 from;
+			public Vector3 to;
+		}
+
 		public WriteableBitmap bufferBitmap;
 		private Image targetImage;
 		protected Line tmpLine = new Line();
@@ -172,7 +178,7 @@ namespace CadCat.Rendering
 			return System.Math.Abs(to - margin) / System.Math.Abs(to - from);
 		}
 
-		private bool ClipAxis(DataStructures.Line clipped, double fromAxis, double toAxis, double farMargin, double closeMargin)
+		private bool ClipAxis(Line clipped, double fromAxis, double toAxis, double farMargin, double closeMargin)
 		{
 			if ((fromAxis > farMargin && toAxis > farMargin) || (fromAxis < closeMargin && toAxis < closeMargin))
 				return false;
@@ -201,7 +207,7 @@ namespace CadCat.Rendering
 		}
 
 
-		public bool Clip(DataStructures.Line clipped, double farMargin = 1.0, double closeMargin = 0.0)
+		protected bool Clip(Line clipped, double farMargin = 1.0, double closeMargin = 0.0)
 		{
 			return clipped.from.Z > 0.0 && clipped.to.Z > 0.0 &&
 					ClipAxis(clipped, clipped.from.X, clipped.to.X, farMargin, closeMargin) &&

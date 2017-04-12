@@ -105,6 +105,21 @@
                             </Button>
                         </Grid>
                     </DataTemplate>
+                    <DataTemplate DataType="{x:Type models:BezierPatch}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="40"/>
+                                <RowDefinition Height="40"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <ToggleButton Grid.Column="0" Grid.Row="0" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
+                          ToolTip="MaterialDesignSwitchAccentToggleButton" IsChecked="{Binding ShowPolygon}" />
+                            <TextBlock VerticalAlignment="Center" Grid.Column="1" Grid.Row="0">Polygon Visible</TextBlock>
+                        </Grid>
+                    </DataTemplate>
                 </ContentControl.Resources>
             </ContentControl>
             <ContentControl Content="{Binding SelectedModel}">

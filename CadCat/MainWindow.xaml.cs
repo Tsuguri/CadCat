@@ -57,7 +57,7 @@ namespace CadCat
 			data = new SceneData();
 			DataContext = data;
 			InitializeComponent();
-			data.SetSelectedModelsGetter(() => { return RightSide.modelList.Models; });
+
 			ctx = new RenderingContext(data, image);
 			var cam = new Camera();
 			cam.LookingAt = new Math.Vector3(0, 0, 0);

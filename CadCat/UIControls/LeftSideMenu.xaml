@@ -36,6 +36,9 @@
                 <Button ToolTip="B-Spline Interpolator" Command="{Binding CreateBSplineInterpolatorCommand}">
                     I
                 </Button>
+                <Button ToolTip="Bezier Patch" Command="{Binding CreateBezierPatchCommand}">
+                    P
+                </Button>
                 <Button ToolTip="Torus" Command="{Binding CreateTorusCommand}">T</Button>
                 <Button ToolTip="Cube" Command="{Binding CreateCubeCommand}">
                     <materialDesign:PackIcon Kind="CubeOutline" />
