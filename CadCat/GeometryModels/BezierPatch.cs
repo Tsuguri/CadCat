@@ -11,18 +11,23 @@ namespace CadCat.GeometryModels
 {
 	class BezierPatch : Model
 	{
-		private CatPoint[] points = new CatPoint[16];
-		private List<Vector3> mesh = new List<Vector3>();
-		private List<int> meshIndices = new List<int>();
-		private SceneData scene;
+		private readonly CatPoint[] points = new CatPoint[16];
+		private readonly List<Vector3> mesh = new List<Vector3>();
+		private readonly List<int> meshIndices = new List<int>();
+		private readonly SceneData scene;
 
-		private bool changed = false;
-		private bool owner = false;
-
+		private bool changed;
+		private readonly bool owner;
+		private bool showPolygon = true;
 		public bool ShowPolygon
 		{
-			get; set;
-		} = true;
+			get { return showPolygon; }
+			set
+			{
+				showPolygon = value;
+				OnPropertyChanged();
+			}
+		}
 
 		public int WidthDiv
 		{ get; set; } = 10;

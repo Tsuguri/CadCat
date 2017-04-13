@@ -548,11 +548,11 @@ namespace CadCat.DataStructures
 			if (!OnMousePoint)
 			{
 				CatPoint clickedPoint;
-				if (SelectClickedPoint(position, out clickedPoint) && !hiddenPoints.Contains(clickedPoint))
+				if (SelectClickedPoint(position, out clickedPoint)) // && !hiddenPoints.Contains(clickedPoint)
 				{
 					if (!Keyboard.IsKeyDown(Key.LeftCtrl))
 					{
-						var list = Points.Where(x => x.IsSelected).ToList();
+						var list = GetPoints().Where(x => x.IsSelected).ToList();
 						foreach (var point in list)
 						{
 							point.IsSelected = false;

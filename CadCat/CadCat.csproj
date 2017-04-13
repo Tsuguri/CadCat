@@ -161,7 +161,9 @@
       <DependentUpon>ToolsMenu.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utilities\BindableObject.cs" />
+    <Compile Include="Utilities\CombineConverter.cs" />
     <Compile Include="Utilities\CommandHandler.cs" />
+    <Compile Include="Utilities\InvertBoolConverter.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

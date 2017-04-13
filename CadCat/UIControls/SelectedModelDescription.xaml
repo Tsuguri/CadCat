@@ -124,22 +124,55 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <ComboBox ItemsSource="{Binding Source={StaticResource dataFromEnum}}" SelectedItem="{Binding Type}" />
+                            <ComboBox ItemsSource="{Binding Source={StaticResource patchTypeFromEnum}}" SelectedItem="{Binding Type}" />
 
                             <TextBlock Text="Size" Grid.Row="2" Grid.Column="0" />
-                            <control:NumericSlider Grid.Column="1" Grid.Row="2" Value="{Binding Width}" IncrementMultiplier="0.1"  />
+                            <control:NumericSlider Grid.Column="1" Grid.Row="2" Value="{Binding Radius}" IncrementMultiplier="0.1" Visibility="{Binding Curved, Converter={StaticResource BoolToVis},Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"  />
+                            <control:NumericSlider Grid.Column="1" Grid.Row="2" Value="{Binding Width}" IncrementMultiplier="0.1" Visibility="{Binding Curved, Converter={StaticResource InvertBoolToVis},Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"  />
                             <control:NumericSlider Grid.Column="2" Grid.Row="2" Value="{Binding Height}" IncrementMultiplier="0.1" />
 
-                            <TextBlock Text="Patches" Grid.Row="0" Grid.Column="0" />
-                            <control:NumericSlider Grid.Column="1" Grid.Row="0" Value="{Binding UDensity}"/>
-                            <control:NumericSlider Grid.Column="2" Grid.Row="0" Value="{Binding VDensity}"/>
+                            <TextBlock Text="Patches" Grid.Row="1" Grid.Column="0" />
+                            <control:NumericSlider Grid.Column="1" Grid.Row="1" Value="{Binding UDensity}"/>
+                            <control:NumericSlider Grid.Column="2" Grid.Row="1" Value="{Binding VDensity}"/>
 
-                            <ToggleButton Grid.Column="0" Grid.Row="3" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
+                            <ToggleButton Grid.Column="1" Grid.Row="0" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
                                           ToolTip="MaterialDesignSwitchAccentToggleButton" IsChecked="{Binding Curved}" />
-                            <TextBlock VerticalAlignment="Center" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="3">Curved</TextBlock>
+                            <TextBlock VerticalAlignment="Center" Grid.Column="2" Grid.Row="0">Curved</TextBlock>
 
-                            <TextBlock Text="Curvature" Grid.Column="0"  Grid.Row="4" Visibility="{Binding Curved, Converter={StaticResource BoolToVis},Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
-                            <control:NumericSlider Value="{Binding CurvatureAngle}" Grid.Column="1" Grid.Row="4" Visibility="{Binding Curved, Converter={StaticResource BoolToVis},Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Text="Curvature" Grid.Column="0"  Grid.Row="3" Visibility="{Binding Curved, Converter={StaticResource BoolToVis},Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <control:NumericSlider Value="{Binding CurvatureAngle}" Grid.Column="1" Grid.Row="3" Visibility="{Binding Curved, Converter={StaticResource BoolToVis},Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="4" Visibility="{Binding IsCylinder, Converter={StaticResource BoolToVis},Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">Cyclic surface</TextBlock>
+                        
+                        </Grid>
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type models:BezierPatch}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="60" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <ToggleButton Grid.Column="0" Grid.Row="0" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
+                                          ToolTip="MaterialDesignSwitchAccentToggleButton" IsChecked="{Binding ShowPolygon}" />
+                            <TextBlock VerticalAlignment="Center" Grid.Column="1" Grid.Row="0">Polygon Visible</TextBlock>
+                        </Grid>
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type models:Surface}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="40" />
+                                <RowDefinition Height="40" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="60" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <ToggleButton Grid.Column="0" Grid.Row="0" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
+                                          ToolTip="MaterialDesignSwitchAccentToggleButton" IsChecked="{Binding ShowPolygon}" />
+                            <TextBlock VerticalAlignment="Center" Grid.Column="1" Grid.Row="0">Polygon Visible</TextBlock>
+
+                            <ToggleButton Grid.Column="0" Grid.Row="1" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
+                                          ToolTip="MaterialDesignSwitchAccentToggleButton" IsChecked="{Binding ShowPoints}" />
+                            <TextBlock VerticalAlignment="Center" Grid.Column="1" Grid.Row="1">Points Visible</TextBlock>
                         </Grid>
                     </DataTemplate>
                 </ContentControl.Resources>
@@ -194,6 +227,9 @@
                             <control:NumericSlider Grid.Column="3" Grid.Row="3" Value="{Binding TrScaleZ}" IncrementMultiplier="0.1" />
                             <TextBlock Text="Rot" Grid.Row="2" Grid.Column="0" />
                         </Grid>
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type models:Model}">
+                        <TextBox Text="{Binding Name}"/>
                     </DataTemplate>
                 </ContentControl.Resources>
             </ContentControl>

@@ -7,18 +7,22 @@ using CadCat.DataStructures;
 using CadCat.Math;
 using CadCat.ModelInterfaces;
 using CadCat.Rendering;
+// ReSharper disable ExplicitCallerInfoArgument
 
 namespace CadCat.GeometryModels.Proxys
 {
 	using Real = Double;
+
+	public enum SurfaceType
+	{
+		Bezier,
+		BSpline
+	}
+
 	class TempSurface : ParametrizedModel, IConvertibleToPoints
 	{
 
-		public enum SurfaceType
-		{
-			Bezier,
-			BSpline
-		}
+
 		//private List<ModelLine> lines;
 		private readonly List<int> indices = new List<int>();
 		private readonly List<Math.Vector3> points = new List<Vector3>();
@@ -29,6 +33,7 @@ namespace CadCat.GeometryModels.Proxys
 
 		private Real width = 10.0;
 		private Real height = 10.0;
+		private Real radius = 1.0;
 
 		private bool changed;
 
@@ -86,6 +91,7 @@ namespace CadCat.GeometryModels.Proxys
 				curved = value;
 				changed = true;
 				OnPropertyChanged();
+				OnPropertyChanged(nameof(IsCylinder));
 			}
 		}
 
@@ -94,15 +100,17 @@ namespace CadCat.GeometryModels.Proxys
 			get { return curvatureAngle; }
 			set
 			{
-				if (System.Math.Abs(curvatureAngle - value) > Math.Utils.Eps && value>1)
+				if (System.Math.Abs(curvatureAngle - value) > Math.Utils.Eps && value>=1.0 && value <=360.0)
 				{
 					curvatureAngle = value;
 					changed = true;
 					OnPropertyChanged();
+					OnPropertyChanged(nameof(IsCylinder));
 				}
 			}
 		}
 
+		public bool IsCylinder => Curved && System.Math.Abs(curvatureAngle - 360.0) < Utils.Eps;
 
 		public Real Width
 		{
@@ -115,6 +123,20 @@ namespace CadCat.GeometryModels.Proxys
 				if (System.Math.Abs(width - value) > Math.Utils.Eps && value > 0)
 				{
 					width = value;
+					changed = true;
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		public Real Radius
+		{
+			get { return radius; }
+			set
+			{
+				if (System.Math.Abs(radius - value) > Math.Utils.Eps && value > 0)
+				{
+					radius = value;
 					changed = true;
 					OnPropertyChanged();
 				}
@@ -189,11 +211,11 @@ namespace CadCat.GeometryModels.Proxys
 				for (int i = 0; i < widthPoints; i++)
 				{
 					Real angle = Utils.DegToRad(i * angleStep - CurvatureAngle / 2);
-					Real x = System.Math.Sin(angle);
+					Real x = radius * System.Math.Sin(angle);
 					for (int j = 0; j < heightPoints; j++)
 					{
 						Real y = heightStep * j - Height / 2;
-						Real z = System.Math.Cos(angle);
+						Real z = radius * System.Math.Cos(angle);
 						points.Insert(i * heightPoints + j, new Vector3(x, y, z));
 					}
 				}

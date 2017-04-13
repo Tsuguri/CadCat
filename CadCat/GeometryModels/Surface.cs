@@ -7,12 +7,43 @@ using CadCat.DataStructures;
 
 namespace CadCat.GeometryModels
 {
-	class Surface : PointModel
+	class Surface : Model
 	{
 
 		private List<BezierPatch> patches;
 		private List<CatPoint> catPoints;
 		private SceneData scene;
+
+		private bool showPolygon;
+		private bool showPoints;
+
+		public bool ShowPolygon
+		{
+			get { return showPolygon; }
+			set
+			{
+				showPolygon = value;
+				OnPropertyChanged();
+				foreach (var bezierPatch in patches)
+				{
+					bezierPatch.ShowPolygon = showPolygon;
+				}
+			}
+		}
+
+		public bool ShowPoints
+		{
+			get { return showPoints; }
+			set
+			{
+				showPoints = value;
+				OnPropertyChanged();
+				foreach (var catPoint in catPoints)
+				{
+					catPoint.Visible = showPoints;
+				}
+			}
+		}
 
 		public override void CleanUp()
 		{

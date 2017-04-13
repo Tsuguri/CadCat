@@ -105,17 +105,15 @@ namespace CadCat.Tools
 
 		private void Catch()
 		{
-			if (scene.SelectedPoint != null)
-			{
-				var pts = scene.Points.Where(x => x.IsSelected).ToList();
-				var pos = pts.Select(x => x.Position).Sum();
-				pos = pos / pts.Count;
-				Transform.Position = pos;
-				catchedPoints = pts.Select(x => new Tuple<CatPoint, Math.Vector3>(x, x.Position - Transform.Position)).ToList();
+			var pts = scene.GetPoints().Where(x => x.IsSelected).ToList();
+			if (pts.Count < 1)
+				return;
+			var pos = pts.Select(x => x.Position).Sum();
+			pos = pos / pts.Count;
+			Transform.Position = pos;
+			catchedPoints = pts.Select(x => new Tuple<CatPoint, Math.Vector3>(x, x.Position - Transform.Position)).ToList();
 
-				InvalidatePosition();
-
-			}
+			InvalidatePosition();
 		}
 
 		private void Center()
