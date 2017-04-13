@@ -1,33 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CadCat.Math;
 using CadCat.DataStructures;
 
 namespace CadCat.GeometryModels
 {
-
-
-	internal struct ModelLine
-	{
-		public int from;
-		public int to;
-
-		public ModelLine(int from, int to)
-		{
-			this.from = from;
-			this.to = to;
-		}
-	}
 	public class Model : Utilities.BindableObject
 	{
 
-		public int ModelID
+		public int ModelId
 		{
 			get;
-			private set;
 		}
 		private string name;
 		public string Name
@@ -42,7 +26,7 @@ namespace CadCat.GeometryModels
 				OnPropertyChanged();
 			}
 		}
-		private bool isSelected = false;
+		private bool isSelected;
 		public bool IsSelected
 		{
 			get
@@ -56,19 +40,13 @@ namespace CadCat.GeometryModels
 			}
 		}
 
-		public IEnumerable<string> Interfaces
-		{
-			get
-			{
-				return this.GetType().GetInterfaces().Select(x=> x.ToString());
-			}
-		}
+		public IEnumerable<Type> Interfaces => this.GetType().GetInterfaces();
 
 		private static int idCounter = 0;
 
 		public Model()
 		{
-			ModelID = idCounter;
+			ModelId = idCounter;
 			name = GetName();
 			idCounter++;
 		}
@@ -90,7 +68,7 @@ namespace CadCat.GeometryModels
 
 		public virtual string GetName()
 		{
-			return ModelID.ToString();
+			return ModelId.ToString();
 		}
 
 		public virtual Matrix4 GetMatrix(bool overrideScale, Vector3 newScale)

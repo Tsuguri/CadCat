@@ -107,6 +107,8 @@
     <Compile Include="GeometryModels\BsplineInterpolator.cs" />
     <Compile Include="GeometryModels\ParametrizedModel.cs" />
     <Compile Include="GeometryModels\PointModel.cs" />
+    <Compile Include="GeometryModels\Surface.cs" />
+    <Compile Include="GeometryModels\Proxys\TempSurface.cs" />
     <Compile Include="Math\Plane.cs" />
     <Compile Include="ModelInterfaces\IChangeablePointCount.cs" />
     <Compile Include="GeometryModels\Model.cs" />
@@ -124,14 +126,10 @@
     <Compile Include="ModelInterfaces\Test.cs" />
     <Compile Include="Rendering\Camera.cs" />
     <Compile Include="Rendering\BaseRenderer.cs" />
-    <Compile Include="Rendering\Packets\RenderingPacket.cs" />
     <Compile Include="Rendering\RenderingContext.cs" />
     <Compile Include="Rendering\StandardRenderer.cs" />
     <Compile Include="Rendering\StereoscopicRender.cs" />
     <Compile Include="Tools\Cursor.cs" />
-    <Compile Include="UIControls\BezierPatchMessage.xaml.cs">
-      <DependentUpon>BezierPatchMessage.xaml</DependentUpon>
-    </Compile>
     <Compile Include="UIControls\LeftSideMenu.xaml.cs">
       <DependentUpon>LeftSideMenu.xaml</DependentUpon>
     </Compile>
@@ -176,10 +174,6 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="UIControls\BezierPatchMessage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="UIControls\LeftSideMenu.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

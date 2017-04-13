@@ -7,9 +7,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CadCat.UIControls"
              xmlns:models="clr-namespace:CadCat.GeometryModels"
+             xmlns:modelProxys="clr-namespace:CadCat.GeometryModels.Proxys"
              xmlns:control="clr-namespace:CadCat.UIControls"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <ResourceDictionary Source="MainWindowResources.xaml" />
+    </UserControl.Resources>
     <ScrollViewer>
         <StackPanel>
             <ContentControl Content="{Binding SelectedModel}">
@@ -105,19 +109,37 @@
                             </Button>
                         </Grid>
                     </DataTemplate>
-                    <DataTemplate DataType="{x:Type models:BezierPatch}">
+                    <DataTemplate DataType="{x:Type modelProxys:TempSurface}">
                         <Grid>
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="40"/>
+                                <RowDefinition Height="40"/>
+                                <RowDefinition Height="40"/>
                                 <RowDefinition Height="40"/>
                                 <RowDefinition Height="40"/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="60"/>
                                 <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <ToggleButton Grid.Column="0" Grid.Row="0" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
-                          ToolTip="MaterialDesignSwitchAccentToggleButton" IsChecked="{Binding ShowPolygon}" />
-                            <TextBlock VerticalAlignment="Center" Grid.Column="1" Grid.Row="0">Polygon Visible</TextBlock>
+
+                            <ComboBox ItemsSource="{Binding Source={StaticResource dataFromEnum}}" SelectedItem="{Binding Type}" />
+
+                            <TextBlock Text="Size" Grid.Row="2" Grid.Column="0" />
+                            <control:NumericSlider Grid.Column="1" Grid.Row="2" Value="{Binding Width}" IncrementMultiplier="0.1"  />
+                            <control:NumericSlider Grid.Column="2" Grid.Row="2" Value="{Binding Height}" IncrementMultiplier="0.1" />
+
+                            <TextBlock Text="Patches" Grid.Row="0" Grid.Column="0" />
+                            <control:NumericSlider Grid.Column="1" Grid.Row="0" Value="{Binding UDensity}"/>
+                            <control:NumericSlider Grid.Column="2" Grid.Row="0" Value="{Binding VDensity}"/>
+
+                            <ToggleButton Grid.Column="0" Grid.Row="3" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
+                                          ToolTip="MaterialDesignSwitchAccentToggleButton" IsChecked="{Binding Curved}" />
+                            <TextBlock VerticalAlignment="Center" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="3">Curved</TextBlock>
+
+                            <TextBlock Text="Curvature" Grid.Column="0"  Grid.Row="4" Visibility="{Binding Curved, Converter={StaticResource BoolToVis},Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <control:NumericSlider Value="{Binding CurvatureAngle}" Grid.Column="1" Grid.Row="4" Visibility="{Binding Curved, Converter={StaticResource BoolToVis},Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
                         </Grid>
                     </DataTemplate>
                 </ContentControl.Resources>
@@ -126,7 +148,7 @@
                 <ContentControl.Resources>
                     <DataTemplate DataType="{x:Type models:PointModel}">
                         <StackPanel>
-                            <TextBox TextAlignment="Center" Text="{Binding Name}" Grid.Row="0" Grid.Column="0" />
+                            <TextBox TextAlignment="Center" Text="{Binding Name}"/>
                             <ListView ItemsSource="{Binding Points}">
                                 <ListView.ItemTemplate>
                                     <DataTemplate>

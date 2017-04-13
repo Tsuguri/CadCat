@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
-using CadCat.DataStructures;
+﻿using CadCat.DataStructures;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
-using CadCat.Math;
 
 namespace CadCat.Rendering
 {

@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CadCat.DataStructures;
 using CadCat.Math;
 using System.Windows.Input;
@@ -107,7 +105,7 @@ namespace CadCat.GeometryModels
 			int current = 0;
 			var cameraMatrix = scene.ActiveCamera.ViewProjectionMatrix;
 
-			Action<int> GetSize = (y) =>
+			Action<int> getSize = (y) =>
 			 {
 				 var rectPts = pts.Skip(current).Take(y).Select(x => (cameraMatrix * new Vector4(x, 1.0)).ToNormalizedVector3()).ToList();
 				 var xMin = rectPts.Select(x => x.X).Min();
@@ -121,7 +119,7 @@ namespace CadCat.GeometryModels
 				 curveDivision = System.Math.Min(curveDivision, 500);
 			 };
 
-			Action<double> Berenstein4Points = (x) =>
+			Action<double> berenstein4Points = (x) =>
 			{
 				double x2 = x * x;
 				double x3 = x2 * x;
@@ -140,7 +138,7 @@ namespace CadCat.GeometryModels
 
 				curvePoints.Add(tempVec);
 			};
-			Action<double> Berenstein3Points = (x) =>
+			Action<double> berenstein3Points = (x) =>
 			{
 				double x2 = x * x;
 				double x11 = (1 - x);
@@ -165,10 +163,10 @@ namespace CadCat.GeometryModels
 				bp.p2 = pts[current + 2];
 				bp.p3 = pts[current + 3];
 
-				GetSize(4);
+				getSize(4);
 
 				for (int i = 0; i <= curveDivision; i++)
-					Berenstein4Points(i / (double)curveDivision);
+					berenstein4Points(i / (double)curveDivision);
 				current += 3;
 			}
 			if (current < max - 1)
@@ -179,10 +177,10 @@ namespace CadCat.GeometryModels
 					bp.p1 = pts[current + 1];
 					bp.p2 = pts[current + 2];
 
-					GetSize(3);
+					getSize(3);
 
 					for (int i = 0; i <= curveDivision; i++)
-						Berenstein3Points(i / (double)curveDivision);
+						berenstein3Points(i / (double)curveDivision);
 				}
 				else
 				{
@@ -218,7 +216,7 @@ namespace CadCat.GeometryModels
 
 		public virtual void RemovePoint(CatPoint point, bool removeDelegate)
 		{
-			var pt = points.Where((x) => x.Point == point).FirstOrDefault();
+			var pt = points.FirstOrDefault(x => x.Point == point);
 			if (pt != null)
 			{
 				RemovePoint(pt, removeDelegate);

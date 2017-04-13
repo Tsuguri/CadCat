@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CadCat.DataStructures;
+﻿using System.Collections.Generic;
+using CadCat.Rendering;
 
 namespace CadCat.GeometryModels
 {
-	using Rendering;
+
 	using Real = System.Double;
 	class Torus : ParametrizedModel
 	{
@@ -15,7 +11,7 @@ namespace CadCat.GeometryModels
 		private List<int> indices;
 		private List<Math.Vector3> points;
 
-		private bool modelReady = false;
+		private bool modelReady;
 
 		private Real bigRadius = 5.0;
 		private Real smallRadius = 1.0;
@@ -30,7 +26,7 @@ namespace CadCat.GeometryModels
 			}
 			set
 			{
-				if(bigRadius!=value)
+				if(System.Math.Abs(bigRadius - value) > Math.Utils.Eps)
 				{
 					bigRadius = value;
 					modelReady = false;
@@ -96,8 +92,8 @@ namespace CadCat.GeometryModels
 
 		private void GenerateModel(Real bigRadius, Real smallRadius, int bigAngleDensity, int smallAngleDensity)
 		{
-			Real bigStep = Math.Utils.PI * 2 / bigAngleDensity;
-			Real smallStep = Math.Utils.PI * 2 / smallAngleDensity;
+			Real bigStep = Math.Utils.Pi * 2 / bigAngleDensity;
+			Real smallStep = Math.Utils.Pi * 2 / smallAngleDensity;
 			points = new List<Math.Vector3>(bigAngleDensity * smallAngleDensity);
 			for (int i=0; i<bigAngleDensity;  i++)
 			{
@@ -136,10 +132,12 @@ namespace CadCat.GeometryModels
 
 		private Math.Vector3 CalculatePoint(Real bigAngle, Real smallAngle, Real bigRadius, Real smallRadius)
 		{
-			Math.Vector3 ret = new Math.Vector3();
-			ret.X = System.Math.Cos(bigAngle) * (bigRadius + smallRadius * System.Math.Cos(smallAngle));
-			ret.Y = System.Math.Sin(bigAngle) * (bigRadius + smallRadius * System.Math.Cos(smallAngle));
-			ret.Z = smallRadius * System.Math.Sin(smallAngle);
+			Math.Vector3 ret = new Math.Vector3
+			{
+				X = System.Math.Cos(bigAngle) * (bigRadius + smallRadius * System.Math.Cos(smallAngle)),
+				Y = System.Math.Sin(bigAngle) * (bigRadius + smallRadius * System.Math.Cos(smallAngle)),
+				Z = smallRadius * System.Math.Sin(smallAngle)
+			};
 			return ret;
 		}
 
@@ -151,7 +149,7 @@ namespace CadCat.GeometryModels
 			renderer.UseIndices = true;
 			renderer.Points = points;
 			renderer.Indices = indices;
-			renderer.ModelMatrix = transform.CreateTransformMatrix();
+			renderer.ModelMatrix = Transform.CreateTransformMatrix();
 			renderer.Transform();
 			renderer.DrawLines();
 		}

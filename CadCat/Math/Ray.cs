@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CadCat.Math
+﻿namespace CadCat.Math
 {
 	public struct Ray
 	{
@@ -14,8 +8,8 @@ namespace CadCat.Math
 
 		public Ray(Vector3 origin, Vector3 direction)
 		{
-			this.Origin = origin;
-			this.Direction = direction;
+			Origin = origin;
+			Direction = direction;
 		}
 
 		public Vector3 GetPoint(double distance)

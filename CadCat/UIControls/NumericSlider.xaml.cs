@@ -1,17 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace CadCat.UIControls
 {
@@ -38,11 +28,11 @@ namespace CadCat.UIControls
 
 		public double IncrementMultiplier
 		{
-			get { return (double)GetValue(MultiplierProperty); }
-			set { SetValue(MultiplierProperty, value); }
+			get { return (double)GetValue(IncrementMultiplierProperty); }
+			set { SetValue(IncrementMultiplierProperty, value); }
 		}
 
-		public static readonly DependencyProperty MultiplierProperty = DependencyProperty.Register(nameof(IncrementMultiplier), typeof(double), typeof(UserControl), new PropertyMetadata(1.0));
+		public static readonly DependencyProperty IncrementMultiplierProperty = DependencyProperty.Register(nameof(IncrementMultiplier), typeof(double), typeof(NumericSlider), new PropertyMetadata(1.0));
 
 		public double Increment
 		{
@@ -72,8 +62,8 @@ namespace CadCat.UIControls
 
 
 		private Point pressPoint;
-		private bool inRange = false;
-		private bool isMoving = false;
+		private bool inRange;
+		private bool isMoving;
 		private double startValue;
 
 		private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -113,7 +103,7 @@ namespace CadCat.UIControls
 
 			var diff = e.GetPosition(inputBox) - pressPoint;
 
-			int diffValue = (int)(diff.X / (double)Precision);
+			int diffValue = (int)(diff.X / Precision);
 
 			Value = startValue + diffValue * IncrementMultiplier;
 		}
@@ -130,16 +120,6 @@ namespace CadCat.UIControls
 
 			if (!inRange)
 				Cursor = Cursors.Arrow;
-		}
-
-		private void UpClick(object sender, RoutedEventArgs e)
-		{
-			Value += Increment;
-		}
-
-		private void DownClick(object sender, RoutedEventArgs e)
-		{
-			Value -= Increment;
 		}
 	}
 }

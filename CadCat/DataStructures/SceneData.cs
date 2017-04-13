@@ -1,20 +1,17 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using CadCat.Math;
 using CadCat.Rendering;
 using System.Windows.Input;
-using System.Windows.Controls;
 using CadCat.GeometryModels;
 using System.Collections.ObjectModel;
 using MaterialDesignThemes.Wpf;
 using CadCat.UIControls;
 using CadCat.ModelInterfaces;
 using System.Windows.Media;
+using CadCat.GeometryModels.Proxys;
+using CadCat.Utilities;
 
 namespace CadCat.DataStructures
 {
@@ -28,7 +25,7 @@ namespace CadCat.DataStructures
 
 		#endregion
 
-		private bool onMousePoint = false;
+		private bool onMousePoint;
 
 		public bool OnMousePoint
 		{
@@ -38,13 +35,12 @@ namespace CadCat.DataStructures
 			}
 			set
 			{
-				if (!value || (value && SelectedModel != null))
-				{
-					onMousePoint = value;
-					OnPropertyChanged();
-				}
+				if (value && SelectedModel == null) return;
+				onMousePoint = value;
+				OnPropertyChanged();
 			}
 		}
+
 		#region PropertiesAndFields
 
 		#region Rendering
@@ -54,17 +50,17 @@ namespace CadCat.DataStructures
 			get; set;
 		}
 
-		private BaseRenderer renderer = null;
+		private BaseRenderer currentRenderer;
 
-		public BaseRenderer Renderer
+		public BaseRenderer CurrentRenderer
 		{
 			get
 			{
-				return renderer;
+				return currentRenderer;
 			}
 			set
 			{
-				renderer = value;
+				currentRenderer = value;
 				OnPropertyChanged();
 			}
 		}
@@ -79,15 +75,15 @@ namespace CadCat.DataStructures
 
 		#region Models
 
-		private ObservableCollection<Model> models = new ObservableCollection<Model>();
-		public ObservableCollection<Model> Models { get { return models; } }
+		private readonly ObservableCollection<Model> models = new ObservableCollection<Model>();
+		public ObservableCollection<Model> Models => models;
 
-		private ObservableCollection<CatPoint> points = new ObservableCollection<CatPoint>();
-		public ObservableCollection<CatPoint> Points { get { return points; } }
+		private readonly ObservableCollection<CatPoint> points = new ObservableCollection<CatPoint>();
+		public ObservableCollection<CatPoint> Points => points;
 
 
-		private List<CatPoint> hiddenPoints = new List<CatPoint>();
-		private Model selectedModel = null;
+		private readonly List<CatPoint> hiddenPoints = new List<CatPoint>();
+		private Model selectedModel;
 
 		public Model SelectedModel
 		{
@@ -104,9 +100,9 @@ namespace CadCat.DataStructures
 			}
 		}
 
-		private CatPoint selectedPoint = null;
+		private CatPoint selectedPoint;
 
-		private bool isAnyPointSelected = false;
+		private bool isAnyPointSelected;
 
 		/// <summary>
 		/// For Point List View
@@ -139,15 +135,9 @@ namespace CadCat.DataStructures
 			}
 		}
 
-		private Tools.Cursor cursor;
+		private readonly Tools.Cursor cursor;
 
-		public Tools.Cursor Cursor
-		{
-			get
-			{
-				return cursor;
-			}
-		}
+		public Tools.Cursor Cursor => cursor;
 
 		#endregion
 
@@ -183,15 +173,9 @@ namespace CadCat.DataStructures
 
 		#region Commands
 
-		private ImageMouseController imageMouse;
+		private readonly ImageMouseController imageMouse;
 
-		public ImageMouseController ImageMouse
-		{
-			get
-			{
-				return imageMouse;
-			}
-		}
+		public ImageMouseController ImageMouse => imageMouse;
 
 		private ICommand createTorusCommand;
 		private ICommand createCubeCommand;
@@ -201,131 +185,56 @@ namespace CadCat.DataStructures
 		private ICommand createBezierPatchCommand;
 
 		private ICommand createPointCommand;
-		
+
 		private ICommand removeSelectedPointsCommand;
 		private ICommand selectPointsCommand;
 		private ICommand addSelectedPointToSelectedItemCommand;
 		private ICommand changeObjectTypeCommand;
+		private ICommand convertToPointsCommand;
 
 
 		private ICommand goToSelectedCommand;
 		private ICommand removeCommand;
 
-		public ICommand CreateTorusCommand
-		{
-			get
-			{
-				return createTorusCommand ?? (createTorusCommand = new Utilities.CommandHandler(CreateTorus));
-			}
-		}
+		public ICommand CreateTorusCommand => createTorusCommand ?? (createTorusCommand = new Utilities.CommandHandler(CreateTorus));
 
-		public ICommand CreateCubeCommand
-		{
-			get
-			{
-				return createCubeCommand ?? (createCubeCommand = new Utilities.CommandHandler(CreateCube));
-			}
-		}
+		public ICommand CreateCubeCommand => createCubeCommand ?? (createCubeCommand = new Utilities.CommandHandler(CreateCube));
 
-		public ICommand CreateBezierCommand
-		{
-			get
-			{
-				return createBezierCommand ?? (createBezierCommand = new Utilities.CommandHandler(CreateBezier));
-			}
-		}
+		public ICommand CreateBezierCommand => createBezierCommand ?? (createBezierCommand = new Utilities.CommandHandler(CreateBezier));
 
-		public ICommand CreateBezierC2Command
-		{
-			get
-			{
-				return createBezierC2Command ?? (createBezierC2Command = new Utilities.CommandHandler(CreateBezierC2));
-			}
-		}
+		public ICommand CreateBezierC2Command => createBezierC2Command ?? (createBezierC2Command = new Utilities.CommandHandler(CreateBezierC2));
 
-		public ICommand CreateBSplineInterpolatorCommand
-		{
-			get
-			{
-				return createBSplineInterpolatorCommand ?? (createBSplineInterpolatorCommand = new Utilities.CommandHandler(CreateBSplineInterpolator));
-			}
-		}
+		public ICommand CreateBSplineInterpolatorCommand => createBSplineInterpolatorCommand ?? (createBSplineInterpolatorCommand = new Utilities.CommandHandler(CreateBSplineInterpolator));
 
-		public ICommand CreateBezierPatchCommand
-		{
-			get
-			{
-				return createBezierPatchCommand ?? (createBezierPatchCommand = new Utilities.CommandHandler(CreateBezierPatch));
-			}
-		}
+		public ICommand CreateBezierPatchCommand => createBezierPatchCommand ?? (createBezierPatchCommand = new Utilities.CommandHandler(CreateBezierPatch));
 
-		public ICommand CreatePointCommand
-		{
-			get
-			{
-				return createPointCommand ?? (createPointCommand = new Utilities.CommandHandler(CreatePoint));
-			}
-		}
+		public ICommand CreatePointCommand => createPointCommand ?? (createPointCommand = new Utilities.CommandHandler(CreatePoint));
 
-		public ICommand GoToSelectedCommand
-		{
-			get
-			{
-				return goToSelectedCommand ?? (goToSelectedCommand = new Utilities.CommandHandler(GoToSelected));
-			}
-		}
+		public ICommand GoToSelectedCommand => goToSelectedCommand ?? (goToSelectedCommand = new Utilities.CommandHandler(GoToSelected));
 
-		public ICommand RemoveCommand
-		{
-			get
-			{
-				return removeCommand ?? (removeCommand = new Utilities.CommandHandler(RemoveSelected));
-			}
-		}
+		public ICommand RemoveCommand => removeCommand ?? (removeCommand = new Utilities.CommandHandler(RemoveSelected));
 
-		public ICommand RemoveSelectedPointsCommand
-		{
-			get
-			{
-				return removeSelectedPointsCommand ?? (removeSelectedPointsCommand = new Utilities.CommandHandler(RemoveSelectedPoints));
-			}
-		}
+		public ICommand RemoveSelectedPointsCommand => removeSelectedPointsCommand ?? (removeSelectedPointsCommand = new Utilities.CommandHandler(RemoveSelectedPoints));
 
-		public ICommand SelectPointsCommand
-		{
-			get
-			{
-				return selectPointsCommand ?? (selectPointsCommand = new Utilities.CommandHandler(SelectPoints));
-			}
-		}
+		public ICommand SelectPointsCommand => selectPointsCommand ?? (selectPointsCommand = new Utilities.CommandHandler(SelectPoints));
 
-		public ICommand AddSelectedPointToSelectedItemCommand
-		{
-			get
-			{
-				return addSelectedPointToSelectedItemCommand ?? (addSelectedPointToSelectedItemCommand = new Utilities.CommandHandler(AddSelectedPointToSelectedItem));
-			}
-		}
+		public ICommand AddSelectedPointToSelectedItemCommand => addSelectedPointToSelectedItemCommand ?? (addSelectedPointToSelectedItemCommand = new Utilities.CommandHandler(AddSelectedPointToSelectedItem));
 
-		public ICommand ChangeObjectTypeCommand
-		{
-			get
-			{
-				return changeObjectTypeCommand ?? (changeObjectTypeCommand = new Utilities.CommandHandler(ChangeObjectType));
-			}
-		}
+		public ICommand ChangeObjectTypeCommand => changeObjectTypeCommand ?? (changeObjectTypeCommand = new Utilities.CommandHandler(ChangeObjectType));
 
+		public ICommand ConvertToPointsCommand => convertToPointsCommand ??
+												  (convertToPointsCommand = new CommandHandler(ConvertToPoints));
 		#endregion
 
 		#region CreatingModels
 
 		private void AddNewParametrizedModel(ParametrizedModel model)
 		{
-			model.transform.Position = ActiveCamera.LookingAt;
+			model.Transform.Position = ActiveCamera.LookingAt;
 			AddNewModel(model);
 		}
 
-		private void AddNewModel(Model model)
+		public void AddNewModel(Model model)
 		{
 			models.Add(model);
 			SelectedModel = model;
@@ -349,7 +258,7 @@ namespace CadCat.DataStructures
 				{
 					Message = { Text = "Not enough points for Bezier Curve (at least 1)." }
 				};
-				
+
 
 				DialogHost.Show(sampleMessageDialog, "RootDialog");
 			}
@@ -399,29 +308,12 @@ namespace CadCat.DataStructures
 
 		private void CreateBezierPatch()
 		{
-			MainWindow window = new MainWindow();
-			window.Closed += Window_Closed;//to change
-			window.WindowStyle = WindowStyle.ToolWindow;
-			window.ResizeMode = ResizeMode.NoResize;
-			window.Title = "New Patch";
-			window.Width = 200;
-			window.Height = 300;
-			window.Content = new BezierPatchMessage();
-			window.Show();
-		}
-
-		private void Window_Closed(object sender, EventArgs e)
-		{
-			throw new NotImplementedException();
+			AddNewModel(new TempSurface());
 		}
 
 		private void CreatePoint()
 		{
-			Vector3 pos;
-			if (Cursor.Visible)
-				pos = Cursor.transform.Position;
-			else
-				pos = ActiveCamera.LookingAt;
+			var pos = Cursor.Visible ? Cursor.Transform.Position : ActiveCamera.LookingAt;
 			CreatePoint(pos);
 		}
 
@@ -435,7 +327,7 @@ namespace CadCat.DataStructures
 				var selected = Models.Where(x => x.IsSelected).ToList();
 				if (selected.Count > 0 && selected[0] is IChangeablePointCount)
 				{
-					var p = selected[0] as IChangeablePointCount;
+					var p = (IChangeablePointCount)selected[0];
 					p.AddPoint(point);
 				}
 			}
@@ -476,7 +368,6 @@ namespace CadCat.DataStructures
 		{
 			imageMouse = new ImageMouseController(this);
 			cursor = new Tools.Cursor(this);
-			AddNewModel(new BezierPatch(this));
 		}
 
 		public IEnumerable<CatPoint> GetPoints()
@@ -493,14 +384,14 @@ namespace CadCat.DataStructures
 			}
 			renderer.UseIndices = false;
 			renderer.ModelMatrix = Matrix4.CreateIdentity();
-			var points = new List<Vector3>(1);
-			points.Insert(0, new Vector3());
-			renderer.Points = points;
+			var renderingPoints = new List<Vector3>(1);
+			renderingPoints.Insert(0, new Vector3());
+			renderer.Points = renderingPoints;
 			foreach (var point in Points)
 			{
 				if (!point.Visible)
 					continue;
-				points[0] = point.Position;
+				renderingPoints[0] = point.Position;
 				renderer.SelectedColor = point.IsSelected ? Colors.LimeGreen : Colors.White;
 				renderer.Transform();
 				renderer.DrawPoints();
@@ -511,7 +402,7 @@ namespace CadCat.DataStructures
 				{
 					if (!point.Visible)
 						continue;
-					points[0] = point.Position;
+					renderingPoints[0] = point.Position;
 					renderer.SelectedColor = point.IsSelected ? Colors.LimeGreen : Colors.White;
 					renderer.Transform();
 					renderer.DrawPoints();
@@ -524,6 +415,7 @@ namespace CadCat.DataStructures
 		internal void UpdateFrameData()
 		{
 			var delta = Delta;
+			// ReSharper disable once CompareOfFloatsByEqualityOperator
 			if (delta.X != -1 && delta.Length > 0.001 && Mouse.LeftButton == MouseButtonState.Pressed && imageMouse.ClickedOnImage)
 			{
 				switch (dragMode)
@@ -541,12 +433,13 @@ namespace CadCat.DataStructures
 
 						break;
 					case MouseDragMode.CursorMove:
-						Cursor.transform.Position += (ActiveCamera.UpVector * delta.Y * 0.05 + ActiveCamera.RightVector * delta.X * 0.05);
+						Cursor.Transform.Position += (ActiveCamera.UpVector * delta.Y * 0.05 + ActiveCamera.RightVector * delta.X * 0.05);
 						Cursor.InvalidateAll();
 						break;
 					case MouseDragMode.PointMove:
 
-						var cameraRay = ActiveCamera.GetViewRay(new Math.Vector2(mousePosition.X / ScreenSize.X, mousePosition.Y / ScreenSize.Y) * 2 - 1);
+						var cameraRay = ActiveCamera.GetViewRay(new Vector2(mousePosition.X / ScreenSize.X, mousePosition.Y / ScreenSize.Y) * 2 - 1);
+						// ReSharper disable once TooWideLocalVariableScope
 						double distance;
 						if (pointPlane != null && pointPlane.RayIntersection(cameraRay, out distance))
 						{
@@ -558,11 +451,9 @@ namespace CadCat.DataStructures
 					case MouseDragMode.None:
 						ActiveCamera.Move(delta.X, delta.Y);
 						break;
-					default:
-						break;
 				}
 			}
-			var pos = (ActiveCamera.ViewProjectionMatrix * new Vector4(Cursor.transform.Position, 1.0)).ToNormalizedVector3();
+			var pos = (ActiveCamera.ViewProjectionMatrix * new Vector4(Cursor.Transform.Position)).ToNormalizedVector3();
 			Cursor.ScreenPosX = pos.X;
 			cursor.ScreenPosY = pos.Y;
 
@@ -579,8 +470,8 @@ namespace CadCat.DataStructures
 
 		}
 		private MouseDragMode dragMode = MouseDragMode.None;
-		private CatPoint draggedPoint = null;
-		private Plane pointPlane = null;
+		private CatPoint draggedPoint;
+		private Plane pointPlane;
 
 
 		public void OnLeftMousePressed(Vector2 mousePos)
@@ -622,7 +513,7 @@ namespace CadCat.DataStructures
 			{
 				if (!point.Visible)
 					continue;
-				var pt = (cameraMatrix * new Vector4(point.Position, 1.0)).ToNormalizedVector3();
+				var pt = (cameraMatrix * new Vector4(point.Position)).ToNormalizedVector3();
 				var dt = new Vector2(pt.X, pt.Y) * ScreenSize - pos;
 				var distance = dt.Length();
 				if (distance < 8)
@@ -653,7 +544,6 @@ namespace CadCat.DataStructures
 		internal void SceneClicked(Vector2 position)
 		{
 
-			var pos = ActiveCamera.GetScreenPointOnViewPlane(position);
 
 			if (!OnMousePoint)
 			{
@@ -663,9 +553,9 @@ namespace CadCat.DataStructures
 					if (!Keyboard.IsKeyDown(Key.LeftCtrl))
 					{
 						var list = Points.Where(x => x.IsSelected).ToList();
-						foreach (var selectedPoint in list)
+						foreach (var point in list)
 						{
-							selectedPoint.IsSelected = false;
+							point.IsSelected = false;
 						}
 
 					}
@@ -677,28 +567,29 @@ namespace CadCat.DataStructures
 				var newPointPos = ActiveCamera.GetScreenPointOnViewPlane(position);
 				CreatePoint(newPointPos);
 			}
-
-
-
 		}
 
 		private void GoToSelected()
 		{
-			if (SelectedModel != null)
-			{
-				// TODO: ActiveCamera.LookingAt = SelectedModel.transform.Position;
-			}
+			var model = SelectedModel as ParametrizedModel;
+			if(model != null)
+				ActiveCamera.LookingAt = model.Transform.Position;
 		}
 
 		private void RemoveSelected()
 		{
 			if (SelectedModel != null)
 			{
-				SelectedModel.CleanUp();
-				models.Remove(SelectedModel);
-
+				RemoveModel(SelectedModel);
 				SelectedModel = null;
 			}
+		}
+
+		public void RemoveModel(Model model)
+		{
+			model.CleanUp();
+			models.Remove(model);
+
 		}
 
 		private void RemoveSelectedPoints()
@@ -727,9 +618,10 @@ namespace CadCat.DataStructures
 
 		private void AddSelectedPointToSelectedItem()
 		{
-			if ((SelectedModel is IChangeablePointCount))
+			var count = SelectedModel as IChangeablePointCount;
+			if (count != null)
 			{
-				var mod = SelectedModel as IChangeablePointCount;
+				var mod = count;
 				foreach (var point in GetFilteredSelected())
 				{
 					mod.AddPoint(point);
@@ -741,6 +633,14 @@ namespace CadCat.DataStructures
 		{
 			var mod = SelectedModel as ITypeChangeable;
 			mod?.ChangeType();
+		}
+
+		private void ConvertToPoints()
+		{
+			var mod = SelectedModel as IConvertibleToPoints;
+			mod?.Convert(this);
+
+
 		}
 	}
 }

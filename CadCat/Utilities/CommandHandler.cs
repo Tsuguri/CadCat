@@ -1,44 +1,40 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace CadCat.Utilities
 {
 	public class CommandHandler : ICommand
 	{
-		private Action _action;
-		private bool _canExecute;
+		private readonly Action action;
+		private readonly bool canExecute;
 		public CommandHandler(Action action, bool canExecute = true)
 		{
-			_action = action;
-			_canExecute = canExecute;
+			this.action = action;
+			this.canExecute = canExecute;
 		}
 
 		public bool CanExecute(object parameter)
 		{
-			return _canExecute;
+			return canExecute;
 		}
 
 		public event EventHandler CanExecuteChanged;
 
 		public void Execute(object parameter)
 		{
-			_action();
+			action();
 		}
 	}
 
 	class RelayCommand : ICommand
 	{
-		private Action _action;
-		private Func<bool> _func;
+		private readonly Action action;
+		private readonly Func<bool> func;
 
 		public RelayCommand(Action action, Func<bool> func)
 		{
-			_action = action;
-			_func = func;
+			this.action = action;
+			this.func = func;
 		}
 
 		public void RaiseCanExecuteChanged()
@@ -50,8 +46,8 @@ namespace CadCat.Utilities
 
 		public bool CanExecute(object parameter)
 		{
-			if (_func != null)
-				return _func();
+			if (func != null)
+				return func();
 			return true;
 		}
 
@@ -61,7 +57,7 @@ namespace CadCat.Utilities
 
 		public void Execute(object parameter)
 		{
-			_action();
+			action();
 		}
 
 		#endregion

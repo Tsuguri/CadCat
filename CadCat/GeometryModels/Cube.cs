@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CadCat.DataStructures;
+﻿using System.Collections.Generic;
 using CadCat.Rendering;
 
 namespace CadCat.GeometryModels
@@ -74,7 +69,7 @@ namespace CadCat.GeometryModels
 			renderer.UseIndices = true;
 			renderer.Points = points;
 			renderer.Indices = indices;
-			renderer.ModelMatrix = transform.CreateTransformMatrix();
+			renderer.ModelMatrix = Transform.CreateTransformMatrix();
 			renderer.Transform();
 			renderer.DrawLines();
 		}

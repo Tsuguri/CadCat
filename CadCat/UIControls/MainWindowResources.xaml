@@ -9,4 +9,5 @@
             <x:Type TypeName="rend:RendererType"/>
         </ObjectDataProvider.MethodParameters>
     </ObjectDataProvider>
+    <BooleanToVisibilityConverter x:Key="BoolToVis" />
 </ResourceDictionary>

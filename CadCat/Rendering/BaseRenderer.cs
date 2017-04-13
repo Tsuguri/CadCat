@@ -1,10 +1,7 @@
 ﻿using CadCat.DataStructures;
 using CadCat.Math;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -26,9 +23,9 @@ namespace CadCat.Rendering
 		protected int width, height;
 
 
-		public virtual void Resize(double width, double height)
+		public virtual void Resize(double newWidth, double newHeight)
 		{
-			bufferBitmap = new WriteableBitmap((int)width, (int)height, 96, 96, PixelFormats.Pbgra32, null);
+			bufferBitmap = new WriteableBitmap((int)newWidth, (int)newHeight, 96, 96, PixelFormats.Pbgra32, null);
 			targetImage.Source = bufferBitmap;
 		}
 

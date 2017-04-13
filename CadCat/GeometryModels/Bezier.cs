@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CadCat.DataStructures;
-using CadCat.Math;
-using CadCat.ModelInterfaces;
-using System.Windows.Input;
 using CadCat.Rendering;
 
 namespace CadCat.GeometryModels

@@ -63,6 +63,11 @@
                         <materialDesign:PackIcon Kind="AccountConvert" />
                     </Button>
                 </DataTemplate>
+                <DataTemplate x:Key="ConvertibleToPoints">
+                    <Button ToolTip="Convert to points"  DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorLevel=1, AncestorType=ItemsControl}}" Command="{Binding ConvertToPointsCommand}">
+                        <materialDesign:PackIcon Kind="AccountConvert" />
+                    </Button>
+                </DataTemplate>
                 <DataTemplate x:Key="Default"></DataTemplate>
             </ItemsControl.Resources>
         </ItemsControl>

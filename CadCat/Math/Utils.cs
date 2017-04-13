@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
 
 namespace CadCat.Math
@@ -13,30 +10,19 @@ namespace CadCat.Math
 		/// <summary>
 		/// Math constant: PI ~= 3.14
 		/// </summary>
-		public static Real PI
-		{
-			get
-			{
-				return System.Math.PI;
-			}
-		}
+		public static Real Pi => System.Math.PI;
+
 		public static Real DegToRad(Real deg)
 		{
-			return deg / 180.0 * PI;
+			return deg / 180.0 * Pi;
 		}
 
 		public static Real RadToDeg(Real rad)
 		{
-			return rad / PI * 180.0;
+			return rad / Pi * 180.0;
 		}
 
-		public static Real Eps
-		{
-			get
-			{
-				return 0.00001;
-			}
-		}
+		public static Real Eps => 0.00001;
 
 		public static List<Vector3> SolveMultidiagonalMatrixEquation(Real[] underDiagonal, Real[] diagonal, Real[] overDiagonal, Vector3[] results)
 		{

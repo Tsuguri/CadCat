@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CadCat.GeometryModels
 {
@@ -10,22 +6,22 @@ namespace CadCat.GeometryModels
 	using Real = Double;
 	public class ParametrizedModel : Model
 	{
-		public DataStructures.SpatialData.Transform transform;
+		public DataStructures.SpatialData.Transform Transform;
 
 		public ParametrizedModel()
 		{
-			transform = new DataStructures.SpatialData.Transform();
+			Transform = new DataStructures.SpatialData.Transform();
 
 		}
 		public Real TrPosX
 		{
 			get
 			{
-				return transform.Position.X;
+				return Transform.Position.X;
 			}
 			set
 			{
-				transform.Position.X = value;
+				Transform.Position.X = value;
 				PositionChanged();
 				OnPropertyChanged();
 			}
@@ -34,11 +30,11 @@ namespace CadCat.GeometryModels
 		{
 			get
 			{
-				return transform.Position.Y;
+				return Transform.Position.Y;
 			}
 			set
 			{
-				transform.Position.Y = value;
+				Transform.Position.Y = value;
 				PositionChanged();
 				OnPropertyChanged();
 			}
@@ -47,11 +43,11 @@ namespace CadCat.GeometryModels
 		{
 			get
 			{
-				return transform.Position.Z;
+				return Transform.Position.Z;
 			}
 			set
 			{
-				transform.Position.Z = value;
+				Transform.Position.Z = value;
 				PositionChanged();
 				OnPropertyChanged();
 			}
@@ -61,7 +57,7 @@ namespace CadCat.GeometryModels
 		{
 			get
 			{
-				return Math.Utils.RadToDeg(transform.Rotation.X);
+				return Utils.RadToDeg(Transform.Rotation.X);
 			}
 			set
 			{
@@ -70,7 +66,7 @@ namespace CadCat.GeometryModels
 					deg -= 360.0;
 				if (deg < 0)
 					deg += 360.0;
-				transform.Rotation.X = Math.Utils.DegToRad(deg);
+				Transform.Rotation.X = Utils.DegToRad(deg);
 				OnPropertyChanged();
 			}
 		}
@@ -78,7 +74,7 @@ namespace CadCat.GeometryModels
 		{
 			get
 			{
-				return Math.Utils.RadToDeg(transform.Rotation.Y);
+				return Utils.RadToDeg(Transform.Rotation.Y);
 			}
 			set
 			{
@@ -87,7 +83,7 @@ namespace CadCat.GeometryModels
 					deg -= 360.0;
 				if (deg < 0)
 					deg += 360.0;
-				transform.Rotation.Y = Math.Utils.DegToRad(deg);
+				Transform.Rotation.Y = Utils.DegToRad(deg);
 				OnPropertyChanged();
 			}
 		}
@@ -95,7 +91,7 @@ namespace CadCat.GeometryModels
 		{
 			get
 			{
-				return Math.Utils.RadToDeg(transform.Rotation.Z);
+				return Utils.RadToDeg(Transform.Rotation.Z);
 			}
 			set
 			{
@@ -104,7 +100,7 @@ namespace CadCat.GeometryModels
 					deg -= 360.0;
 				if (deg < 0)
 					deg += 360.0;
-				transform.Rotation.Z = Math.Utils.DegToRad(deg);
+				Transform.Rotation.Z = Utils.DegToRad(deg);
 				OnPropertyChanged();
 			}
 		}
@@ -113,11 +109,11 @@ namespace CadCat.GeometryModels
 		{
 			get
 			{
-				return transform.Scale.X;
+				return Transform.Scale.X;
 			}
 			set
 			{
-				transform.Scale.X = value;
+				Transform.Scale.X = value;
 				OnPropertyChanged();
 			}
 		}
@@ -125,11 +121,11 @@ namespace CadCat.GeometryModels
 		{
 			get
 			{
-				return transform.Scale.Y;
+				return Transform.Scale.Y;
 			}
 			set
 			{
-				transform.Scale.Y = value;
+				Transform.Scale.Y = value;
 				OnPropertyChanged();
 			}
 		}
@@ -137,11 +133,11 @@ namespace CadCat.GeometryModels
 		{
 			get
 			{
-				return transform.Scale.Z;
+				return Transform.Scale.Z;
 			}
 			set
 			{
-				transform.Scale.Z = value;
+				Transform.Scale.Z = value;
 				OnPropertyChanged();
 			}
 		}
@@ -177,7 +173,7 @@ namespace CadCat.GeometryModels
 
 		public override Matrix4 GetMatrix(bool overrideScale, Vector3 newScale)
 		{
-			return transform.CreateTransformMatrix(overrideScale, newScale);
+			return Transform.CreateTransformMatrix(overrideScale, newScale);
 		}
 
 		protected virtual void PositionChanged()

@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+// ReSharper disable RedundantArgumentDefaultValue
 
 namespace CadCat.Math
 {
-	using Real = System.Double;
+	using Real = Double;
 
 	public class Matrix4
 	{
@@ -291,11 +288,13 @@ namespace CadCat.Math
 
 		public static Vector4 operator *(Matrix4 mat, Vector4 vec)
 		{
-			var result = new Vector4();
-			result.X = mat.m11 * vec.X + mat.m12 * vec.Y + mat.m13 * vec.Z + mat.m14 * vec.W;
-			result.Y = mat.m21 * vec.X + mat.m22 * vec.Y + mat.m23 * vec.Z + mat.m24 * vec.W;
-			result.Z = mat.m31 * vec.X + mat.m32 * vec.Y + mat.m33 * vec.Z + mat.m34 * vec.W;
-			result.W = mat.m41 * vec.X + mat.m42 * vec.Y + mat.m43 * vec.Z + mat.m44 * vec.W;
+			var result = new Vector4
+			{
+				X = mat.m11 * vec.X + mat.m12 * vec.Y + mat.m13 * vec.Z + mat.m14 * vec.W,
+				Y = mat.m21 * vec.X + mat.m22 * vec.Y + mat.m23 * vec.Z + mat.m24 * vec.W,
+				Z = mat.m31 * vec.X + mat.m32 * vec.Y + mat.m33 * vec.Z + mat.m34 * vec.W,
+				W = mat.m41 * vec.X + mat.m42 * vec.Y + mat.m43 * vec.Z + mat.m44 * vec.W
+			};
 			return result;
 		}
 
@@ -307,10 +306,12 @@ namespace CadCat.Math
 		/// <returns></returns>
 		public static Vector3 operator *(Matrix4 mat, Vector3 vec)
 		{
-			var result = new Vector3();
-			result.X = mat.m11 * vec.X + mat.m12 * vec.Y + mat.m13 * vec.Z + mat.m14;
-			result.Y = mat.m21 * vec.X + mat.m22 * vec.Y + mat.m23 * vec.Z + mat.m24;
-			result.Z = mat.m31 * vec.X + mat.m32 * vec.Y + mat.m33 * vec.Z + mat.m34;
+			var result = new Vector3
+			{
+				X = mat.m11 * vec.X + mat.m12 * vec.Y + mat.m13 * vec.Z + mat.m14,
+				Y = mat.m21 * vec.X + mat.m22 * vec.Y + mat.m23 * vec.Z + mat.m24,
+				Z = mat.m31 * vec.X + mat.m32 * vec.Y + mat.m33 * vec.Z + mat.m34
+			};
 			return result;
 		}
 		public static Matrix4 operator *(Matrix4 mat, Real scalar)
@@ -488,7 +489,7 @@ namespace CadCat.Math
 
 			Real det = m11 * tmp1 + m12 * tmp2 + m13 * tmp3 + m14 * tmp4;
 
-			if (det == 0.0)
+			if (System.Math.Abs(det) < Utils.Eps)
 				return new Matrix4();
 
 			Real invdet = 1.0 / det;

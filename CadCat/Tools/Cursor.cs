@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CadCat.DataStructures;
-using CadCat.Rendering.Packets;
 using System.Windows.Input;
-using CadCat.DataStructures.SpatialData;
 using CadCat.Rendering;
+// ReSharper disable RedundantArgumentDefaultValue
 
 namespace CadCat.Tools
 {
@@ -27,10 +24,10 @@ namespace CadCat.Tools
 	}
 	public class Cursor : GeometryModels.ParametrizedModel
 	{
-		SceneData scene;
-		private List<Math.Vector3> points;
-		private List<int> indices;
-		private bool visible = false;
+		readonly SceneData scene;
+		private readonly List<Math.Vector3> points;
+		private readonly List<int> indices;
+		private bool visible;
 		public bool Visible
 		{
 			get
@@ -83,30 +80,11 @@ namespace CadCat.Tools
 		private ICommand centerCommand;
 		private ICommand releaseCommand;
 
-		public ICommand CatchCommand
-		{
-			get
-			{
-				return catchCommand ?? (catchCommand = new Utilities.CommandHandler(Catch));
-			}
-		}
+		public ICommand CatchCommand => catchCommand ?? (catchCommand = new Utilities.CommandHandler(Catch));
 
-		public ICommand CenterCommand
-		{
-			get
-			{
-				return centerCommand ?? (centerCommand = new Utilities.CommandHandler(Center));
-			}
-		}
+		public ICommand CenterCommand => centerCommand ?? (centerCommand = new Utilities.CommandHandler(Center));
 
-		public ICommand ReleaseCommand
-		{
-			get
-			{
-				return releaseCommand ?? (releaseCommand = new Utilities.CommandHandler(Release));
-			}
-		}
-
+		public ICommand ReleaseCommand => releaseCommand ?? (releaseCommand = new Utilities.CommandHandler(Release));
 
 
 		public Cursor(SceneData data)
@@ -131,9 +109,9 @@ namespace CadCat.Tools
 			{
 				var pts = scene.Points.Where(x => x.IsSelected).ToList();
 				var pos = pts.Select(x => x.Position).Sum();
-				pos = pos / pts.Count();
-				transform.Position = pos;
-				catchedPoints = pts.Select(x => new Tuple<CatPoint, Math.Vector3>(x, x.Position - transform.Position)).ToList();
+				pos = pos / pts.Count;
+				Transform.Position = pos;
+				catchedPoints = pts.Select(x => new Tuple<CatPoint, Math.Vector3>(x, x.Position - Transform.Position)).ToList();
 
 				InvalidatePosition();
 
@@ -142,7 +120,7 @@ namespace CadCat.Tools
 
 		private void Center()
 		{
-			scene.ActiveCamera.LookingAt = this.transform.Position;
+			scene.ActiveCamera.LookingAt = Transform.Position;
 		}
 
 		private void Release()
@@ -155,9 +133,9 @@ namespace CadCat.Tools
 			if (!Visible)
 				return;
 			base.Render(renderer);
-			var cursorScale = (transform.Position - scene.ActiveCamera.CameraPosition).Length() / 10;
+			var cursorScale = (Transform.Position - scene.ActiveCamera.CameraPosition).Length() / 10;
 
-			renderer.ModelMatrix = transform.CreateTransformMatrix(true, new Math.Vector3(cursorScale, cursorScale, cursorScale));
+			renderer.ModelMatrix = Transform.CreateTransformMatrix(true, new Math.Vector3(cursorScale, cursorScale, cursorScale));
 			renderer.Points = points;
 			renderer.Indices = indices;
 			renderer.UseIndices = true;
@@ -172,7 +150,7 @@ namespace CadCat.Tools
 			if (catchedPoints != null)
 				foreach (var point in catchedPoints)
 				{
-					var pos = point.Item2 + transform.Position;
+					var pos = point.Item2 + Transform.Position;
 					point.Item1.X = pos.X;
 					point.Item1.Y = pos.Y;
 					point.Item1.Z = pos.Z;

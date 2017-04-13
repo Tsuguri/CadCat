@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
 using CadCat.Rendering;
 using System.Windows.Media;
@@ -74,7 +72,7 @@ namespace CadCat.GeometryModels
 			for (int i = 0; i < 4; i++)
 				for (int j = 0; j < 4; j++)
 				{
-					var pt = scene.CreateHiddenCatPoint(new Math.Vector3(i, System.Math.Sin(Math.Utils.PI * (i * 0.5 + j * 0.1) / 2.0), j));
+					var pt = scene.CreateHiddenCatPoint(new Math.Vector3(i, System.Math.Sin(Math.Utils.Pi * (i * 0.5 + j * 0.1) / 2.0), j));
 					points[i * 4 + j] = pt;
 					pt.OnChanged += OnBezierPointChanged;
 				}
@@ -82,12 +80,18 @@ namespace CadCat.GeometryModels
 			owner = true;
 		}
 
-		public BezierPatch(CatPoint[,] points)
+		public BezierPatch(CatPoint[,] pts)
 		{
 			Debug.Assert(points.Length == 16);
-			Debug.Assert(points.GetLength(0) == 4);
 
-			throw new NotImplementedException();
+			for (int i = 0; i < 4; i++)
+				for (int j = 0; j < 4; j++)
+				{
+					points[i * 4 + j] = pts[i,j];
+					pts[i,j].OnChanged += OnBezierPointChanged;
+				}
+			changed = true;
+			owner = false;
 		}
 
 		private void OnBezierPointChanged(CatPoint point)
@@ -130,8 +134,8 @@ namespace CadCat.GeometryModels
 			mesh.Clear();
 			mesh.Capacity = System.Math.Max(mesh.Capacity, WidthDiv * HeightDiv);
 			meshIndices.Clear();
-			double widthStep = 1.0 / (WidthDiv-1);
-			double heightStep = 1.0 / (HeightDiv-1);
+			double widthStep = 1.0 / (WidthDiv - 1);
+			double heightStep = 1.0 / (HeightDiv - 1);
 
 			for (int i = 0; i < WidthDiv; i++)
 				for (int j = 0; j < HeightDiv; j++)
@@ -147,15 +151,15 @@ namespace CadCat.GeometryModels
 					meshIndices.Add(i * WidthDiv + j);
 					meshIndices.Add((i + 1) * WidthDiv + j);
 				}
-			for(int i=0;i<WidthDiv-1;i++)
+			for (int i = 0; i < WidthDiv - 1; i++)
 			{
 				meshIndices.Add(WidthDiv * (i + 1) - 1);
 				meshIndices.Add(WidthDiv * (i + 2) - 1);
 			}
-			for(int j=0; j<HeightDiv-1;j++)
+			for (int j = 0; j < HeightDiv - 1; j++)
 			{
-				meshIndices.Add((HeightDiv-1)*WidthDiv+j);
-				meshIndices.Add((HeightDiv - 1) * WidthDiv + j+1);
+				meshIndices.Add((HeightDiv - 1) * WidthDiv + j);
+				meshIndices.Add((HeightDiv - 1) * WidthDiv + j + 1);
 			}
 			changed = false;
 		}
@@ -217,13 +221,18 @@ namespace CadCat.GeometryModels
 		public override void CleanUp()
 		{
 			base.CleanUp();
-			if(owner)
+			if (owner)
 			{
 				foreach (var pt in points)
 				{
 					scene.RemovePoint(pt);
 				}
 			}
+		}
+
+		public override string GetName()
+		{
+			return "Bezier patch "+base.GetName();
 		}
 	}
 }

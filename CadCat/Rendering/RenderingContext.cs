@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using CadCat.DataStructures;
-using CadCat.Math;
 
 namespace CadCat.Rendering
 {
@@ -21,11 +14,10 @@ namespace CadCat.Rendering
 	{
 		Point imageSize;
 		RendererType rendererType;
-		private SceneData Scene;
-		private Image targetImage;
+		private readonly SceneData scene;
+		private readonly Image targetImage;
 		private BaseRenderer renderer = new StandardRenderer();
-		//private Image targetImage;
-		DrawingVisual visual = new DrawingVisual();
+
 		public int Thickness
 		{
 			get;
@@ -46,7 +38,7 @@ namespace CadCat.Rendering
 			targetImage = image;
 			rendererType = lineData.RenderingMode;
 			renderer.SetImageContent(image);
-			Scene = lineData;
+			scene = lineData;
 			Thickness = 1;
 			SelectedItemThickness = 3;
 			LineColor = Colors.Gold;
@@ -54,9 +46,9 @@ namespace CadCat.Rendering
 
 		public void UpdatePoints()
 		{
-			if(Scene.RenderingMode!=rendererType)
+			if(scene.RenderingMode!=rendererType)
 			{
-				switch (Scene.RenderingMode)
+				switch (scene.RenderingMode)
 				{
 					case RendererType.Standard:
 						renderer = new StandardRenderer();
@@ -70,15 +62,15 @@ namespace CadCat.Rendering
 				}
 				renderer.SetImageContent(targetImage);
 				renderer.Resize(imageSize.X, imageSize.Y);
-				rendererType = Scene.RenderingMode;
-				Scene.Renderer = renderer;
+				rendererType = scene.RenderingMode;
+				scene.CurrentRenderer = renderer;
 			}
 
-			renderer.BeforeRendering(Scene);
+			renderer.BeforeRendering(scene);
 
-			Scene.Render(renderer);
+			scene.Render(renderer);
 
-			renderer.AfterRendering(Scene);
+			renderer.AfterRendering(scene);
 			
 		}
 

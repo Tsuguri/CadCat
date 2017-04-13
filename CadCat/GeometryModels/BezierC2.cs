@@ -2,13 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CadCat.DataStructures;
 using CadCat.Math;
 using System.Windows.Input;
 using CadCat.Rendering;
-using System.Windows.Media;
 
 namespace CadCat.GeometryModels
 {
@@ -95,8 +92,6 @@ namespace CadCat.GeometryModels
 						case BezierType.BSpline:
 							pt.Visible = false;
 							break;
-						default:
-							break;
 					}
 				}
 
@@ -147,8 +142,6 @@ namespace CadCat.GeometryModels
 						renderer.Points = points.Select(x => x.Point.Position).ToList();
 
 						break;
-					default:
-						break;
 				}
 				renderer.Transform();
 				renderer.DrawLines();
@@ -166,8 +159,6 @@ namespace CadCat.GeometryModels
 					break;
 				case BezierType.BSpline:
 					point.Visible = true;
-					break;
-				default:
 					break;
 			}
 			if (!generateLater)
@@ -200,8 +191,6 @@ namespace CadCat.GeometryModels
 					{
 						pt.Point.Visible = false;
 					}
-					break;
-				default:
 					break;
 			}
 		}
@@ -237,14 +226,14 @@ namespace CadCat.GeometryModels
 
 				if (berensteinPtNumber % 3 == 0)
 				{
-					var A = berensteinPtNumber / 3;
-					var B = A + 1;
-					var C = A + 2;
-					var Apt = points[A];
-					var Bpt = points[B];
-					var Cpt = points[C];
+					var a = berensteinPtNumber / 3;
+					var b = a + 1;
+					var c = a + 2;
+					var aPt = points[a];
+					var bPt = points[b];
+					var cPt = points[c];
 
-					Bpt.Point.Position = (point.Position * 6 - Apt.Point.Position - Cpt.Point.Position) / 4;
+					bPt.Point.Position = (point.Position * 6 - aPt.Point.Position - cPt.Point.Position) / 4;
 
 					UpdateBerensteinPoints();
 				}

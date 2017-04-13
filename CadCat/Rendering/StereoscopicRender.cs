@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using CadCat.DataStructures;
 using System.Windows.Media.Imaging;
 using CadCat.Math;
@@ -39,19 +35,20 @@ namespace CadCat.Rendering
 				OnPropertyChanged();
 			}
 		}
-		public WriteableBitmap rightBitmap;
-		private Color leftEye = Color.FromRgb(0, 240, 255);
-		private Color rightEye = Colors.Red;
-		protected List<Vector3> transformedRightPoints = new List<Vector3>();
+
+		protected WriteableBitmap RightBitmap;
+		private readonly Color leftEye = Color.FromRgb(0, 240, 255);
+		private readonly Color rightEye = Colors.Red;
+		protected List<Vector3> TransformedRightPoints = new List<Vector3>();
 		BitmapContext leftContext;
 		BitmapContext rightContext;
 		SceneData data;
 
 
-		public override void Resize(double width, double height)
+		public override void Resize(double newWidth, double newHeight)
 		{
-			base.Resize(width, height);
-			rightBitmap = new WriteableBitmap((int)width, (int)height, 96, 96, PixelFormats.Pbgra32, null);
+			base.Resize(newWidth, newHeight);
+			RightBitmap = new WriteableBitmap((int)newWidth, (int)newHeight, 96, 96, PixelFormats.Pbgra32, null);
 		}
 
 		public override void Transform()
@@ -59,39 +56,39 @@ namespace CadCat.Rendering
 			var activeMatrix = data.ActiveCamera.GetLeftEyeMatrix(EyeDistance / 2.0, DepthMultiplier) * modelMatrix;
 			transformedPoints = TransformVertexBuffer(activeMatrix);
 			activeMatrix = data.ActiveCamera.GetRightEyeMatrix(EyeDistance / 2.0, DepthMultiplier) * modelMatrix;
-			transformedRightPoints = TransformVertexBuffer(activeMatrix);
+			TransformedRightPoints = TransformVertexBuffer(activeMatrix);
 		}
 		protected override void RenderLine(int index1, int index2)
 		{
 			SelectedColor = leftEye;
 			base.RenderLine(index1, index2);
-			tmpLine.from = transformedRightPoints[index1];
-			tmpLine.to = transformedRightPoints[index2];
+			tmpLine.from = TransformedRightPoints[index1];
+			tmpLine.to = TransformedRightPoints[index2];
 			if (Clip(tmpLine, 0.99, 0.01))
-				DrawLine(rightBitmap, tmpLine, rightEye, LineStroke);
+				DrawLine(RightBitmap, tmpLine, rightEye, LineStroke);
 		}
 
 		protected override void RenderPoint(int index)
 		{
 			SelectedColor = leftEye;
 			base.RenderPoint(index);
-			if (ClipPoint(transformedRightPoints[index]))
-				DrawPoint(rightBitmap, transformedRightPoints[index], rightEye);
+			if (ClipPoint(TransformedRightPoints[index]))
+				DrawPoint(RightBitmap, TransformedRightPoints[index], rightEye);
 
 		}
 
 		public override void BeforeRendering(SceneData scene)
 		{
 			base.BeforeRendering(scene);
-			rightContext = rightBitmap.GetBitmapContext();
-			rightBitmap.Clear(Colors.Black);
+			rightContext = RightBitmap.GetBitmapContext();
+			RightBitmap.Clear(Colors.Black);
 			leftContext = bufferBitmap.GetBitmapContext();
 			bufferBitmap.Clear(Colors.Black);
-			this.data = scene;
+			data = scene;
 		}
 		public override void AfterRendering(SceneData scene)
 		{
-			bufferBitmap.Blit(new System.Windows.Rect(0, 0, bufferBitmap.Width, bufferBitmap.Height), rightBitmap, new System.Windows.Rect(0, 0, rightBitmap.Width, rightBitmap.Height), WriteableBitmapExtensions.BlendMode.Additive);
+			bufferBitmap.Blit(new System.Windows.Rect(0, 0, bufferBitmap.Width, bufferBitmap.Height), RightBitmap, new System.Windows.Rect(0, 0, RightBitmap.Width, RightBitmap.Height), WriteableBitmapExtensions.BlendMode.Additive);
 			rightContext.Dispose();
 			leftContext.Dispose();
 		}

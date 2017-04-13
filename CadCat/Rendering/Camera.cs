@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CadCat.DataStructures;
-using CadCat.Math;
+﻿using CadCat.Math;
 namespace CadCat.Rendering
 {
 	public class Camera
@@ -24,13 +18,7 @@ namespace CadCat.Rendering
 		}
 
 		private Vector3 cameraPos;
-		public Vector3 CameraPosition
-		{
-			get
-			{
-				return cameraPos;
-			}
-		}
+		public Vector3 CameraPosition => cameraPos;
 
 		public double HorizontalAngle { get; set; }
 		public double VerticalAngle { get; set; }
@@ -54,6 +42,7 @@ namespace CadCat.Rendering
 
 		private Matrix4 MatrixReset
 		{
+			// ReSharper disable once ValueParameterNotUsed
 			set
 			{
 				viewProjection = null;
@@ -66,7 +55,7 @@ namespace CadCat.Rendering
 		Matrix4 viewMatrix;
 		Matrix4 projectionMatrix;
 
-		double aspectRatio = 4 / 3;
+		double aspectRatio = 1.33333333333333D;
 
 		public double AspectRatio
 		{
@@ -76,7 +65,7 @@ namespace CadCat.Rendering
 			}
 			set
 			{
-				if (aspectRatio != value)
+				if (System.Math.Abs(aspectRatio - value) > Utils.Eps)
 					MatrixReset = null;
 				aspectRatio = value;
 
@@ -103,31 +92,11 @@ namespace CadCat.Rendering
 			}
 		}
 
-		public Matrix4 ProjectionMatrix
-		{
-			get
-			{
-				if (projectionMatrix == null)
-					projectionMatrix = CreateFrustum();
-				return projectionMatrix;
-			}
-		}
+		public Matrix4 ProjectionMatrix => projectionMatrix ?? (projectionMatrix = CreateFrustum());
 
-		public Vector3 UpVector
-		{
-			get
-			{
-				return (ViewMatrix.Inversed() * new Vector4(0, 1, 0, 0)).ClipToVector3().Normalized();
-			}
-		}
+		public Vector3 UpVector => (ViewMatrix.Inversed() * new Vector4(0, 1, 0, 0)).ClipToVector3().Normalized();
 
-		public Vector3 RightVector
-		{
-			get
-			{
-				return (ViewMatrix.Inversed() * new Vector4(1, 0, 0, 0)).ClipToVector3().Normalized();
-			}
-		}
+		public Vector3 RightVector => (ViewMatrix.Inversed() * new Vector4(1, 0, 0, 0)).ClipToVector3().Normalized();
 
 
 		private void CreateViewProjectionMatrix()
@@ -150,7 +119,7 @@ namespace CadCat.Rendering
 
 		public Matrix4 GetRightEyeMatrix(double halfEyeSeparation, double focusDepth)
 		{
-			double fovy = Math.Utils.DegToRad(45);
+			double fovy = Utils.DegToRad(45);
 			double zNear = 1;
 			double zFar = 60;
 			double top = zNear * System.Math.Tan(0.5 * fovy);
@@ -162,7 +131,7 @@ namespace CadCat.Rendering
 			double frustumShift = halfEyeSeparation * zNear / focusDepth;
 
 
-			var view = Matrix4.CreatePerspectiveOffCenter(left - frustumShift, right - frustumShift, bottom, top, zNear, zFar) * Matrix4.CreateTranslation((float)halfEyeSeparation, 0.0f, 0.0f);
+			var view = Matrix4.CreatePerspectiveOffCenter(left - frustumShift, right - frustumShift, bottom, top, zNear, zFar) * Matrix4.CreateTranslation((float)halfEyeSeparation);
 			var transRadius = CreateTransRadius();
 			var rot = CreateAngleRotation();
 			var trans = CreateTargetTranslation();
@@ -171,7 +140,7 @@ namespace CadCat.Rendering
 
 		public Matrix4 GetLeftEyeMatrix(double halfEyeSeparation, double focusDepth)
 		{
-			double fovy = Math.Utils.DegToRad(45);
+			double fovy = Utils.DegToRad(45);
 			double zNear = 1;
 			double zFar = 60;
 			double top = zNear * System.Math.Tan(0.5 * fovy);
@@ -183,7 +152,7 @@ namespace CadCat.Rendering
 			double frustumShift = halfEyeSeparation * zNear / focusDepth;
 
 
-			var view = Matrix4.CreatePerspectiveOffCenter(left + frustumShift, right + frustumShift, bottom, top, zNear, zFar) * Matrix4.CreateTranslation(-(float)halfEyeSeparation, 0.0f, 0.0f);
+			var view = Matrix4.CreatePerspectiveOffCenter(left + frustumShift, right + frustumShift, bottom, top, zNear, zFar) * Matrix4.CreateTranslation(-(float)halfEyeSeparation);
 			var transRadius = CreateTransRadius();
 			var rot = CreateAngleRotation();
 			var trans = CreateTargetTranslation();
@@ -214,11 +183,6 @@ namespace CadCat.Rendering
 			return Matrix4.CreateTranslation(-LookingAt.X, -LookingAt.Y, -LookingAt.Z);
 		}
 
-		public Camera()
-		{
-
-		}
-
 		public void Rotate(double vertical, double horizontal)
 		{
 			HorizontalAngle += horizontal;
@@ -247,11 +211,11 @@ namespace CadCat.Rendering
 		public Ray GetViewRay(Vector2 position)
 		{
 			var inverseView = ViewMatrix.Inversed();
-			var inverseProjection = this.ProjectionMatrix.Inversed();
+			var inverseProjection = ProjectionMatrix.Inversed();
 
-			Vector4 direction = new Vector4(position, 1.0f, 1.0f);
+			Vector4 direction = new Vector4(position, 1.0f);
 
-			direction = ((inverseView * inverseProjection) * direction);
+			direction = inverseView * inverseProjection * direction;
 
 			Vector3 origin = CameraPosition;
 			var normDir = (direction.ToNormalizedVector3() - origin).Normalized();
@@ -260,14 +224,6 @@ namespace CadCat.Rendering
 
 		public Vector3 GetScreenPointOnViewPlane(Vector2 position)
 		{
-			var pos = new Vector3(position.X, position.Y, 0.1);
-			pos *= Radius;
-			var inverseView = ViewMatrix.Inversed();
-			var inverseProjection = ProjectionMatrix.Inversed();
-
-			var afterProjection = inverseProjection * new Vector4(pos, 1.0);
-			var afterView = inverseView * afterProjection;
-
 			Ray ray = GetViewRay(position);
 
 			var plane = new Plane(LookingAt, (LookingAt - CameraPosition).Normalized());
