@@ -10,12 +10,12 @@ namespace CadCat.GeometryModels
 	class Surface : Model
 	{
 
-		private List<BezierPatch> patches;
-		private List<CatPoint> catPoints;
-		private SceneData scene;
+		private readonly List<BezierPatch> patches;
+		private readonly List<CatPoint> catPoints;
+		private readonly SceneData scene;
 
-		private bool showPolygon;
-		private bool showPoints;
+		private bool showPolygon = true;
+		private bool showPoints = true;
 
 		public bool ShowPolygon
 		{

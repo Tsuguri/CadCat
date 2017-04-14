@@ -16,7 +16,8 @@ namespace CadCat.GeometryModels.Proxys
 	public enum SurfaceType
 	{
 		Bezier,
-		BSpline
+		BSpline,
+		Nurbs
 	}
 
 	class TempSurface : ParametrizedModel, IConvertibleToPoints
@@ -25,6 +26,7 @@ namespace CadCat.GeometryModels.Proxys
 
 		//private List<ModelLine> lines;
 		private readonly List<int> indices = new List<int>();
+		private readonly List<int> outlineIndices = new List<int>();
 		private readonly List<Math.Vector3> points = new List<Vector3>();
 
 
@@ -100,7 +102,7 @@ namespace CadCat.GeometryModels.Proxys
 			get { return curvatureAngle; }
 			set
 			{
-				if (System.Math.Abs(curvatureAngle - value) > Math.Utils.Eps && value>=1.0 && value <=360.0)
+				if (System.Math.Abs(curvatureAngle - value) > Math.Utils.Eps && value >= 1.0 && value <= 360.0)
 				{
 					curvatureAngle = value;
 					changed = true;
@@ -181,10 +183,10 @@ namespace CadCat.GeometryModels.Proxys
 			int heightPoints = VDensity * 3 + 1;
 			points.Capacity = System.Math.Max(points.Capacity, widthPoints * heightPoints);
 			indices.Capacity = System.Math.Max(indices.Capacity, ((widthPoints - 1) * (heightPoints - 1) + (widthPoints - 1) + (heightPoints - 1)) * 4);
-
+			outlineIndices.Capacity = System.Math.Max(outlineIndices.Capacity, (UDensity + 1 + VDensity + 1) * 2);
 			points.Clear();
 			indices.Clear();
-
+			outlineIndices.Clear();
 
 
 			if (!Curved)
@@ -225,21 +227,42 @@ namespace CadCat.GeometryModels.Proxys
 			for (int i = 0; i < widthPoints - 1; i++)
 				for (int j = 0; j < heightPoints - 1; j++)
 				{
-					indices.Add(i * heightPoints + j);
-					indices.Add(i * heightPoints + j + 1);
-					indices.Add(i * heightPoints + j);
-					indices.Add((i + 1) * heightPoints + j);
+					int ind = i * heightPoints + j;
+					bool horizontalOutline = ind % heightPoints % 3 == 0;
+					bool verticalOutline = i % 3 == 0;
+
+					if (verticalOutline)
+					{
+						outlineIndices.Add(i * heightPoints + j);
+						outlineIndices.Add(i * heightPoints + j + 1);
+					}
+					else
+					{
+						indices.Add(i * heightPoints + j);
+						indices.Add(i * heightPoints + j + 1);
+					}
+
+					if (horizontalOutline)
+					{
+						outlineIndices.Add(i * heightPoints + j);
+						outlineIndices.Add((i + 1) * heightPoints + j);
+					}
+					else
+					{
+						indices.Add(i * heightPoints + j);
+						indices.Add((i + 1) * heightPoints + j);
+					}
 				}
 			for (int i = 0; i < widthPoints - 1; i++)
 			{
-				indices.Add(heightPoints * (i + 1) - 1);
-				indices.Add(heightPoints * (i + 2) - 1);
+				outlineIndices.Add(heightPoints * (i + 1) - 1);
+				outlineIndices.Add(heightPoints * (i + 2) - 1);
 			}
 
 			for (int j = 0; j < heightPoints - 1; j++)
 			{
-				indices.Add((widthPoints - 1) * heightPoints + j);
-				indices.Add((widthPoints - 1) * heightPoints + j + 1);
+				outlineIndices.Add((widthPoints - 1) * heightPoints + j);
+				outlineIndices.Add((widthPoints - 1) * heightPoints + j + 1);
 			}
 
 
@@ -258,10 +281,90 @@ namespace CadCat.GeometryModels.Proxys
 			renderer.ModelMatrix = Transform.CreateTransformMatrix();
 			renderer.Transform();
 			renderer.DrawLines();
+
+			renderer.Indices = outlineIndices;
+			renderer.SelectedColor = IsSelected ? Colors.OrangeRed : Colors.White;
+			renderer.DrawLines();
+
 		}
+
 		public override string GetName()
 		{
 			return "New Surface Patch" + base.GetName();
+		}
+
+		private void ConvertToBezierPatches(SceneData scene)
+		{
+			int widthPoints = UDensity * 3 + 1;
+			int heightPoints = VDensity * 3 + 1;
+			var catPoints = new CatPoint[widthPoints, heightPoints];
+			var matrix = GetMatrix(false, new Vector3());
+			if (!Curved)
+				for (int i = 0; i < widthPoints; i++)
+					for (int j = 0; j < heightPoints; j++)
+					{
+						var pt = points[i * heightPoints + j];
+						catPoints[i, j] = scene.CreateHiddenCatPoint((matrix * new Vector4(pt)).ClipToVector3());
+					}
+			else
+			{
+				bool cylinder = System.Math.Abs(CurvatureAngle - 360) < Utils.Eps;
+
+				for (int i = 0; i < widthPoints - (cylinder ? 1 : 0); i++)
+					for (int j = 0; j < heightPoints; j++)
+					{
+						Vector3 pt;
+						if (i % 3 != 0)
+						{
+							int ai = i - i % 3;
+							int ci = ai + 3;
+							var p = (points[(ai + 1) * heightPoints + j] + points[(ai + 2) * heightPoints + j]);
+							var b = p - (points[ai * heightPoints + j] + points[ci * heightPoints + j]) / 2;
+
+							var pot = i % 3 == 1 ? points[ai * heightPoints + j] : points[ci * heightPoints + j];
+
+							pt = b * 2 / 3.0 + pot * 1 / 3.0;
+						}
+						else
+							pt = points[i * heightPoints + j];
+						catPoints[i, j] = scene.CreateHiddenCatPoint((matrix * new Vector4(pt)).ClipToVector3());
+					}
+				if (cylinder)
+					for (int j = 0; j < heightPoints; j++)
+						catPoints[widthPoints - 1, j] = catPoints[0, j];
+			}
+			scene.RemoveModel(this);
+			var subArray = new CatPoint[4, 4];
+			var patches = new List<BezierPatch>();
+			for (int i = 0; i < UDensity; i++)
+				for (int j = 0; j < VDensity; j++)
+				{
+					for (int x = 0; x < 4; x++)
+						for (int y = 0; y < 4; y++)
+							subArray[x, y] = catPoints[i * 3 + x, j * 3 + y];
+					var patch = new BezierPatch(subArray);
+					scene.AddNewModel(patch);
+					patches.Add(patch);
+
+				}
+			var catPointsList = new List<CatPoint>(catPoints.GetLength(0) * catPoints.GetLength(1));
+			foreach (var catPoint in catPoints)
+			{
+				catPointsList.Add(catPoint);
+			}
+			scene.AddNewModel(new Surface(patches, catPointsList, scene));
+
+		}
+
+		private void ConvertToBSpline(SceneData scene)
+		{
+			throw new NotImplementedException();
+
+		}
+
+		private void ConvertToNurbs(SceneData scene)
+		{
+			throw new NotImplementedException();
 		}
 
 		public void Convert(SceneData scene)
@@ -269,76 +372,13 @@ namespace CadCat.GeometryModels.Proxys
 			switch (Type)
 			{
 				case SurfaceType.Bezier:
-					int widthPoints = UDensity * 3 + 1;
-					int heightPoints = VDensity * 3 + 1;
-					var catPoints = new CatPoint[widthPoints, heightPoints];
-					var matrix = GetMatrix(false, new Vector3());
-					if (!Curved)
-						for (int i = 0; i < widthPoints; i++)
-							for (int j = 0; j < heightPoints; j++)
-							{
-								var pt = points[i * heightPoints + j];
-								catPoints[i, j] = scene.CreateHiddenCatPoint((matrix * new Vector4(pt)).ClipToVector3());
-							}
-					else
-					{
-						bool cylinder = System.Math.Abs(CurvatureAngle - 360) < Utils.Eps;
-
-						for (int j = 0; j < heightPoints; j++)
-							for (int i = 0; i < widthPoints - (cylinder ? 1 : 0); i++)
-							{
-
-							}
-
-
-						for (int i = 0; i < widthPoints - (cylinder ? 1 : 0); i++)
-							for (int j = 0; j < heightPoints; j++)
-							{
-								Vector3 pt;
-								if (i % 3 != 0)
-								{
-									int ai = i - i % 3;
-									int ci = ai + 3;
-									var p = (points[(ai + 1) * heightPoints + j] + points[(ai + 2) * heightPoints + j]);
-									var b = p - (points[ai * heightPoints + j] + points[ci * heightPoints + j]) / 2;
-
-									var pot = i % 3 == 1 ? points[ai * heightPoints + j] : points[ci * heightPoints + j];
-
-									pt = b * 2 / 3.0 + pot * 1 / 3.0;
-								}
-								else
-									pt = points[i * heightPoints + j];
-								catPoints[i, j] = scene.CreateHiddenCatPoint((matrix * new Vector4(pt)).ClipToVector3());
-							}
-						if (cylinder)
-							for (int j = 0; j < heightPoints; j++)
-								catPoints[widthPoints - 1, j] = catPoints[0, j];
-					}
-					scene.RemoveModel(this);
-					var subArray = new CatPoint[4, 4];
-					var patches = new List<BezierPatch>();
-					for (int i = 0; i < UDensity; i++)
-						for (int j = 0; j < VDensity; j++)
-						{
-							for (int x = 0; x < 4; x++)
-								for (int y = 0; y < 4; y++)
-									subArray[x, y] = catPoints[i * 3 + x, j * 3 + y];
-							var patch = new BezierPatch(subArray);
-							scene.AddNewModel(patch);
-							patches.Add(patch);
-
-						}
-					var catPointsList = new List<CatPoint>(catPoints.GetLength(0)*catPoints.GetLength(1));
-					foreach (var catPoint in catPoints)
-					{
-						catPointsList.Add(catPoint);
-					}
-					scene.AddNewModel(new Surface(patches,catPointsList,scene));
-
+					ConvertToBezierPatches(scene);
 					break;
 				case SurfaceType.BSpline:
-					throw new NotImplementedException();
-
+					ConvertToBSpline(scene);
+					break;
+				case SurfaceType.Nurbs:
+					ConvertToNurbs(scene);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();

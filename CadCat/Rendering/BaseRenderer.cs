@@ -97,11 +97,6 @@ namespace CadCat.Rendering
 			protected get; set;
 		}
 
-		public int LineStroke
-		{
-			protected get; set;
-		}
-
 		public RenderingType RenderingMode = RenderingType.Points;
 
 		public virtual void BeforeRendering(SceneData scene)
@@ -142,7 +137,7 @@ namespace CadCat.Rendering
 			tmpLine.from = transformedPoints[index1];
 			tmpLine.to = transformedPoints[index2];
 			if (Clip(tmpLine, 0.99, 0.01))
-				DrawLine(bufferBitmap, tmpLine, selectedColor, LineStroke);
+				DrawLine(bufferBitmap, tmpLine, selectedColor);
 		}
 
 		protected virtual void RenderPoint(int index)
@@ -165,7 +160,7 @@ namespace CadCat.Rendering
 
 		public void DrawPoints()
 		{
-			Enumerable.Range(0, transformedPoints.Count).ToList().ForEach(x => RenderPoint(x));
+			Enumerable.Range(0, transformedPoints.Count).ToList().ForEach(RenderPoint);
 		}
 
 
@@ -225,7 +220,7 @@ namespace CadCat.Rendering
 			return vec;
 		}
 
-		protected void DrawLine(WriteableBitmap bitmap, Line line, Color color, int stroke)
+		protected void DrawLine(WriteableBitmap bitmap, Line line, Color color)
 		{
 			bitmap.DrawLineDDA((int)(line.from.X * width), (int)(line.from.Y * height), (int)(line.to.X * width), (int)(line.to.Y * height), color);
 
@@ -236,27 +231,5 @@ namespace CadCat.Rendering
 			bitmap.FillEllipse((int)(point.X * width - 3), (int)(point.Y * height - 3), (int)(point.X * width + 3), (int)(point.Y * height + 3), color);
 		}
 
-		protected void ProcessLine(WriteableBitmap bitmap, Line line, Matrix4 matrix, Color color, int stroke)
-		{
-			var from = (matrix * new Vector4(line.from, 1)).ToNormalizedVector3();
-			from = NormalizeToBitmapSpace(from);
-
-			var to = (matrix * new Vector4(line.to, 1)).ToNormalizedVector3();
-			to = NormalizeToBitmapSpace(to);
-
-			tmpLine.from = from;
-			tmpLine.to = to;
-			if (Clip(tmpLine, 0.99, 0.01))
-				DrawLine(bitmap, tmpLine, color, stroke);
-		}
-
-		protected void ProcessPoint(WriteableBitmap bitmap, Vector3 point, Matrix4 matrix, Color color)
-		{
-			var pt = (matrix * new Vector4(point, 1)).ToNormalizedVector3();
-			pt = NormalizeToBitmapSpace(pt);
-
-			if (ClipPoint(pt))
-				DrawPoint(bitmap, pt, color);
-		}
 	}
 }

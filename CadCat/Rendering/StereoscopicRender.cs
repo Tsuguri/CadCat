@@ -65,7 +65,7 @@ namespace CadCat.Rendering
 			tmpLine.from = TransformedRightPoints[index1];
 			tmpLine.to = TransformedRightPoints[index2];
 			if (Clip(tmpLine, 0.99, 0.01))
-				DrawLine(RightBitmap, tmpLine, rightEye, LineStroke);
+				DrawLine(RightBitmap, tmpLine, rightEye);
 		}
 
 		protected override void RenderPoint(int index)

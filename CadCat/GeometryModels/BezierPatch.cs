@@ -19,6 +19,8 @@ namespace CadCat.GeometryModels
 		private bool changed;
 		private readonly bool owner;
 		private bool showPolygon = true;
+		private int heightDiv = 3;
+		private int widthDiv = 3;
 		public bool ShowPolygon
 		{
 			get { return showPolygon; }
@@ -30,10 +32,32 @@ namespace CadCat.GeometryModels
 		}
 
 		public int WidthDiv
-		{ get; set; } = 10;
+		{
+			get { return widthDiv; }
+			set
+			{
+				if (widthDiv != value)
+				{
+					widthDiv = value;
+					changed = true;
+					OnPropertyChanged();
+				}
+			}
+		}
 
 		public int HeightDiv
-		{ get; set; } = 10;
+		{
+			get { return heightDiv; }
+			set
+			{
+				if (heightDiv != value)
+				{
+					heightDiv = value;
+					changed = true;
+					OnPropertyChanged();
+				}
+			}
+		}
 
 		private static List<int> indices = new List<int>()
 		{
@@ -92,8 +116,8 @@ namespace CadCat.GeometryModels
 			for (int i = 0; i < 4; i++)
 				for (int j = 0; j < 4; j++)
 				{
-					points[i * 4 + j] = pts[i,j];
-					pts[i,j].OnChanged += OnBezierPointChanged;
+					points[i * 4 + j] = pts[i, j];
+					pts[i, j].OnChanged += OnBezierPointChanged;
 				}
 			changed = true;
 			owner = false;
@@ -137,34 +161,36 @@ namespace CadCat.GeometryModels
 		private void RecalculatePoints()
 		{
 			mesh.Clear();
-			mesh.Capacity = System.Math.Max(mesh.Capacity, WidthDiv * HeightDiv);
+			mesh.Capacity = System.Math.Max(mesh.Capacity, (WidthDiv + 1) * (HeightDiv + 1));
 			meshIndices.Clear();
-			double widthStep = 1.0 / (WidthDiv - 1);
-			double heightStep = 1.0 / (HeightDiv - 1);
+			double widthStep = 1.0 / WidthDiv;
+			double heightStep = 1.0 / HeightDiv;
+			int widthPoints = WidthDiv + 1;
+			int heightPoints = HeightDiv + 1;
 
-			for (int i = 0; i < WidthDiv; i++)
-				for (int j = 0; j < HeightDiv; j++)
+			for (int i = 0; i < widthPoints; i++)
+				for (int j = 0; j < heightPoints; j++)
 				{
-					mesh.Insert(i * WidthDiv + j, EvaluatePointValue(i * widthStep, j * heightStep));
+					mesh.Insert(i * heightPoints + j, EvaluatePointValue(i * widthStep, j * heightStep));
 				}
 
-			for (int i = 0; i < WidthDiv - 1; i++)
-				for (int j = 0; j < HeightDiv - 1; j++)
+			for (int i = 0; i < widthPoints - 1; i++)
+				for (int j = 0; j < heightPoints - 1; j++)
 				{
-					meshIndices.Add(i * WidthDiv + j);
-					meshIndices.Add(i * WidthDiv + j + 1);
-					meshIndices.Add(i * WidthDiv + j);
-					meshIndices.Add((i + 1) * WidthDiv + j);
+					meshIndices.Add(i * heightPoints + j);
+					meshIndices.Add(i * heightPoints + j + 1);
+					meshIndices.Add(i * heightPoints + j);
+					meshIndices.Add((i + 1) * heightPoints + j);
 				}
-			for (int i = 0; i < WidthDiv - 1; i++)
+			for (int i = 0; i < widthPoints - 1; i++)
 			{
-				meshIndices.Add(WidthDiv * (i + 1) - 1);
-				meshIndices.Add(WidthDiv * (i + 2) - 1);
+				meshIndices.Add(heightPoints * (i + 1) - 1);
+				meshIndices.Add(heightPoints * (i + 2) - 1);
 			}
-			for (int j = 0; j < HeightDiv - 1; j++)
+			for (int j = 0; j < heightPoints - 1; j++)
 			{
-				meshIndices.Add((HeightDiv - 1) * WidthDiv + j);
-				meshIndices.Add((HeightDiv - 1) * WidthDiv + j + 1);
+				meshIndices.Add((widthPoints - 1) * heightPoints + j);
+				meshIndices.Add((widthPoints - 1) * heightPoints + j + 1);
 			}
 			changed = false;
 		}
@@ -237,7 +263,7 @@ namespace CadCat.GeometryModels
 
 		public override string GetName()
 		{
-			return "Bezier patch "+base.GetName();
+			return "Bezier patch " + base.GetName();
 		}
 	}
 }
