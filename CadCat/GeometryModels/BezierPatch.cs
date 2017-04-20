@@ -36,7 +36,7 @@ namespace CadCat.GeometryModels
 			get { return widthDiv; }
 			set
 			{
-				if (widthDiv != value)
+				if (widthDiv != value && value > 0)
 				{
 					widthDiv = value;
 					changed = true;
@@ -50,7 +50,7 @@ namespace CadCat.GeometryModels
 			get { return heightDiv; }
 			set
 			{
-				if (heightDiv != value)
+				if (heightDiv != value && value > 0)
 				{
 					heightDiv = value;
 					changed = true;
