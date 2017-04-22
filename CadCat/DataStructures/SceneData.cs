@@ -572,24 +572,24 @@ namespace CadCat.DataStructures
 		private void GoToSelected()
 		{
 			var model = SelectedModel as ParametrizedModel;
-			if(model != null)
+			if (model != null)
 				ActiveCamera.LookingAt = model.Transform.Position;
 		}
 
 		private void RemoveSelected()
 		{
-			if (SelectedModel != null)
+			foreach (var model in Models.Where(x => x.IsSelected))
 			{
-				RemoveModel(SelectedModel);
-				SelectedModel = null;
+				RemoveModel(model);
 			}
 		}
 
 		public void RemoveModel(Model model)
 		{
-			model.CleanUp();
-			models.Remove(model);
-
+			if (models.Remove(model))
+			{
+				model.CleanUp();
+			}
 		}
 
 		private void RemoveSelectedPoints()
