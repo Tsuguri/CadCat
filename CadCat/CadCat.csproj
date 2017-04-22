@@ -257,6 +257,12 @@
   <ItemGroup>
     <Resource Include="cat_s4T_icon.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GM1Serialization\GM1Serialization\GM1Serialization\GM1Serialization.csproj">
+      <Project>{749c1413-06ee-4bd9-87e7-6df953feee7a}</Project>
+      <Name>GM1Serialization</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

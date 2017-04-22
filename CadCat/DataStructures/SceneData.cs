@@ -12,6 +12,11 @@ using CadCat.ModelInterfaces;
 using System.Windows.Media;
 using CadCat.GeometryModels.Proxys;
 using CadCat.Utilities;
+using GM1.Serialization;
+using Camera = CadCat.Rendering.Camera;
+using Point = System.Windows.Point;
+using Vector3 = CadCat.Math.Vector3;
+using Vector4 = CadCat.Math.Vector4;
 
 namespace CadCat.DataStructures
 {
@@ -195,6 +200,10 @@ namespace CadCat.DataStructures
 
 		private ICommand goToSelectedCommand;
 		private ICommand removeCommand;
+
+
+		private ICommand testSaveCommand;
+		public ICommand TestSaveCommand => testSaveCommand ?? (testSaveCommand = new CommandHandler(TestSave));
 
 		public ICommand CreateTorusCommand => createTorusCommand ?? (createTorusCommand = new CommandHandler(CreateTorus));
 
@@ -642,5 +651,78 @@ namespace CadCat.DataStructures
 
 
 		}
+
+		private void TestSave()
+		{
+			SaveToFile("superduperFile.xml");
+		}
+
+		private void SaveToFile(string filename)
+		{
+			var serializer = new GM1.Serialization.XMLSerializer();
+			var scene = new Scene();
+
+			var ptCount = points.Count + hiddenPoints.Count;
+			scene.Points = new GM1.Serialization.Point[ptCount];
+			int i = 0;
+			foreach (var catPoint in points.Concat(hiddenPoints))
+			{
+				scene.Points[i] = new GM1.Serialization.Point() { Position = catPoint.Position.ToShitpoint(), Name = catPoint.Name };
+				catPoint.SerializationId = i;
+				i++;
+			}
+			List<BezierCurveC0> beziersc0 = new List<BezierCurveC0>();
+			List<BezierCurveC2> beziersc2 = new List<BezierCurveC2>();
+			List<InterpolationBezierCurveC2> interpolators = new List<InterpolationBezierCurveC2>();
+			List<BezierSurfaceC0> surfacesc0 = new List<BezierSurfaceC0>();
+			List<BezierSurfaceC2> surfacesc2 = new List<BezierSurfaceC2>();
+
+			foreach (var model in models)
+			{
+				var type = model.GetType();
+				if (type == typeof(Bezier))
+				{
+					var bezier = model as Bezier;
+					var sceneBezier = new BezierCurveC0
+					{
+						Name = bezier.Name,
+						DisplayPolygon = bezier.ShowPolygon,
+						DisplayPolygonSpecified = true,
+						Points = bezier.Points.Select(x => x.Point.SerializationId).ToArray()
+					};
+					beziersc0.Add(sceneBezier);
+
+				}
+				else if (type == typeof(BezierC2))
+				{
+					var bezier = model as BezierC2;
+					var sceneBezier = new BezierCurveC2
+					{
+						Name = bezier.Name,
+						DisplayPolygon = bezier.ShowPolygon,
+						DisplayPolygonSpecified = true,
+						Points = bezier.Points.Select(x => x.Point.SerializationId).ToArray()
+					};
+					beziersc2.Add(sceneBezier);
+				}
+				else if (type == typeof(BsplineInterpolator))
+				{
+					var interpolationBezier = model as BsplineInterpolator;
+					var sceneBezier = new InterpolationBezierCurveC2()
+					{
+						Name = interpolationBezier.Name,
+						DisplayPolygon = interpolationBezier.ShowPolygon,
+						DisplayPolygonSpecified = true,
+						Points = interpolationBezier.Points.Select(x => x.Point.SerializationId).ToArray()
+					};
+					interpolators.Add(sceneBezier);
+				}
+				else if (type == typeof(Surface)))
+			}
+
+
+			serializer.SerializeToFile(filename, scene);
+		}
+
 	}
 }

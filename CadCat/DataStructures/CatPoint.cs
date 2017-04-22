@@ -36,6 +36,8 @@ namespace CadCat.DataStructures
 			}
 		}
 
+		public int SerializationId { get; set; }
+
 		public Vector3 Position
 		{
 			get

@@ -82,5 +82,10 @@
 		{
 			return vec1 * (1 - point) + vec2 * point;
 		}
+
+		public GM1.Serialization.Vector3 ToShitpoint()
+		{
+			return new GM1.Serialization.Vector3 {X = (float)X, Y = (float)Y, Z = (float)Z};
+		}
 	}
 }
