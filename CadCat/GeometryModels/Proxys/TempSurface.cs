@@ -335,7 +335,7 @@ namespace CadCat.GeometryModels.Proxys
 			}
 			scene.RemoveModel(this);
 			var subArray = new CatPoint[4, 4];
-			var patches = new List<BezierPatch>();
+			var patches = new List<Patch>();
 			for (int i = 0; i < UDensity; i++)
 				for (int j = 0; j < VDensity; j++)
 				{
@@ -358,7 +358,65 @@ namespace CadCat.GeometryModels.Proxys
 
 		private void ConvertToBSpline(SceneData scene)
 		{
-			throw new NotImplementedException();
+			int widthPoints = UDensity * 3 + 1;
+			int heightPoints = VDensity * 3 + 1;
+			var catPoints = new CatPoint[widthPoints, heightPoints];
+			var matrix = GetMatrix(false, new Vector3());
+			if (!Curved)
+				for (int i = 0; i < widthPoints; i++)
+				for (int j = 0; j < heightPoints; j++)
+				{
+					var pt = points[i * heightPoints + j];
+					catPoints[i, j] = scene.CreateHiddenCatPoint((matrix * new Vector4(pt)).ClipToVector3());
+				}
+			else
+			{
+				bool cylinder = System.Math.Abs(CurvatureAngle - 360) < Utils.Eps;
+
+				for (int i = 0; i < widthPoints - (cylinder ? 1 : 0); i++)
+				for (int j = 0; j < heightPoints; j++)
+				{
+					Vector3 pt;
+					if (i % 3 != 0)
+					{
+						int ai = i - i % 3;
+						int ci = ai + 3;
+						var p = (points[(ai + 1) * heightPoints + j] + points[(ai + 2) * heightPoints + j]);
+						var b = p - (points[ai * heightPoints + j] + points[ci * heightPoints + j]) / 2;
+
+						var pot = i % 3 == 1 ? points[ai * heightPoints + j] : points[ci * heightPoints + j];
+
+						pt = b * 2 / 3.0 + pot * 1 / 3.0;
+					}
+					else
+						pt = points[i * heightPoints + j];
+					catPoints[i, j] = scene.CreateHiddenCatPoint((matrix * new Vector4(pt)).ClipToVector3());
+				}
+				if (cylinder)
+					for (int j = 0; j < heightPoints; j++)
+						catPoints[widthPoints - 1, j] = catPoints[0, j];
+			}
+			scene.RemoveModel(this);
+			var subArray = new CatPoint[4, 4];
+			var patches = new List<Patch>();
+			for (int i = 0; i < UDensity; i++)
+			for (int j = 0; j < VDensity; j++)
+			{
+				for (int x = 0; x < 4; x++)
+				for (int y = 0; y < 4; y++)
+					subArray[x, y] = catPoints[i * 3 + x, j * 3 + y];
+				var patch = new BSplinePatch(subArray);
+				scene.AddNewModel(patch);
+				patches.Add(patch);
+
+			}
+			var catPointsList = new List<CatPoint>(catPoints.GetLength(0) * catPoints.GetLength(1));
+			foreach (var catPoint in catPoints)
+			{
+				catPointsList.Add(catPoint);
+			}
+			scene.AddNewModel(new Surface(patches, catPointsList, scene));
+
 
 		}
 

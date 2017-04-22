@@ -166,6 +166,7 @@
                         </Grid>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type models:Surface}">
+                        <StackPanel>
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="40" />
@@ -183,6 +184,18 @@
                                           ToolTip="MaterialDesignSwitchAccentToggleButton" IsChecked="{Binding ShowPoints}" />
                             <TextBlock VerticalAlignment="Center" Grid.Column="1" Grid.Row="1">Points Visible</TextBlock>
                         </Grid>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="40" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Button Command="{Binding BothDivUpCommand}">BothDivUp</Button>
+                                <Button Grid.Column="1" Command="{Binding BothDivDownCommand}">BothDivDown</Button>
+                            </Grid>
+                        </StackPanel>
                     </DataTemplate>
                 </ContentControl.Resources>
             </ContentControl>

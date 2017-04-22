@@ -105,7 +105,9 @@
     <Compile Include="GeometryModels\BezierCurveBase.cs" />
     <Compile Include="GeometryModels\BezierPatch.cs" />
     <Compile Include="GeometryModels\BsplineInterpolator.cs" />
+    <Compile Include="GeometryModels\BSplinePatch.cs" />
     <Compile Include="GeometryModels\ParametrizedModel.cs" />
+    <Compile Include="GeometryModels\Patch.cs" />
     <Compile Include="GeometryModels\PointModel.cs" />
     <Compile Include="GeometryModels\Surface.cs" />
     <Compile Include="GeometryModels\Proxys\TempSurface.cs" />

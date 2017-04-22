@@ -1,26 +1,27 @@
-﻿using CadCat.DataStructures;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Diagnostics;
-using CadCat.Rendering;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Media;
+using CadCat.DataStructures;
 using CadCat.Math;
+using CadCat.Rendering;
 
 namespace CadCat.GeometryModels
 {
-	class BezierPatch : Patch
+	class BSplinePatch : Patch
 	{
 		private readonly CatPoint[] points = new CatPoint[16];
 		private readonly List<Vector3> mesh = new List<Vector3>();
 		private readonly List<int> meshIndices = new List<int>();
 		private readonly SceneData scene;
 
-
 		private readonly bool owner;
 
 
-		private static readonly List<int> Indices = new List<int>()
+		private static readonly List<int> Indices = new List<int>
 		{
 			0,1,
 			1,2,
@@ -55,31 +56,31 @@ namespace CadCat.GeometryModels
 			11,15
 		};
 
-		public BezierPatch(SceneData scene)
+		public BSplinePatch(SceneData scene)
 		{
 			this.scene = scene;
 
 			for (int i = 0; i < 4; i++)
-				for (int j = 0; j < 4; j++)
-				{
-					var pt = scene.CreateHiddenCatPoint(new Math.Vector3(i, System.Math.Sin(Math.Utils.Pi * (i * 0.5 + j * 0.1) / 2.0), j));
-					points[i * 4 + j] = pt;
-					pt.OnChanged += OnBezierPointChanged;
-				}
+			for (int j = 0; j < 4; j++)
+			{
+				var pt = scene.CreateHiddenCatPoint(new Math.Vector3(i, System.Math.Sin(Math.Utils.Pi * (i * 0.5 + j * 0.1) / 2.0), j));
+				points[i * 4 + j] = pt;
+				pt.OnChanged += OnBezierPointChanged;
+			}
 			changed = true;
 			owner = true;
 		}
 
-		public BezierPatch(CatPoint[,] pts)
+		public BSplinePatch(CatPoint[,] pts)
 		{
 			Debug.Assert(points.Length == 16);
 
 			for (int i = 0; i < 4; i++)
-				for (int j = 0; j < 4; j++)
-				{
-					points[i * 4 + j] = pts[i, j];
-					pts[i, j].OnChanged += OnBezierPointChanged;
-				}
+			for (int j = 0; j < 4; j++)
+			{
+				points[i * 4 + j] = pts[i, j];
+				pts[i, j].OnChanged += OnBezierPointChanged;
+			}
 			changed = true;
 			owner = false;
 		}
@@ -130,19 +131,19 @@ namespace CadCat.GeometryModels
 			int heightPoints = HeightDiv + 1;
 
 			for (int i = 0; i < widthPoints; i++)
-				for (int j = 0; j < heightPoints; j++)
-				{
-					mesh.Insert(i * heightPoints + j, EvaluatePointValue(i * widthStep, j * heightStep));
-				}
+			for (int j = 0; j < heightPoints; j++)
+			{
+				mesh.Insert(i * heightPoints + j, EvaluatePointValue(i * widthStep, j * heightStep));
+			}
 
 			for (int i = 0; i < widthPoints - 1; i++)
-				for (int j = 0; j < heightPoints - 1; j++)
-				{
-					meshIndices.Add(i * heightPoints + j);
-					meshIndices.Add(i * heightPoints + j + 1);
-					meshIndices.Add(i * heightPoints + j);
-					meshIndices.Add((i + 1) * heightPoints + j);
-				}
+			for (int j = 0; j < heightPoints - 1; j++)
+			{
+				meshIndices.Add(i * heightPoints + j);
+				meshIndices.Add(i * heightPoints + j + 1);
+				meshIndices.Add(i * heightPoints + j);
+				meshIndices.Add((i + 1) * heightPoints + j);
+			}
 			for (int i = 0; i < widthPoints - 1; i++)
 			{
 				meshIndices.Add(heightPoints * (i + 1) - 1);
@@ -171,8 +172,8 @@ namespace CadCat.GeometryModels
 
 			var sum = new Vector3();
 			for (int i = 0; i < 4; i++)
-				for (int j = 0; j < 4; j++)
-					sum += points[i * 4 + j].Position * temp[0, i] * temp[1, j];
+			for (int j = 0; j < 4; j++)
+				sum += points[i * 4 + j].Position * temp[0, i] * temp[1, j];
 
 
 			return sum;
@@ -205,7 +206,7 @@ namespace CadCat.GeometryModels
 			double x13 = x12 * (1 - x);
 			Vector3 tempVec = new Vector3();
 			tempVec = points[startPoint + step * 0].Position * x13 + points[startPoint + step * 1].Position * x12 * x * 3
-				+ points[startPoint + step * 2].Position * x2 * x11 * 3 + points[startPoint + step * 3].Position * x3;
+			          + points[startPoint + step * 2].Position * x2 * x11 * 3 + points[startPoint + step * 3].Position * x3;
 
 			return tempVec;
 		}
@@ -224,7 +225,7 @@ namespace CadCat.GeometryModels
 
 		public override string GetName()
 		{
-			return "Bezier patch " + base.GetName();
+			return "BSpline patch " + base.GetName();
 		}
 	}
 }

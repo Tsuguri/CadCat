@@ -578,7 +578,8 @@ namespace CadCat.DataStructures
 
 		private void RemoveSelected()
 		{
-			foreach (var model in Models.Where(x => x.IsSelected))
+			var l = Models.Where(x => x.IsSelected).ToList();
+			foreach (var model in l)
 			{
 				RemoveModel(model);
 			}
