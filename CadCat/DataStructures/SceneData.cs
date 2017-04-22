@@ -16,7 +16,7 @@ using CadCat.Utilities;
 namespace CadCat.DataStructures
 {
 
-	public class SceneData : Utilities.BindableObject
+	public class SceneData : BindableObject
 	{
 		#region Types
 
@@ -196,31 +196,31 @@ namespace CadCat.DataStructures
 		private ICommand goToSelectedCommand;
 		private ICommand removeCommand;
 
-		public ICommand CreateTorusCommand => createTorusCommand ?? (createTorusCommand = new Utilities.CommandHandler(CreateTorus));
+		public ICommand CreateTorusCommand => createTorusCommand ?? (createTorusCommand = new CommandHandler(CreateTorus));
 
-		public ICommand CreateCubeCommand => createCubeCommand ?? (createCubeCommand = new Utilities.CommandHandler(CreateCube));
+		public ICommand CreateCubeCommand => createCubeCommand ?? (createCubeCommand = new CommandHandler(CreateCube));
 
-		public ICommand CreateBezierCommand => createBezierCommand ?? (createBezierCommand = new Utilities.CommandHandler(CreateBezier));
+		public ICommand CreateBezierCommand => createBezierCommand ?? (createBezierCommand = new CommandHandler(CreateBezier));
 
-		public ICommand CreateBezierC2Command => createBezierC2Command ?? (createBezierC2Command = new Utilities.CommandHandler(CreateBezierC2));
+		public ICommand CreateBezierC2Command => createBezierC2Command ?? (createBezierC2Command = new CommandHandler(CreateBezierC2));
 
-		public ICommand CreateBSplineInterpolatorCommand => createBSplineInterpolatorCommand ?? (createBSplineInterpolatorCommand = new Utilities.CommandHandler(CreateBSplineInterpolator));
+		public ICommand CreateBSplineInterpolatorCommand => createBSplineInterpolatorCommand ?? (createBSplineInterpolatorCommand = new CommandHandler(CreateBSplineInterpolator));
 
-		public ICommand CreateBezierPatchCommand => createBezierPatchCommand ?? (createBezierPatchCommand = new Utilities.CommandHandler(CreateBezierPatch));
+		public ICommand CreateBezierPatchCommand => createBezierPatchCommand ?? (createBezierPatchCommand = new CommandHandler(CreateBezierPatch));
 
-		public ICommand CreatePointCommand => createPointCommand ?? (createPointCommand = new Utilities.CommandHandler(CreatePoint));
+		public ICommand CreatePointCommand => createPointCommand ?? (createPointCommand = new CommandHandler(CreatePoint));
 
-		public ICommand GoToSelectedCommand => goToSelectedCommand ?? (goToSelectedCommand = new Utilities.CommandHandler(GoToSelected));
+		public ICommand GoToSelectedCommand => goToSelectedCommand ?? (goToSelectedCommand = new CommandHandler(GoToSelected));
 
-		public ICommand RemoveCommand => removeCommand ?? (removeCommand = new Utilities.CommandHandler(RemoveSelected));
+		public ICommand RemoveCommand => removeCommand ?? (removeCommand = new CommandHandler(RemoveSelected));
 
-		public ICommand RemoveSelectedPointsCommand => removeSelectedPointsCommand ?? (removeSelectedPointsCommand = new Utilities.CommandHandler(RemoveSelectedPoints));
+		public ICommand RemoveSelectedPointsCommand => removeSelectedPointsCommand ?? (removeSelectedPointsCommand = new CommandHandler(RemoveSelectedPoints));
 
-		public ICommand SelectPointsCommand => selectPointsCommand ?? (selectPointsCommand = new Utilities.CommandHandler(SelectPoints));
+		public ICommand SelectPointsCommand => selectPointsCommand ?? (selectPointsCommand = new CommandHandler(SelectPoints));
 
-		public ICommand AddSelectedPointToSelectedItemCommand => addSelectedPointToSelectedItemCommand ?? (addSelectedPointToSelectedItemCommand = new Utilities.CommandHandler(AddSelectedPointToSelectedItem));
+		public ICommand AddSelectedPointToSelectedItemCommand => addSelectedPointToSelectedItemCommand ?? (addSelectedPointToSelectedItemCommand = new CommandHandler(AddSelectedPointToSelectedItem));
 
-		public ICommand ChangeObjectTypeCommand => changeObjectTypeCommand ?? (changeObjectTypeCommand = new Utilities.CommandHandler(ChangeObjectType));
+		public ICommand ChangeObjectTypeCommand => changeObjectTypeCommand ?? (changeObjectTypeCommand = new CommandHandler(ChangeObjectType));
 
 		public ICommand ConvertToPointsCommand => convertToPointsCommand ??
 												  (convertToPointsCommand = new CommandHandler(ConvertToPoints));
@@ -260,7 +260,7 @@ namespace CadCat.DataStructures
 				};
 
 
-				DialogHost.Show(sampleMessageDialog, "RootDialog");
+				DialogHost.Show(sampleMessageDialog, "RootDialog").Wait();
 			}
 			else
 			{
@@ -279,12 +279,11 @@ namespace CadCat.DataStructures
 					Message = { Text = "Not enough points for C2 Bezier Curve (at least 4)." }
 				};
 
-				DialogHost.Show(sampleMessageDialog, "RootDialog");
+				DialogHost.Show(sampleMessageDialog, "RootDialog").Wait();
 			}
 			else
 			{
 				AddNewModel(new BezierC2(selected, this));
-
 			}
 		}
 
@@ -298,7 +297,7 @@ namespace CadCat.DataStructures
 					Message = { Text = "Not enough points for BSpline interpolation (at least 2)." }
 				};
 
-				DialogHost.Show(sampleMessageDialog, "RootDialog");
+				DialogHost.Show(sampleMessageDialog, "RootDialog").Wait();
 			}
 			else
 			{

@@ -1,4 +1,7 @@
-﻿namespace CadCat.Math
+﻿using System;
+using System.Dynamic;
+
+namespace CadCat.Math
 {
 	using Real = System.Double;
 
@@ -43,5 +46,59 @@
 		{
 			return new Vector3(X, Y, Z);
 		}
+
+	    public Matrix4 MatrixMultiply(Vector4 vec2)
+	    {
+		    var mat = new Matrix4();
+			for(int i=0;i<4;i++)
+			for (int j = 0; j < 4; j++)
+				mat[i, j] = this[i] * vec2[j];
+		    return mat;
+	    }
+
+	    public static Vector4 operator /(Vector4 vec, double val)
+	    {
+		    return new Vector4(vec.X/val, vec.Y/val,vec.Z/val,vec.W/val);
+	    }
+
+		public double this[int index]
+	    {
+			get
+			{
+				switch (index)
+				{
+					case 0:
+						return X;
+					case 1:
+						return Y;
+					case 2:
+						return Z;
+					case 3:
+						return W;
+					default:
+						throw new ArgumentException("Index out of boundary values");
+				}
+			}
+			set
+			{
+				switch (index)
+				{
+					case 0:
+						X = value;
+						return;
+					case 1:
+						Y = value;
+						return;
+					case 2:
+						Z = value;
+						return;
+					case 3:
+						W = value;
+						return;
+					default:
+						throw new ArgumentException("Index out of boundary values");
+				}
+			}
+	    }
     }
 }

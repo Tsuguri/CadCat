@@ -5,9 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using System.Windows.Navigation;
 using CadCat.DataStructures;
 using CadCat.Math;
 using CadCat.Rendering;
+using Microsoft.Win32;
 
 namespace CadCat.GeometryModels
 {
@@ -61,12 +63,12 @@ namespace CadCat.GeometryModels
 			this.scene = scene;
 
 			for (int i = 0; i < 4; i++)
-			for (int j = 0; j < 4; j++)
-			{
-				var pt = scene.CreateHiddenCatPoint(new Math.Vector3(i, System.Math.Sin(Math.Utils.Pi * (i * 0.5 + j * 0.1) / 2.0), j));
-				points[i * 4 + j] = pt;
-				pt.OnChanged += OnBezierPointChanged;
-			}
+				for (int j = 0; j < 4; j++)
+				{
+					var pt = scene.CreateHiddenCatPoint(new Math.Vector3(i, System.Math.Sin(Math.Utils.Pi * (i * 0.5 + j * 0.1) / 2.0), j));
+					points[i * 4 + j] = pt;
+					pt.OnChanged += OnBezierPointChanged;
+				}
 			changed = true;
 			owner = true;
 		}
@@ -76,11 +78,11 @@ namespace CadCat.GeometryModels
 			Debug.Assert(points.Length == 16);
 
 			for (int i = 0; i < 4; i++)
-			for (int j = 0; j < 4; j++)
-			{
-				points[i * 4 + j] = pts[i, j];
-				pts[i, j].OnChanged += OnBezierPointChanged;
-			}
+				for (int j = 0; j < 4; j++)
+				{
+					points[i * 4 + j] = pts[i, j];
+					pts[i, j].OnChanged += OnBezierPointChanged;
+				}
 			changed = true;
 			owner = false;
 		}
@@ -131,19 +133,19 @@ namespace CadCat.GeometryModels
 			int heightPoints = HeightDiv + 1;
 
 			for (int i = 0; i < widthPoints; i++)
-			for (int j = 0; j < heightPoints; j++)
-			{
-				mesh.Insert(i * heightPoints + j, EvaluatePointValue(i * widthStep, j * heightStep));
-			}
+				for (int j = 0; j < heightPoints; j++)
+				{
+					mesh.Insert(i * heightPoints + j, EvaluatePointValue(i * widthStep, j * heightStep));
+				}
 
 			for (int i = 0; i < widthPoints - 1; i++)
-			for (int j = 0; j < heightPoints - 1; j++)
-			{
-				meshIndices.Add(i * heightPoints + j);
-				meshIndices.Add(i * heightPoints + j + 1);
-				meshIndices.Add(i * heightPoints + j);
-				meshIndices.Add((i + 1) * heightPoints + j);
-			}
+				for (int j = 0; j < heightPoints - 1; j++)
+				{
+					meshIndices.Add(i * heightPoints + j);
+					meshIndices.Add(i * heightPoints + j + 1);
+					meshIndices.Add(i * heightPoints + j);
+					meshIndices.Add((i + 1) * heightPoints + j);
+				}
 			for (int i = 0; i < widthPoints - 1; i++)
 			{
 				meshIndices.Add(heightPoints * (i + 1) - 1);
@@ -158,57 +160,44 @@ namespace CadCat.GeometryModels
 		}
 
 		private static double[,] temp = new double[2, 4];
+
 		private Vector3 EvaluatePointValue(double u, double v)
 		{
-			temp[0, 0] = EvaluateBerenstein(0, u);
-			temp[0, 1] = EvaluateBerenstein(1, u);
-			temp[0, 2] = EvaluateBerenstein(2, u);
-			temp[0, 3] = EvaluateBerenstein(3, u);
-
-			temp[1, 0] = EvaluateBerenstein(0, v);
-			temp[1, 1] = EvaluateBerenstein(1, v);
-			temp[1, 2] = EvaluateBerenstein(2, v);
-			temp[1, 3] = EvaluateBerenstein(3, v);
-
 			var sum = new Vector3();
-			for (int i = 0; i < 4; i++)
-			for (int j = 0; j < 4; j++)
-				sum += points[i * 4 + j].Position * temp[0, i] * temp[1, j];
 
+			var uVal = EvaluateBSpline(u);
+			var vVal = EvaluateBSpline(v);
+			var values = vVal.MatrixMultiply(uVal);
+
+
+			for (int i = 0; i < 4; i++)
+				for (int j = 0; j < 4; j++)
+				{
+					sum += points[i * 4 + j].Position * values[i, j];
+				}
 
 			return sum;
 		}
 
-		private double EvaluateBerenstein(int n, double val)
+
+
+		private Vector4 EvaluateBSpline(double t)
 		{
-			double neg = 1 - val;
-			switch (n)
+			var N = new Vector4 { [0] = 1.0 };
+			double tm = 1.0 - t;
+			for (int j = 1; j <= 3; j++)
 			{
-				case 0:
-					return neg * neg * neg;
-				case 1:
-					return 3 * neg * neg * val;
-				case 2:
-					return 3 * neg * val * val;
-				case 3:
-					return val * val * val;
-				default:
-					throw new ArgumentException("bad n value");
+				double saved = 0.0;
+				for (int k = 1; k <= j; k++)
+				{
+					double term = N[k - 1] / ((tm + k - 1.0) + (t + j - k));
+					N[k - 1] = saved + (tm + k - 1.0) * term;
+					saved = (t + j - k) * term;
+				}
+				N[j] = saved;
 			}
-		}
 
-		private Vector3 EvaluateBezierCurve(int startPoint, int step, double x)
-		{
-			double x2 = x * x;
-			double x3 = x2 * x;
-			double x11 = (1 - x);
-			double x12 = x11 * (1 - x);
-			double x13 = x12 * (1 - x);
-			Vector3 tempVec = new Vector3();
-			tempVec = points[startPoint + step * 0].Position * x13 + points[startPoint + step * 1].Position * x12 * x * 3
-			          + points[startPoint + step * 2].Position * x2 * x11 * 3 + points[startPoint + step * 3].Position * x3;
-
-			return tempVec;
+			return N;
 		}
 
 		public override void CleanUp()
