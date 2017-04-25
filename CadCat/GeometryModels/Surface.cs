@@ -53,6 +53,13 @@ namespace CadCat.GeometryModels
 				}
 			}
 		}
+		private Proxys.SurfaceType surfacetype;
+		public Proxys.SurfaceType SurfaceType => surfacetype;
+
+		public IEnumerable<Patch> GetPatches()
+		{
+			return patches;
+		}
 
 		public override void CleanUp()
 		{
@@ -65,16 +72,20 @@ namespace CadCat.GeometryModels
 
 			foreach (var catPoint in catPoints)
 			{
+				catPoint.Removeable = true;
 				scene.RemovePoint(catPoint);
 			}
 
 		}
 
-		public Surface(List<Patch> patches, List<CatPoint> catPoints, SceneData scene)
+		public Surface(Proxys.SurfaceType surfacetype, List<Patch> patches, List<CatPoint> catPoints, SceneData scene)
 		{
+			this.surfacetype = surfacetype;
 			this.patches = patches;
 			this.catPoints = catPoints;
 			this.scene = scene;
+
+			this.catPoints.ForEach(x => x.OnReplace += OnPointReplaced);
 		}
 
 		private void BothDivUp()
@@ -95,9 +106,21 @@ namespace CadCat.GeometryModels
 			}
 		}
 
+		private void OnPointReplaced(CatPoint point, CatPoint newPoint)
+		{
+			point.OnReplace -= OnPointReplaced;
+			catPoints.Remove(point);
+			if (!catPoints.Contains(newPoint))
+			{
+				catPoints.Add(newPoint);
+				newPoint.Removeable = false;
+				newPoint.OnReplace += OnPointReplaced;
+			}
+		}
+
 		public override string GetName()
 		{
-			return "Surface "+base.GetName();
+			return "Surface " + base.GetName();
 		}
 	}
 }

@@ -196,6 +196,7 @@ namespace CadCat.DataStructures
 		private ICommand addSelectedPointToSelectedItemCommand;
 		private ICommand changeObjectTypeCommand;
 		private ICommand convertToPointsCommand;
+		private ICommand mergePointsCommand;
 
 
 		private ICommand goToSelectedCommand;
@@ -222,6 +223,8 @@ namespace CadCat.DataStructures
 		public ICommand GoToSelectedCommand => goToSelectedCommand ?? (goToSelectedCommand = new CommandHandler(GoToSelected));
 
 		public ICommand RemoveCommand => removeCommand ?? (removeCommand = new CommandHandler(RemoveSelected));
+
+		public ICommand MergePointsCommand => mergePointsCommand ?? (mergePointsCommand = new CommandHandler(MergePoints));
 
 		public ICommand RemoveSelectedPointsCommand => removeSelectedPointsCommand ?? (removeSelectedPointsCommand = new CommandHandler(RemoveSelectedPoints));
 
@@ -260,8 +263,7 @@ namespace CadCat.DataStructures
 
 		private void CreateBezier()
 		{
-			var selected = GetFilteredSelected();
-			if (selected.Count < 1)
+			if (GetFilteredSelected().Any())
 			{
 				var sampleMessageDialog = new MessageHost
 				{
@@ -273,15 +275,14 @@ namespace CadCat.DataStructures
 			}
 			else
 			{
-				AddNewModel(new Bezier(selected, this));
+				AddNewModel(new Bezier(GetFilteredSelected(), this));
 
 			}
 		}
 
 		private void CreateBezierC2()
 		{
-			var selected = GetFilteredSelected();
-			if (selected.Count < 4)
+			if (GetFilteredSelected().Any())
 			{
 				var sampleMessageDialog = new MessageHost
 				{
@@ -292,14 +293,13 @@ namespace CadCat.DataStructures
 			}
 			else
 			{
-				AddNewModel(new BezierC2(selected, this));
+				AddNewModel(new BezierC2(GetFilteredSelected(), this));
 			}
 		}
 
 		private void CreateBSplineInterpolator()
 		{
-			var selected = GetFilteredSelected();
-			if (selected.Count < 2)
+			if (GetFilteredSelected().Any())
 			{
 				var sampleMessageDialog = new MessageHost
 				{
@@ -310,7 +310,7 @@ namespace CadCat.DataStructures
 			}
 			else
 			{
-				AddNewModel(new BsplineInterpolator(selected, this));
+				AddNewModel(new BsplineInterpolator(GetFilteredSelected(), this));
 			}
 		}
 
@@ -352,6 +352,8 @@ namespace CadCat.DataStructures
 
 		internal void RemovePoint(CatPoint point)
 		{
+			if (!point.Removeable)
+				return;
 			point.CleanUp();
 			Points.Remove(point);
 			hiddenPoints.Remove(point);
@@ -360,6 +362,28 @@ namespace CadCat.DataStructures
 		private void CreatePoint(Vector3 pos)
 		{
 			CreateCatPoint(pos);
+		}
+
+		private void MergePoints()
+		{
+			var pt = GetFilteredSelected().FirstOrDefault();
+			if (pt != null)
+			{
+				Vector3 pos = new Vector3();
+				var pts = GetFilteredSelected().ToList();
+				var newPt = CreateCatPoint(new Vector3());
+				int count = 0;
+				foreach (var point in pts)
+				{
+					pos += point.Position;
+					point.Replace(newPt);
+					point.Removeable = true;
+					count += 1;
+					RemovePoint(point);
+				}
+				newPt.Position = pos / count;
+				Points.Add(newPt);
+			}
 		}
 
 		#endregion
@@ -603,8 +627,7 @@ namespace CadCat.DataStructures
 
 		private void RemoveSelectedPoints()
 		{
-			var pointList = GetFilteredSelected();
-			foreach (var point in pointList)
+			foreach (var point in GetFilteredSelected().Where(x => !x.Removeable))
 			{
 				RemovePoint(point);
 			}
@@ -620,9 +643,9 @@ namespace CadCat.DataStructures
 				pt.IsSelected = true;
 		}
 
-		private List<CatPoint> GetFilteredSelected()
+		private IEnumerable<CatPoint> GetFilteredSelected()
 		{
-			return Points.Where(x => (x.IsSelected && !x.AddAble)).ToList();
+			return Points.Where(x => (x.IsSelected));
 		}
 
 		private void AddSelectedPointToSelectedItem()
@@ -665,7 +688,7 @@ namespace CadCat.DataStructures
 			var ptCount = points.Count + hiddenPoints.Count;
 			scene.Points = new GM1.Serialization.Point[ptCount];
 			int i = 0;
-			foreach (var catPoint in points.Concat(hiddenPoints))
+			foreach (var catPoint in points)
 			{
 				scene.Points[i] = new GM1.Serialization.Point() { Position = catPoint.Position.ToShitpoint(), Name = catPoint.Name };
 				catPoint.SerializationId = i;
@@ -717,7 +740,47 @@ namespace CadCat.DataStructures
 					};
 					interpolators.Add(sceneBezier);
 				}
-				else if (type == typeof(Surface)))
+				else if (type == typeof(Surface))
+				{
+					var surface = model as Surface;
+
+					switch (surface.SurfaceType)
+					{
+						case SurfaceType.Bezier:
+							break;
+						case SurfaceType.BSpline:
+							var sceneSurf = new BezierSurfaceC2();
+							sceneSurf.Name = surface.Name;
+							foreach (var patch in surface.GetPatches().Cast<BSplinePatch>())
+							{
+								var scenePatch = new BezierSurfaceC2Patch()
+								{
+									Name = patch.Name,
+									SurfaceDivisionsU = patch.WidthDiv,
+									SurfaceDivisionsV = patch.HeightDiv,
+									PatchU = patch.UPos,
+									PatchV = patch.VPos,
+									Points = new PointsU4V4()
+								};
+								int ind = 0;
+								foreach (var pt in patch.EnumerateCatPoints().Select(x => x.SerializationId))
+								{
+									scenePatch.Points[ind] = pt;
+									ind++;
+								}
+
+
+
+							}
+
+
+							break;
+						case SurfaceType.Nurbs:
+							break;
+						default:
+							break;
+					}
+				}
 			}
 
 

@@ -82,7 +82,6 @@ namespace CadCat.GeometryModels
 				{
 					var pt = scene.CreateHiddenCatPoint(new Vector3());
 					pt.OnChanged += OnBerensteinPointChanged;
-					pt.AddAble = false;
 					berensteinPoints.Add(pt);
 					switch (currentType)
 					{

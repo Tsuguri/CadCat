@@ -21,5 +21,8 @@
             <MenuItem Header="Bezier C2" Command="{Binding CreateBezierC2Command}" />
 
         </MenuItem>
+        <MenuItem Header="Points">
+            <MenuItem Header="Merge selected" Command="{Binding MergePointsCommand}" />
+        </MenuItem>
     </Menu>
 </UserControl>

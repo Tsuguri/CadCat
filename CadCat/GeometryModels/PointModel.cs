@@ -11,7 +11,15 @@ namespace CadCat.GeometryModels
 		{
 			private CadCat.DataStructures.CatPoint point;
 
-			public DataStructures.CatPoint Point => point;
+			public DataStructures.CatPoint Point
+			{
+				get { return point; }
+				set
+				{
+					point = value;
+				}
+			}
+
 			internal PointWrapper(DataStructures.CatPoint point)
 			{
 				this.point = point;
@@ -48,7 +56,7 @@ namespace CadCat.GeometryModels
 
 		public override IEnumerable<CatPoint> EnumerateCatPoints()
 		{
-			return Points.Select(x=>x.Point);
+			return Points.Select(x => x.Point);
 		}
 	}
 }

@@ -201,6 +201,7 @@ namespace CadCat.GeometryModels
 		{
 			point.OnDeleted += OnPointDeleted;
 			point.OnChanged += OnPointChanged;
+			point.OnReplace += OnPointReplacement;
 			points.Add(new PointWrapper(point));
 		}
 
@@ -211,6 +212,7 @@ namespace CadCat.GeometryModels
 				wrapper.Point.OnDeleted -= OnPointDeleted;
 			}
 			wrapper.Point.OnChanged -= OnPointChanged;
+			wrapper.Point.OnReplace -= OnPointReplacement;
 			points.Remove(wrapper);
 		}
 
@@ -254,6 +256,20 @@ namespace CadCat.GeometryModels
 		protected virtual void OnPointChanged(CatPoint point)
 		{
 
+		}
+
+		protected virtual void OnPointReplacement(CatPoint point, CatPoint newPoint)
+		{
+			var pt = points.FirstOrDefault(x => x.Point == point);
+			if (pt == null)
+				throw new Exception("Bad curve was informed about replacement");
+			pt.Point.OnChanged -= OnPointChanged;
+			pt.Point.OnDeleted -= OnPointDeleted;
+			pt.Point = newPoint;
+
+			pt.Point.OnDeleted += OnPointChanged;
+			pt.Point.OnDeleted += OnPointDeleted;
+			pt.Point.OnReplace += OnPointReplacement;
 		}
 
 		#endregion

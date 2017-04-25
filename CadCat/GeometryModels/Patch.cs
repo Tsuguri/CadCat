@@ -24,6 +24,9 @@ namespace CadCat.GeometryModels
 		private int widthDiv = 3;
 
 
+		public int UPos { get; set; }
+		public int VPos { get; set; }
+
 		public int WidthDiv
 		{
 			get { return widthDiv; }

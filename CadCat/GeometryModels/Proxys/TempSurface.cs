@@ -310,7 +310,7 @@ namespace CadCat.GeometryModels.Proxys
 					for (int j = 0; j < heightPoints; j++)
 					{
 						var pt = points[i * heightPoints + j];
-						catPoints[i, j] = scene.CreateHiddenCatPoint((matrix * new Vector4(pt)).ClipToVector3());
+						catPoints[i, j] = scene.CreateCatPoint((matrix * new Vector4(pt)).ClipToVector3());
 					}
 			else
 			{
@@ -333,7 +333,7 @@ namespace CadCat.GeometryModels.Proxys
 						}
 						else
 							pt = points[i * heightPoints + j];
-						catPoints[i, j] = scene.CreateHiddenCatPoint((matrix * new Vector4(pt)).ClipToVector3());
+						catPoints[i, j] = scene.CreateCatPoint((matrix * new Vector4(pt)).ClipToVector3());
 					}
 				if (cylinder)
 					for (int j = 0; j < heightPoints; j++)
@@ -348,7 +348,11 @@ namespace CadCat.GeometryModels.Proxys
 					for (int x = 0; x < 4; x++)
 						for (int y = 0; y < 4; y++)
 							subArray[x, y] = catPoints[i * 3 + x, j * 3 + y];
-					var patch = new BezierPatch(subArray);
+					var patch = new BezierPatch(subArray)
+					{
+						UPos = i,
+						VPos = j
+					};
 					scene.AddNewModel(patch);
 					patches.Add(patch);
 
@@ -356,9 +360,10 @@ namespace CadCat.GeometryModels.Proxys
 			var catPointsList = new List<CatPoint>(catPoints.GetLength(0) * catPoints.GetLength(1));
 			foreach (var catPoint in catPoints)
 			{
+				catPoint.Removeable = false;
 				catPointsList.Add(catPoint);
 			}
-			scene.AddNewModel(new Surface(patches, catPointsList, scene));
+			scene.AddNewModel(new Surface(SurfaceType.Bezier, patches, catPointsList, scene));
 
 		}
 
@@ -382,38 +387,38 @@ namespace CadCat.GeometryModels.Proxys
 					for (int j = 1; j < heightPoints - 1; j++)
 					{
 						var pt = pts[(i - 1), (j - 1)];
-						catPoints[i, j] = scene.CreateHiddenCatPoint((matrix * new Vector4(pt)).ClipToVector3());
+						catPoints[i, j] = scene.CreateCatPoint((matrix * new Vector4(pt)).ClipToVector3());
 					}
 
 				for (int i = 1; i < widthPoints - 1; i++)
 				{
 					int j = 0;
 					var pt = pts[i - 1, 0] * 2 - pts[i - 1, 1];
-					catPoints[i, j] = scene.CreateHiddenCatPoint((matrix * new Vector4(pt)).ClipToVector3());
+					catPoints[i, j] = scene.CreateCatPoint((matrix * new Vector4(pt)).ClipToVector3());
 					j = heightPoints - 1;
 					pt = pts[i - 1, j - 2] * 2 - pts[i - 1, j - 3];
-					catPoints[i, j] = scene.CreateHiddenCatPoint((matrix * new Vector4(pt)).ClipToVector3());
+					catPoints[i, j] = scene.CreateCatPoint((matrix * new Vector4(pt)).ClipToVector3());
 				}
 				for (int j = 1; j < heightPoints - 1; j++)
 				{
 					int i = 0;
 					var pt = pts[0, j - 1] * 2 - pts[1, j - 1];
-					catPoints[i, j] = scene.CreateHiddenCatPoint((matrix * new Vector4(pt)).ClipToVector3());
+					catPoints[i, j] = scene.CreateCatPoint((matrix * new Vector4(pt)).ClipToVector3());
 					i = widthPoints - 1;
 					pt = pts[i - 2, j - 1] * 2 - pts[i - 3, j - 1];
-					catPoints[i, j] = scene.CreateHiddenCatPoint((matrix * new Vector4(pt)).ClipToVector3());
+					catPoints[i, j] = scene.CreateCatPoint((matrix * new Vector4(pt)).ClipToVector3());
 				}
 
-				catPoints[0, 0] = scene.CreateHiddenCatPoint((matrix * new Vector4(pts[0, 0] * 2 - pts[1, 1])).ClipToVector3());
-				catPoints[widthPoints - 1, heightPoints - 1] = scene.CreateHiddenCatPoint(
+				catPoints[0, 0] = scene.CreateCatPoint((matrix * new Vector4(pts[0, 0] * 2 - pts[1, 1])).ClipToVector3());
+				catPoints[widthPoints - 1, heightPoints - 1] = scene.CreateCatPoint(
 					(matrix * new Vector4(pts[pts.GetLength(0) - 1, pts.GetLength(1) - 1] * 2 -
 										  pts[pts.GetLength(0) - 2, pts.GetLength(1) - 2])).ClipToVector3());
 
 				catPoints[widthPoints - 1, 0] =
-					scene.CreateHiddenCatPoint((matrix * new Vector4(pts[pts.GetLength(0) - 1, 0] * 2 - pts[pts.GetLength(0) - 2, 1]))
+					scene.CreateCatPoint((matrix * new Vector4(pts[pts.GetLength(0) - 1, 0] * 2 - pts[pts.GetLength(0) - 2, 1]))
 						.ClipToVector3());
 				catPoints[0, heightPoints - 1] =
-					scene.CreateHiddenCatPoint((matrix * new Vector4(pts[0, pts.GetLength(1) - 1] * 2 - pts[1, pts.GetLength(1) - 2]))
+					scene.CreateCatPoint((matrix * new Vector4(pts[0, pts.GetLength(1) - 1] * 2 - pts[1, pts.GetLength(1) - 2]))
 						.ClipToVector3());
 			}
 			else
@@ -432,7 +437,7 @@ namespace CadCat.GeometryModels.Proxys
 					{
 						Real y = heightStep * j - Height / 2;
 						Real z = newRadius * System.Math.Cos(angle);
-						catPoints[i, j] = scene.CreateHiddenCatPoint((matrix * new Vector4(x, y, z, 1.0)).ClipToVector3());
+						catPoints[i, j] = scene.CreateCatPoint((matrix * new Vector4(x, y, z, 1.0)).ClipToVector3());
 					}
 				}
 
@@ -455,7 +460,8 @@ namespace CadCat.GeometryModels.Proxys
 					for (int x = 0; x < 4; x++)
 						for (int y = 0; y < 4; y++)
 							subArray[x, y] = catPoints[i + x, j + y];
-					var patch = new BSplinePatch(subArray);
+					var patch = new BSplinePatch(subArray)
+					{ UPos = i, VPos = j };
 					scene.AddNewModel(patch);
 					patches.Add(patch);
 
@@ -463,9 +469,10 @@ namespace CadCat.GeometryModels.Proxys
 			var catPointsList = new List<CatPoint>(catPoints.GetLength(0) * catPoints.GetLength(1));
 			foreach (var catPoint in catPoints)
 			{
+				catPoint.Removeable = false;
 				catPointsList.Add(catPoint);
 			}
-			scene.AddNewModel(new Surface(patches, catPointsList, scene));
+			scene.AddNewModel(new Surface(SurfaceType.BSpline, patches, catPointsList, scene));
 
 
 		}

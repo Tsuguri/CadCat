@@ -82,6 +82,7 @@ namespace CadCat.GeometryModels
 				{
 					points[i * 4 + j] = pts[i, j];
 					pts[i, j].OnChanged += OnBezierPointChanged;
+					pts[i, j].OnReplace += OnBezierPointReplaced;
 				}
 			changed = true;
 			owner = false;
@@ -90,6 +91,22 @@ namespace CadCat.GeometryModels
 		private void OnBezierPointChanged(CatPoint point)
 		{
 			changed = true;
+		}
+
+		private void OnBezierPointReplaced(CatPoint point, CatPoint newPoint)
+		{
+			if (point != newPoint)
+			{
+
+				for (int i = 0; i < points.Length; i++)
+					if (points[i] == point)
+						points[i] = newPoint;
+				changed = true;
+				point.OnChanged -= OnBezierPointChanged;
+				newPoint.OnChanged += OnBezierPointChanged;
+				newPoint.OnReplace += OnBezierPointReplaced;
+			}
+
 		}
 
 
@@ -210,6 +227,11 @@ namespace CadCat.GeometryModels
 					scene.RemovePoint(pt);
 				}
 			}
+		}
+
+		public override IEnumerable<CatPoint> EnumerateCatPoints()
+		{
+			return points;
 		}
 
 		public override string GetName()

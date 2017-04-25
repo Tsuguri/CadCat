@@ -1,4 +1,5 @@
 ﻿using CadCat.Math;
+using System.Diagnostics;
 
 namespace CadCat.DataStructures
 {
@@ -6,9 +7,11 @@ namespace CadCat.DataStructures
 	{
 		public delegate void DeletedHandler(CatPoint sender);
 		public delegate void ChangedHandler(CatPoint sender);
+		public delegate void ReplacedHandler(CatPoint sender, CatPoint replacement);
 
 		public event DeletedHandler OnDeleted;
 		public event ChangedHandler OnChanged;
+		public event ReplacedHandler OnReplace;
 
 		private static int id = 0;
 
@@ -126,12 +129,21 @@ namespace CadCat.DataStructures
 			}
 		}
 
-		public bool AddAble { get; set; }
+		public bool Removeable { get; set; } = true;
 
 		public void CleanUp()
 		{
+			if (!Removeable)
+				throw new System.Exception("Tried to remove unremovable point");
 			OnDeleted?.Invoke(this);
 		}
 
+		internal void Replace(CatPoint replacement)
+		{
+			if (this != replacement)
+			{
+				OnReplace?.Invoke(this, replacement);
+			}
+		}
 	}
 }
