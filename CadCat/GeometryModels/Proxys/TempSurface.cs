@@ -363,7 +363,7 @@ namespace CadCat.GeometryModels.Proxys
 				catPoint.Removeable = false;
 				catPointsList.Add(catPoint);
 			}
-			scene.AddNewModel(new Surface(SurfaceType.Bezier, patches, catPointsList, scene));
+			scene.AddNewModel(new Surface(SurfaceType.Bezier, patches, catPointsList, scene) { PatchesU = UDensity, PatchesV = VDensity });
 
 		}
 
@@ -472,7 +472,7 @@ namespace CadCat.GeometryModels.Proxys
 				catPoint.Removeable = false;
 				catPointsList.Add(catPoint);
 			}
-			scene.AddNewModel(new Surface(SurfaceType.BSpline, patches, catPointsList, scene));
+			scene.AddNewModel(new Surface(SurfaceType.BSpline, patches, catPointsList, scene) {PatchesU = UDensity, PatchesV = VDensity});
 
 
 		}

@@ -749,6 +749,8 @@ namespace CadCat.DataStructures
 						case SurfaceType.Bezier:
 							var bezierSurf = new BezierSurfaceC0();
 							bezierSurf.Name = surface.Name;
+							bezierSurf.PatchesU = surface.PatchesU;
+							bezierSurf.PatchesV = surface.PatchesV;
 							var ptchs = new List<BezierSurfaceC0Patch>();
 							foreach (var patch in surface.GetPatches().Cast<BezierPatch>())
 							{
@@ -777,6 +779,8 @@ namespace CadCat.DataStructures
 						case SurfaceType.BSpline:
 							var sceneSurf = new BezierSurfaceC2();
 							sceneSurf.Name = surface.Name;
+							sceneSurf.PatchesU = surface.PatchesU;
+							sceneSurf.PatchesV = surface.PatchesV;
 							var ptch = new List<BezierSurfaceC2Patch>();
 							foreach (var patch in surface.GetPatches().Cast<BSplinePatch>())
 							{
@@ -818,6 +822,21 @@ namespace CadCat.DataStructures
 			scene.InterpolationBezierCurvesC2 = interpolators.ToArray();
 
 			serializer.SerializeToFile(filename, scene);
+		}
+
+		private void LoadFile()
+		{
+			
+		}
+
+		private void LoadFromFile(string filename)
+		{
+			ClearScene();
+		}
+
+		private void ClearScene()
+		{
+			
 		}
 
 	}

@@ -22,6 +22,8 @@ namespace CadCat.GeometryModels
 		private ICommand bothDivUpCommand;
 		private ICommand bothDivDownCommand;
 
+		public int PatchesU { get; set; }
+		public int PatchesV { get; set; }
 		public ICommand BothDivUpCommand => bothDivUpCommand ?? (bothDivUpCommand = new CommandHandler(BothDivUp));
 
 		public ICommand BothDivDownCommand => bothDivDownCommand ?? (bothDivDownCommand = new CommandHandler(BothDivDown));
