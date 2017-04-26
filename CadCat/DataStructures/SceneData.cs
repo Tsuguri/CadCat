@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using CadCat.Math;
@@ -13,6 +14,7 @@ using System.Windows.Media;
 using CadCat.GeometryModels.Proxys;
 using CadCat.Utilities;
 using GM1.Serialization;
+using Microsoft.Win32;
 using Camera = CadCat.Rendering.Camera;
 using Point = System.Windows.Point;
 using Vector3 = CadCat.Math.Vector3;
@@ -826,17 +828,48 @@ namespace CadCat.DataStructures
 
 		private void LoadFile()
 		{
+			OpenFileDialog openFileDialog = new OpenFileDialog();
+			if (openFileDialog.ShowDialog() == false)
+				return;
 			
+			LoadFromFile(openFileDialog.FileName);
 		}
 
 		private void LoadFromFile(string filename)
 		{
+
+			var p = new XMLSerializer();
+			Scene scene;
+			try
+			{
+				scene = p.DeserializeFromFile(filename);
+			}
+			catch (Exception e)
+			{
+				return;
+			}
+
+
 			ClearScene();
+
+			var catPoints = new List<CatPoint>(scene.Points.Length);
+			for (int i = 0; i < scene.Points.Length; i++)
+			{
+				var pos = scene.Points[i].Position;
+				var pt = CreateCatPoint(new Vector3(pos.X, pos.Y, pos.Z), false);
+				pt.Name = scene.Points[i].Name;
+				catPoints.Add(pt);
+			}
+
 		}
 
 		private void ClearScene()
 		{
-			
+			CatPoint.ResetID();
+			Model.ResetId();
+
+			Models.Clear();
+			Points.Clear();
 		}
 
 	}

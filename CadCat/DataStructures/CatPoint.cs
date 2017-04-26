@@ -15,6 +15,10 @@ namespace CadCat.DataStructures
 
 		private static int id = 0;
 
+		public static void ResetID()
+		{
+			id = 0;
+		}
 		Vector3 position;
 		string name;
 		bool isSelected = false;

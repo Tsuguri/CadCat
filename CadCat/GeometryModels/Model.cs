@@ -44,6 +44,11 @@ namespace CadCat.GeometryModels
 
 		private static int idCounter = 0;
 
+		public static void ResetId()
+		{
+			idCounter = 0;
+		}
+
 		public Model()
 		{
 			ModelId = idCounter;
