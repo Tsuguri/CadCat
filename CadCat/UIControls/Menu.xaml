@@ -9,7 +9,7 @@
     <Menu Grid.Row="0">
         <MenuItem Header="File">
             <MenuItem Header="Nothing here yet" />
-            <MenuItem Header="Test save" Command="{Binding TestSaveCommand}" />
+            <MenuItem Header="Save File" Command="{Binding SaveFileCommand}" />
             <MenuItem Header="Load File" Command="{Binding LoadFileCommand}" />
         </MenuItem>
         <MenuItem Header="Models">

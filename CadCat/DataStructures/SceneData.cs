@@ -205,11 +205,11 @@ namespace CadCat.DataStructures
 		private ICommand removeCommand;
 
 
-		private ICommand testSaveCommand;
+		private ICommand saveFileCommand;
 		private ICommand loadFileCommand;
 
 		public ICommand LoadFileCommand => loadFileCommand ?? (loadFileCommand = new CommandHandler(LoadFile));
-		public ICommand TestSaveCommand => testSaveCommand ?? (testSaveCommand = new CommandHandler(TestSave));
+		public ICommand SaveFileCommand => saveFileCommand ?? (saveFileCommand = new CommandHandler(SaveFile));
 
 		public ICommand CreateTorusCommand => createTorusCommand ?? (createTorusCommand = new CommandHandler(CreateTorus));
 
@@ -680,9 +680,13 @@ namespace CadCat.DataStructures
 
 		}
 
-		private void TestSave()
+		private void SaveFile()
 		{
-			SaveToFile("superduperFile.xml");
+			SaveFileDialog saveFileDialog = new SaveFileDialog();
+			if (saveFileDialog.ShowDialog() == false)
+				return;
+
+			SaveToFile(saveFileDialog.FileName);
 		}
 
 		private void SaveToFile(string filename)
