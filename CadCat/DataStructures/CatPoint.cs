@@ -1,4 +1,5 @@
-﻿using CadCat.Math;
+﻿using System.CodeDom;
+using CadCat.Math;
 using System.Diagnostics;
 
 namespace CadCat.DataStructures
@@ -133,7 +134,10 @@ namespace CadCat.DataStructures
 			}
 		}
 
-		public bool Removeable { get; set; } = true;
+		public bool Removeable => DependentUnremovable==0;
+
+		public uint DependentUnremovable { get; set; } = 0;
+
 
 		public void CleanUp()
 		{
@@ -149,5 +153,6 @@ namespace CadCat.DataStructures
 				OnReplace?.Invoke(this, replacement);
 			}
 		}
+
 	}
 }

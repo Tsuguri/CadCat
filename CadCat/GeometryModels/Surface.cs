@@ -74,7 +74,7 @@ namespace CadCat.GeometryModels
 
 			foreach (var catPoint in catPoints)
 			{
-				catPoint.Removeable = true;
+				catPoint.DependentUnremovable -= 1;
 				scene.RemovePoint(catPoint);
 			}
 
@@ -87,7 +87,11 @@ namespace CadCat.GeometryModels
 			this.catPoints = catPoints;
 			this.scene = scene;
 
-			this.catPoints.ForEach(x => x.OnReplace += OnPointReplaced);
+			this.catPoints.ForEach(x =>
+			{
+				x.OnReplace += OnPointReplaced;
+				x.DependentUnremovable += 1;
+			});
 		}
 
 		private void BothDivUp()
@@ -111,11 +115,12 @@ namespace CadCat.GeometryModels
 		private void OnPointReplaced(CatPoint point, CatPoint newPoint)
 		{
 			point.OnReplace -= OnPointReplaced;
+			point.DependentUnremovable -= 1;
 			catPoints.Remove(point);
 			if (!catPoints.Contains(newPoint))
 			{
 				catPoints.Add(newPoint);
-				newPoint.Removeable = false;
+				newPoint.DependentUnremovable += 1;
 				newPoint.OnReplace += OnPointReplaced;
 			}
 		}

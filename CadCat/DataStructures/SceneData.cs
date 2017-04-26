@@ -382,7 +382,6 @@ namespace CadCat.DataStructures
 				{
 					pos += point.Position;
 					point.Replace(newPt);
-					point.Removeable = true;
 					count += 1;
 					RemovePoint(point);
 				}
