@@ -252,9 +252,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\point.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="cat_s4T_icon.ico" />
   </ItemGroup>
   <ItemGroup>

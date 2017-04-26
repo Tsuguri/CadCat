@@ -206,6 +206,9 @@ namespace CadCat.DataStructures
 
 
 		private ICommand testSaveCommand;
+		private ICommand loadFileCommand;
+
+		public ICommand LoadFileCommand => loadFileCommand ?? (loadFileCommand = new CommandHandler(LoadFile));
 		public ICommand TestSaveCommand => testSaveCommand ?? (testSaveCommand = new CommandHandler(TestSave));
 
 		public ICommand CreateTorusCommand => createTorusCommand ?? (createTorusCommand = new CommandHandler(CreateTorus));
@@ -860,6 +863,96 @@ namespace CadCat.DataStructures
 				pt.Name = scene.Points[i].Name;
 				catPoints.Add(pt);
 			}
+
+
+			foreach (var bezierCurveC0 in scene.BezierCurvesC0)
+			{
+				var curve = new Bezier(bezierCurveC0.Points.Select(x => catPoints[x]), this) {Name = bezierCurveC0.Name};
+				if(bezierCurveC0.DisplayPolygonSpecified)
+					curve.ShowPolygon = bezierCurveC0.DisplayPolygon;
+				AddNewModel(curve);
+			}
+
+			foreach (var bezierCurveC2 in scene.BezierCurvesC2)
+			{
+				var curve = new BezierC2(bezierCurveC2.Points.Select(x => catPoints[x]), this) { Name = bezierCurveC2.Name };
+				if (bezierCurveC2.DisplayPolygonSpecified)
+					curve.ShowPolygon = bezierCurveC2.DisplayPolygon;
+				AddNewModel(curve);
+			}
+
+			foreach (var interpolationBezierCurveC2 in scene.InterpolationBezierCurvesC2)
+			{
+				var curve = new BsplineInterpolator(interpolationBezierCurveC2.Points.Select(x => catPoints[x]), this) { Name = interpolationBezierCurveC2.Name };
+				if (interpolationBezierCurveC2.DisplayPolygonSpecified)
+					curve.ShowPolygon = interpolationBezierCurveC2.DisplayPolygon;
+				AddNewModel(curve);
+			}
+
+			foreach (var bezierSurfaceC0 in scene.BezierSurfacesC0)
+			{
+				var patches = new List<Patch>();
+				foreach (var bezierSurfaceC0Patch in bezierSurfaceC0.Patches)
+				{
+					var pts = new CatPoint[4,4];
+					for(int i=0;i<4;i++)
+					for (int j = 0; j < 4; j++)
+						pts[i, j] = catPoints[bezierSurfaceC0Patch.Points[i, j]];
+					var patch = new BezierPatch(pts)
+					{
+						HeightDiv = bezierSurfaceC0Patch.SurfaceDivisionsV,
+						WidthDiv = bezierSurfaceC0Patch.SurfaceDivisionsU,
+						Name = bezierSurfaceC0Patch.Name,
+						UPos = bezierSurfaceC0Patch.PatchU,
+						VPos = bezierSurfaceC0Patch.PatchV
+					};
+					AddNewModel(patch);
+					patches.Add(patch);
+				}
+
+				var surfacePoints = patches.SelectMany(x => x.EnumerateCatPoints()).Distinct().ToList();
+				var surface = new Surface(SurfaceType.Bezier, patches, surfacePoints, this)
+				{
+					Name = bezierSurfaceC0.Name,
+					PatchesU = bezierSurfaceC0.PatchesU,
+					PatchesV = bezierSurfaceC0.PatchesV
+				};
+				AddNewModel(surface);
+			}
+
+			foreach (var bezierSurfaceC2 in scene.BezierSurfacesC2)
+			{
+				var patches = new List<Patch>();
+				foreach (var bezierSurfaceC0Patch in bezierSurfaceC2.Patches)
+				{
+					var pts = new CatPoint[4, 4];
+					for (int i = 0; i < 4; i++)
+					for (int j = 0; j < 4; j++)
+						pts[i, j] = catPoints[bezierSurfaceC0Patch.Points[i, j]];
+					var patch = new BSplinePatch(pts)
+					{
+						HeightDiv = bezierSurfaceC0Patch.SurfaceDivisionsV,
+						WidthDiv = bezierSurfaceC0Patch.SurfaceDivisionsU,
+						Name = bezierSurfaceC0Patch.Name,
+						UPos = bezierSurfaceC0Patch.PatchU,
+						VPos = bezierSurfaceC0Patch.PatchV
+					};
+					AddNewModel(patch);
+					patches.Add(patch);
+				}
+
+				var surfacePoints = patches.SelectMany(x => x.EnumerateCatPoints()).Distinct().ToList();
+				var surface = new Surface(SurfaceType.BSpline, patches, surfacePoints, this)
+				{
+					Name = bezierSurfaceC2.Name,
+					PatchesU = bezierSurfaceC2.PatchesU,
+					PatchesV = bezierSurfaceC2.PatchesV
+				};
+				AddNewModel(surface);
+			}
+
+
+
 
 		}
 
