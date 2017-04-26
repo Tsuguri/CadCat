@@ -263,7 +263,7 @@ namespace CadCat.DataStructures
 
 		private void CreateBezier()
 		{
-			if (GetFilteredSelected().Any())
+			if (GetFilteredSelected().Count() < 2)
 			{
 				var sampleMessageDialog = new MessageHost
 				{
@@ -271,7 +271,7 @@ namespace CadCat.DataStructures
 				};
 
 
-				DialogHost.Show(sampleMessageDialog, "RootDialog").Wait();
+				DialogHost.Show(sampleMessageDialog, "RootDialog");
 			}
 			else
 			{
@@ -282,14 +282,14 @@ namespace CadCat.DataStructures
 
 		private void CreateBezierC2()
 		{
-			if (GetFilteredSelected().Any())
+			if (GetFilteredSelected().Count() < 4)
 			{
 				var sampleMessageDialog = new MessageHost
 				{
 					Message = { Text = "Not enough points for C2 Bezier Curve (at least 4)." }
 				};
 
-				DialogHost.Show(sampleMessageDialog, "RootDialog").Wait();
+				DialogHost.Show(sampleMessageDialog, "RootDialog");
 			}
 			else
 			{
@@ -299,14 +299,14 @@ namespace CadCat.DataStructures
 
 		private void CreateBSplineInterpolator()
 		{
-			if (GetFilteredSelected().Any())
+			if (GetFilteredSelected().Count()<2)
 			{
 				var sampleMessageDialog = new MessageHost
 				{
 					Message = { Text = "Not enough points for BSpline interpolation (at least 2)." }
 				};
 
-				DialogHost.Show(sampleMessageDialog, "RootDialog").Wait();
+				DialogHost.Show(sampleMessageDialog, "RootDialog");
 			}
 			else
 			{
@@ -382,7 +382,6 @@ namespace CadCat.DataStructures
 					RemovePoint(point);
 				}
 				newPt.Position = pos / count;
-				Points.Add(newPt);
 			}
 		}
 
@@ -627,7 +626,8 @@ namespace CadCat.DataStructures
 
 		private void RemoveSelectedPoints()
 		{
-			foreach (var point in GetFilteredSelected().Where(x => !x.Removeable))
+			var toRemove = GetFilteredSelected().Where(x => x.Removeable).ToList();
+			foreach (var point in toRemove)
 			{
 				RemovePoint(point);
 			}
@@ -747,10 +747,37 @@ namespace CadCat.DataStructures
 					switch (surface.SurfaceType)
 					{
 						case SurfaceType.Bezier:
+							var bezierSurf = new BezierSurfaceC0();
+							bezierSurf.Name = surface.Name;
+							var ptchs = new List<BezierSurfaceC0Patch>();
+							foreach (var patch in surface.GetPatches().Cast<BezierPatch>())
+							{
+								var scenePatch = new BezierSurfaceC0Patch()
+								{
+									Name = patch.Name,
+									SurfaceDivisionsU = patch.WidthDiv,
+									SurfaceDivisionsV = patch.HeightDiv,
+									PatchU = patch.UPos,
+									PatchV = patch.VPos,
+									Points = new PointsU4V4()
+								};
+								int ind = 0;
+								foreach (var pt in patch.EnumerateCatPoints().Select(x => x.SerializationId))
+								{
+									scenePatch.Points[ind] = pt;
+									ind++;
+								}
+								ptchs.Add(scenePatch);
+
+							}
+							bezierSurf.Patches = ptchs.ToArray();
+							surfacesc0.Add(bezierSurf);
+
 							break;
 						case SurfaceType.BSpline:
 							var sceneSurf = new BezierSurfaceC2();
 							sceneSurf.Name = surface.Name;
+							var ptch = new List<BezierSurfaceC2Patch>();
 							foreach (var patch in surface.GetPatches().Cast<BSplinePatch>())
 							{
 								var scenePatch = new BezierSurfaceC2Patch()
@@ -768,11 +795,12 @@ namespace CadCat.DataStructures
 									scenePatch.Points[ind] = pt;
 									ind++;
 								}
-
+								ptch.Add(scenePatch);
 
 
 							}
-
+							sceneSurf.Patches = ptch.ToArray();
+							surfacesc2.Add(sceneSurf);
 
 							break;
 						case SurfaceType.Nurbs:
@@ -783,6 +811,11 @@ namespace CadCat.DataStructures
 				}
 			}
 
+			scene.BezierSurfacesC0 = surfacesc0.ToArray();
+			scene.BezierSurfacesC2 = surfacesc2.ToArray();
+			scene.BezierCurvesC0 = beziersc0.ToArray();
+			scene.BezierCurvesC2 = beziersc2.ToArray();
+			scene.InterpolationBezierCurvesC2 = interpolators.ToArray();
 
 			serializer.SerializeToFile(filename, scene);
 		}
