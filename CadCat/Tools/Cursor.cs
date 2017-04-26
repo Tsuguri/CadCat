@@ -28,6 +28,22 @@ namespace CadCat.Tools
 		private readonly List<Math.Vector3> points;
 		private readonly List<int> indices;
 		private bool visible;
+		private double radius = 1.0;
+
+		public double Radius
+		{
+			get { return radius; }
+			set
+			{
+				if (value >= 0.0)
+				{
+					radius = value;
+					PositionChanged();
+					OnPropertyChanged();
+				}
+			}
+		}
+
 		public bool Visible
 		{
 			get
@@ -148,7 +164,7 @@ namespace CadCat.Tools
 			if (catchedPoints != null)
 				foreach (var point in catchedPoints)
 				{
-					var pos = point.Item2 + Transform.Position;
+					var pos = point.Item2*Radius + Transform.Position;
 					point.Item1.X = pos.X;
 					point.Item1.Y = pos.Y;
 					point.Item1.Z = pos.Z;

@@ -304,7 +304,7 @@ namespace CadCat.DataStructures
 
 		private void CreateBSplineInterpolator()
 		{
-			if (GetFilteredSelected().Count()<2)
+			if (GetFilteredSelected().Count() < 2)
 			{
 				var sampleMessageDialog = new MessageHost
 				{
@@ -444,6 +444,14 @@ namespace CadCat.DataStructures
 
 				}
 
+			if (dragMode == MouseDragMode.SelectPoints)
+			{
+				var minX = System.Math.Min(dragActualPosition.X, dragStartPosition.X) / ScreenSize.X;
+				var maxX = System.Math.Max(dragActualPosition.X, dragStartPosition.X) / ScreenSize.X;
+				var minY = System.Math.Min(dragActualPosition.Y, dragStartPosition.Y) / ScreenSize.Y;
+				var maxY = System.Math.Max(dragActualPosition.Y, dragStartPosition.Y) / ScreenSize.Y;
+				renderer.DrawRectangle(minX, maxX, 1.0 - minY, 1.0 - maxY, Colors.DarkOrchid);
+			}
 			Cursor.Render(renderer);
 		}
 
@@ -483,6 +491,9 @@ namespace CadCat.DataStructures
 						}
 
 						break;
+					case MouseDragMode.SelectPoints:
+						dragActualPosition = MousePosition;
+						break;
 					case MouseDragMode.None:
 						ActiveCamera.Move(delta.X, delta.Y);
 						break;
@@ -501,12 +512,15 @@ namespace CadCat.DataStructures
 			CameraMove,
 			CursorMove,
 			PointMove,
+			SelectPoints,
 			None
 
 		}
 		private MouseDragMode dragMode = MouseDragMode.None;
 		private CatPoint draggedPoint;
 		private Plane pointPlane;
+		private Point dragStartPosition;
+		private Point dragActualPosition;
 
 
 		public void OnLeftMousePressed(Vector2 mousePos)
@@ -519,6 +533,11 @@ namespace CadCat.DataStructures
 				dragMode = MouseDragMode.CameraMove;
 			else if (Keyboard.IsKeyDown(Key.C))
 				dragMode = MouseDragMode.CursorMove;
+			else if (Keyboard.IsKeyDown(Key.S))
+			{
+				dragMode = MouseDragMode.SelectPoints;
+				dragStartPosition = dragActualPosition = MousePosition;
+			}
 			else // dragging point
 			{
 				CatPoint clicked;
@@ -533,6 +552,35 @@ namespace CadCat.DataStructures
 
 		public void OnLeftMouseReleased()
 		{
+			if (dragMode == MouseDragMode.SelectPoints)
+			{
+				var dragEnd = MousePosition;
+				var minX = System.Math.Min(dragEnd.X, dragStartPosition.X) / ScreenSize.X;
+				var maxX = System.Math.Max(dragEnd.X, dragStartPosition.X) / ScreenSize.X;
+				var minY = System.Math.Min(dragEnd.Y, dragStartPosition.Y) / ScreenSize.Y;
+				var maxY = System.Math.Max(dragEnd.Y, dragStartPosition.Y) / ScreenSize.Y;
+
+				var ptsList = new List<CatPoint>();
+				var cameraMatrix = ActiveCamera.ViewProjectionMatrix;
+
+				foreach (var catPoint in GetPoints().Where(x => x.Visible))
+				{
+
+					var pt = (cameraMatrix * new Vector4(catPoint.Position)).ToNormalizedVector3() / 2 + 0.5f;
+					if (pt.X < maxX && pt.X > minX && pt.Y < maxY && pt.Y > minY)
+						ptsList.Add(catPoint);
+				}
+				if (!Keyboard.IsKeyDown(Key.LeftCtrl))
+					foreach (var catPoint in Points)
+					{
+						catPoint.IsSelected = false;
+					}
+				foreach (var catPoint in ptsList)
+				{
+					catPoint.IsSelected = true;
+				}
+
+			}
 			dragMode = MouseDragMode.None;
 			draggedPoint = null;
 		}
@@ -837,7 +885,7 @@ namespace CadCat.DataStructures
 			OpenFileDialog openFileDialog = new OpenFileDialog();
 			if (openFileDialog.ShowDialog() == false)
 				return;
-			
+
 			LoadFromFile(openFileDialog.FileName);
 		}
 
@@ -870,8 +918,8 @@ namespace CadCat.DataStructures
 
 			foreach (var bezierCurveC0 in scene.BezierCurvesC0)
 			{
-				var curve = new Bezier(bezierCurveC0.Points.Select(x => catPoints[x]), this) {Name = bezierCurveC0.Name};
-				if(bezierCurveC0.DisplayPolygonSpecified)
+				var curve = new Bezier(bezierCurveC0.Points.Select(x => catPoints[x]), this) { Name = bezierCurveC0.Name };
+				if (bezierCurveC0.DisplayPolygonSpecified)
 					curve.ShowPolygon = bezierCurveC0.DisplayPolygon;
 				AddNewModel(curve);
 			}
@@ -897,10 +945,10 @@ namespace CadCat.DataStructures
 				var patches = new List<Patch>();
 				foreach (var bezierSurfaceC0Patch in bezierSurfaceC0.Patches)
 				{
-					var pts = new CatPoint[4,4];
-					for(int i=0;i<4;i++)
-					for (int j = 0; j < 4; j++)
-						pts[i, j] = catPoints[bezierSurfaceC0Patch.Points[i, j]];
+					var pts = new CatPoint[4, 4];
+					for (int i = 0; i < 4; i++)
+						for (int j = 0; j < 4; j++)
+							pts[i, j] = catPoints[bezierSurfaceC0Patch.Points[i, j]];
 					var patch = new BezierPatch(pts)
 					{
 						HeightDiv = bezierSurfaceC0Patch.SurfaceDivisionsV,
@@ -930,8 +978,8 @@ namespace CadCat.DataStructures
 				{
 					var pts = new CatPoint[4, 4];
 					for (int i = 0; i < 4; i++)
-					for (int j = 0; j < 4; j++)
-						pts[i, j] = catPoints[bezierSurfaceC0Patch.Points[i, j]];
+						for (int j = 0; j < 4; j++)
+							pts[i, j] = catPoints[bezierSurfaceC0Patch.Points[i, j]];
 					var patch = new BSplinePatch(pts)
 					{
 						HeightDiv = bezierSurfaceC0Patch.SurfaceDivisionsV,

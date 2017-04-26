@@ -163,7 +163,25 @@ namespace CadCat.Rendering
 			Enumerable.Range(0, transformedPoints.Count).ToList().ForEach(RenderPoint);
 		}
 
+		public void DrawRectangle(double x1, double x2, double y1, double y2, Color color)
+		{
+			tmpLine.from = new Vector3(x1,y1);
+			tmpLine.to = new Vector3(x2,y1);
+			DrawLine(bufferBitmap, tmpLine,color);
 
+			tmpLine.from = new Vector3(x2, y1);
+			tmpLine.to = new Vector3(x2, y2);
+			DrawLine(bufferBitmap, tmpLine, color);
+
+			tmpLine.from = new Vector3(x2, y2);
+			tmpLine.to = new Vector3(x1, y2);
+			DrawLine(bufferBitmap, tmpLine, color);
+
+			tmpLine.from = new Vector3(x1, y2);
+			tmpLine.to = new Vector3(x1, y1);
+			DrawLine(bufferBitmap, tmpLine, color);
+
+		}
 
 		private double CountClipParameter(double from, double to, double margin)
 		{
