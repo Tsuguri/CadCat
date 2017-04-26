@@ -82,7 +82,7 @@ namespace CadCat.DataStructures
 
 		#region Models
 
-		private readonly ObservableCollection<Model> models = new ObservableCollection<Model>();
+		private ObservableCollection<Model> models = new ObservableCollection<Model>();
 		public ObservableCollection<Model> Models => models;
 
 		private readonly ObservableCollection<CatPoint> points = new ObservableCollection<CatPoint>();
@@ -203,6 +203,7 @@ namespace CadCat.DataStructures
 
 		private ICommand goToSelectedCommand;
 		private ICommand removeCommand;
+		private ICommand sortCommand;
 
 
 		private ICommand saveFileCommand;
@@ -210,6 +211,7 @@ namespace CadCat.DataStructures
 
 		public ICommand LoadFileCommand => loadFileCommand ?? (loadFileCommand = new CommandHandler(LoadFile));
 		public ICommand SaveFileCommand => saveFileCommand ?? (saveFileCommand = new CommandHandler(SaveFile));
+		public ICommand SortCommand => sortCommand ?? (sortCommand = new CommandHandler(SortModels));
 
 		public ICommand CreateTorusCommand => createTorusCommand ?? (createTorusCommand = new CommandHandler(CreateTorus));
 
@@ -727,6 +729,13 @@ namespace CadCat.DataStructures
 
 		}
 
+		private void SortModels()
+		{
+			models = new ObservableCollection<Model>(Models.OrderBy(x => x.Name));
+			// ReSharper disable once ExplicitCallerInfoArgument
+			OnPropertyChanged(nameof(Models));
+		}
+
 		private void SaveFile()
 		{
 			SaveFileDialog saveFileDialog = new SaveFileDialog();
@@ -951,6 +960,7 @@ namespace CadCat.DataStructures
 							pts[i, j] = catPoints[bezierSurfaceC0Patch.Points[i, j]];
 					var patch = new BezierPatch(pts)
 					{
+						ShowPolygon = false,
 						HeightDiv = bezierSurfaceC0Patch.SurfaceDivisionsV,
 						WidthDiv = bezierSurfaceC0Patch.SurfaceDivisionsU,
 						Name = bezierSurfaceC0Patch.Name,
@@ -982,6 +992,7 @@ namespace CadCat.DataStructures
 							pts[i, j] = catPoints[bezierSurfaceC0Patch.Points[i, j]];
 					var patch = new BSplinePatch(pts)
 					{
+						ShowPolygon = false,
 						HeightDiv = bezierSurfaceC0Patch.SurfaceDivisionsV,
 						WidthDiv = bezierSurfaceC0Patch.SurfaceDivisionsU,
 						Name = bezierSurfaceC0Patch.Name,

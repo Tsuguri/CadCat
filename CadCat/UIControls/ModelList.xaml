@@ -5,8 +5,17 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CadCat.UIControls"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <CollectionViewSource x:Key='src' Source="{Binding Models}">
+            <CollectionViewSource.SortDescriptions>
+                <componentModel:SortDescription PropertyName="Name" />
+            </CollectionViewSource.SortDescriptions>
+
+        </CollectionViewSource>
+    </UserControl.Resources>
     <Grid >
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
@@ -17,7 +26,8 @@
             <ColumnDefinition Width="45"/>
         </Grid.ColumnDefinitions>
         <Button Grid.Row="0" Grid.Column="1" Command="{Binding RemoveCommand}" Style="{StaticResource ResourceKey=MaterialDesignRaisedButton}">R</Button>
-        <ListView Name="models" Grid.Row="1" Grid.ColumnSpan="2" ItemsSource="{Binding Models}" SelectedItem="{Binding Path=SelectedModel, Mode=TwoWay}">
+        <Button Grid.Row="0" Grid.Column="0" Command="{Binding SortCommand}" Style="{StaticResource ResourceKey=MaterialDesignRaisedButton}">Sort</Button>
+        <ListView Name="models" Grid.Row="1" Grid.ColumnSpan="2" ItemsSource="{Binding Source={StaticResource src}}" SelectedItem="{Binding Path=SelectedModel, Mode=TwoWay}">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Name}"/>

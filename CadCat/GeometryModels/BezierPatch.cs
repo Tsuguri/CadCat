@@ -237,5 +237,10 @@ namespace CadCat.GeometryModels
 		{
 			return "Bezier patch " + base.GetName();
 		}
+
+		public override IEnumerable<CatPoint> EnumerateCatPoints()
+		{
+			return points;
+		}
 	}
 }
