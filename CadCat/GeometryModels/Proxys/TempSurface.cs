@@ -458,7 +458,7 @@ namespace CadCat.GeometryModels.Proxys
 				{
 					for (int x = 0; x < 4; x++)
 						for (int y = 0; y < 4; y++)
-							subArray[x, y] = catPoints[i + x, j + y];
+							subArray[x,y] = catPoints[i + x, j + y];
 					var patch = new BSplinePatch(subArray)
 					{ UPos = i, VPos = j };
 					scene.AddNewModel(patch);
@@ -470,7 +470,7 @@ namespace CadCat.GeometryModels.Proxys
 			{
 				catPointsList.Add(catPoint);
 			}
-			scene.AddNewModel(new Surface(SurfaceType.BSpline, patches, catPointsList, scene) {PatchesU = UDensity, PatchesV = VDensity});
+			scene.AddNewModel(new Surface(SurfaceType.BSpline, patches, catPointsList, scene) {PatchesU = VDensity, PatchesV = UDensity});
 
 
 		}

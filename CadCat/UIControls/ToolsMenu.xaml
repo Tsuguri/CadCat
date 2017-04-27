@@ -17,7 +17,7 @@
             <Expander  Header="Camera Options">
                 <StackPanel >
                     <ComboBox ItemsSource="{Binding Source={StaticResource dataFromEnum}}" SelectedItem="{Binding RenderingMode}" />
-                    <ContentControl Content="{Binding Renderer}">
+                    <ContentControl Content="{Binding CurrentRenderer}">
                         <ContentControl.Resources>
                             <DataTemplate DataType="{x:Type rend:StandardRenderer}" />
                             <DataTemplate DataType="{x:Type rend:StereoscopicRender}">

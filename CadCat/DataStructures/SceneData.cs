@@ -824,8 +824,8 @@ namespace CadCat.DataStructures
 									Name = patch.Name,
 									SurfaceDivisionsU = patch.WidthDiv,
 									SurfaceDivisionsV = patch.HeightDiv,
-									PatchU = patch.UPos,
-									PatchV = patch.VPos,
+									PatchU = patch.VPos,
+									PatchV = patch.UPos,
 									Points = new PointsU4V4()
 								};
 								int ind = 0;

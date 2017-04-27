@@ -66,7 +66,7 @@ namespace CadCat.GeometryModels
 				for (int j = 0; j < 4; j++)
 				{
 					var pt = scene.CreateHiddenCatPoint(new Math.Vector3(i, System.Math.Sin(Math.Utils.Pi * (i * 0.5 + j * 0.1) / 2.0), j));
-					points[i * 4 + j] = pt;
+					points[i + j * 4] = pt;
 					pt.OnChanged += OnBezierPointChanged;
 				}
 			changed = true;
@@ -80,7 +80,7 @@ namespace CadCat.GeometryModels
 			for (int i = 0; i < 4; i++)
 				for (int j = 0; j < 4; j++)
 				{
-					points[i * 4 + j] = pts[i, j];
+					points[i + j * 4] = pts[i, j];
 					pts[i, j].OnChanged += OnBezierPointChanged;
 					pts[i, j].OnReplace += OnBezierPointReplaced;
 				}
@@ -190,7 +190,7 @@ namespace CadCat.GeometryModels
 			for (int i = 0; i < 4; i++)
 				for (int j = 0; j < 4; j++)
 				{
-					sum += points[i * 4 + j].Position * values[i, j];
+					sum += points[i + j * 4].Position * values[i, j];
 				}
 
 			return sum;
