@@ -1,3 +1,6 @@
 [submodule "GM1Serialization"]
 	path = GM1Serialization
 	url = git@gitlab.com:Piter9122/GM1Serialization.git
+[submodule "GM1Models"]
+	path = GM1Models
+	url = git@gitlab.com:Piter9122/GM1Models.git
