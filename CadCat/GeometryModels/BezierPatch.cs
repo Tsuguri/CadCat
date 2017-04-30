@@ -207,20 +207,6 @@ namespace CadCat.GeometryModels
 			}
 		}
 
-		private Vector3 EvaluateBezierCurve(int startPoint, int step, double x)
-		{
-			double x2 = x * x;
-			double x3 = x2 * x;
-			double x11 = (1 - x);
-			double x12 = x11 * (1 - x);
-			double x13 = x12 * (1 - x);
-			Vector3 tempVec = new Vector3();
-			tempVec = points[startPoint + step * 0].Position * x13 + points[startPoint + step * 1].Position * x12 * x * 3
-				+ points[startPoint + step * 2].Position * x2 * x11 * 3 + points[startPoint + step * 3].Position * x3;
-
-			return tempVec;
-		}
-
 		public override void CleanUp()
 		{
 			base.CleanUp();
@@ -241,6 +227,179 @@ namespace CadCat.GeometryModels
 		public override IEnumerable<CatPoint> EnumerateCatPoints()
 		{
 			return points;
+		}
+
+		public bool ContainsTwoInCorners(List<CatPoint> catPoints)
+		{
+			int contained = 0;
+
+			if (catPoints.Contains(points[0]))
+				contained++;
+			if (catPoints.Contains(points[3]))
+				contained++;
+			if (catPoints.Contains(points[12]))
+				contained++;
+			if (catPoints.Contains(points[15]))
+				contained++;
+
+			return contained == 2;
+		}
+
+		public bool ContainsInCorner(CatPoint catPoint)
+		{
+			return points[0] == catPoint || points[3] == catPoint || points[12] == catPoint || points[15] == catPoint;
+		}
+
+		public bool ContainsNearby(CatPoint prev, CatPoint next)
+		{
+			int ind;
+			if (points[0] == prev)
+				ind = 0;
+			else if (points[3] == prev)
+				ind = 3;
+			else if (points[12] == prev)
+				ind = 12;
+			else if (points[15] == prev)
+				ind = 15;
+			else
+				throw new Exception("Something failed");
+
+			switch (ind)
+			{
+				case 0:
+					return points[3] == next || points[12] == next;
+				case 3:
+					return points[0] == next || points[15] == next;
+				case 12:
+					return points[0] == next || points[15] == next;
+				case 15:
+					return points[3] == next || points[12] == next;
+
+			}
+			return false;
+		}
+
+		private int IndexOf(CatPoint point)
+		{
+			for (int i = 0; i < points.Length; i++)
+				if (points[i] == point)
+					return i;
+			return -1;
+		}
+
+		public HalfPatchData GetDataBetweenPoints(CatPoint first, CatPoint second)
+		{
+			var firstInd = IndexOf(first);
+			var secondInd = IndexOf(second);
+			var back = new CatPoint[4];
+			var nearest = new CatPoint[4];
+
+			switch (firstInd)
+			{
+				case 0:
+					switch (secondInd)
+					{
+						case 3:
+							nearest[0] = points[0];
+							nearest[1] = points[1];
+							nearest[2] = points[2];
+							nearest[3] = points[3];
+							back[0] = points[4];
+							back[1] = points[5];
+							back[2] = points[6];
+							back[3] = points[7];
+							break;
+						case 12:
+							nearest[0] = points[0];
+							nearest[1] = points[4];
+							nearest[2] = points[8];
+							nearest[3] = points[12];
+							back[0] = points[1];
+							back[1] = points[5];
+							back[2] = points[9];
+							back[3] = points[13];
+							break;
+					}
+					break;
+				case 3:
+					switch (secondInd)
+					{
+						case 0:
+							nearest[0] = points[3];
+							nearest[1] = points[2];
+							nearest[2] = points[1];
+							nearest[3] = points[0];
+							back[0] = points[7];
+							back[1] = points[6];
+							back[2] = points[5];
+							back[3] = points[4];
+							break;
+						case 15:
+							nearest[0] = points[3];
+							nearest[1] = points[7];
+							nearest[2] = points[11];
+							nearest[3] = points[15];
+							back[0] = points[2];
+							back[1] = points[6];
+							back[2] = points[10];
+							back[3] = points[14];
+							break;
+					}
+					break;
+				case 12:
+					switch (secondInd)
+					{
+						case 0:
+							nearest[0] = points[12];
+							nearest[1] = points[8];
+							nearest[2] = points[4];
+							nearest[3] = points[0];
+							back[0] = points[13];
+							back[1] = points[9];
+							back[2] = points[5];
+							back[3] = points[1];
+							break;
+						case 15:
+							nearest[0] = points[12];
+							nearest[1] = points[13];
+							nearest[2] = points[14];
+							nearest[3] = points[15];
+							back[0] = points[8];
+							back[1] = points[9];
+							back[2] = points[10];
+							back[3] = points[11];
+							break;
+					}
+					break;
+				case 15:
+					switch (secondInd)
+					{
+						case 3:
+							nearest[0] = points[15];
+							nearest[1] = points[11];
+							nearest[2] = points[7];
+							nearest[3] = points[3];
+							back[0] = points[14];
+							back[1] = points[10];
+							back[2] = points[6];
+							back[3] = points[2];
+							break;
+						case 12:
+							nearest[0] = points[15];
+							nearest[1] = points[14];
+							nearest[2] = points[13];
+							nearest[3] = points[12];
+							back[0] = points[11];
+							back[1] = points[10];
+							back[2] = points[9];
+							back[3] = points[8];
+							break;
+					}
+					break;
+			}
+
+
+			return new HalfPatchData(back, nearest);
 		}
 	}
 }

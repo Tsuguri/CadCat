@@ -190,6 +190,7 @@ namespace CadCat.DataStructures
 		private ICommand createBezierC2Command;
 		private ICommand createBSplineInterpolatorCommand;
 		private ICommand createBezierPatchCommand;
+		private ICommand createGregoryPatchCommand;
 
 		private ICommand createPointCommand;
 
@@ -224,6 +225,8 @@ namespace CadCat.DataStructures
 		public ICommand CreateBSplineInterpolatorCommand => createBSplineInterpolatorCommand ?? (createBSplineInterpolatorCommand = new CommandHandler(CreateBSplineInterpolator));
 
 		public ICommand CreateBezierPatchCommand => createBezierPatchCommand ?? (createBezierPatchCommand = new CommandHandler(CreateBezierPatch));
+
+		public ICommand CreateGregoryPatchCommand => createGregoryPatchCommand ?? (createGregoryPatchCommand = new CommandHandler(CreateGregoryPatch));
 
 		public ICommand CreatePointCommand => createPointCommand ?? (createPointCommand = new CommandHandler(CreatePoint));
 
@@ -326,6 +329,67 @@ namespace CadCat.DataStructures
 			AddNewModel(new TempSurface());
 		}
 
+		private void CreateGregoryPatch()
+		{
+
+			var selectedPoints = GetPoints().Where(x => x.IsSelected).ToList();
+
+			var patches = Models.Where(x => x is BezierPatch).Cast<BezierPatch>().Where(x => x.ContainsTwoInCorners(selectedPoints)).ToList();
+
+			var cycle = CreatePatchCycle(selectedPoints, patches);
+			if (cycle == null)
+			{
+				var sampleMessageDialog = new MessageHost
+				{
+					Message = { Text = "Selected points and their patches does not create proper cycle." }
+				};
+
+
+				DialogHost.Show(sampleMessageDialog, "RootDialog");
+			}
+			else
+				AddNewModel(new GregoryPatch(cycle,this));
+		}
+
+		private PatchCycle CreatePatchCycle(List<CatPoint> points, List<BezierPatch> patches)
+		{
+			var cycle = new List<BezierPatch>();
+			var cyclePoints = new List<CatPoint>();
+			var actualPatch = patches[0];
+			var firstPoint = points.First(x => actualPatch.ContainsInCorner(x));
+			var secondPoint = points.First(x => actualPatch.ContainsNearby(firstPoint, x));
+			patches.Remove(actualPatch);
+			cycle.Add(actualPatch);
+			cyclePoints.Add(firstPoint);
+			cyclePoints.Add(secondPoint);
+			points.Remove(firstPoint);
+			points.Remove(secondPoint);
+
+			while (patches.Count > 0)
+			{
+				var nextPatch = patches.FirstOrDefault(x => x.ContainsInCorner(secondPoint));
+				if (nextPatch == null)
+					return null;
+				patches.Remove(nextPatch);
+				cycle.Add(nextPatch);
+
+				if (points.Count == 0 && nextPatch.ContainsNearby(secondPoint, firstPoint))
+					break;
+
+				var pt = points.FirstOrDefault(x => nextPatch.ContainsNearby(secondPoint, x));
+				if (pt == null)
+					return null;
+				cyclePoints.Add(pt);
+				points.Remove(pt);
+				secondPoint = pt;
+
+			}
+
+
+			return new PatchCycle(cycle, cyclePoints);
+		}
+
+
 		private void CreatePoint()
 		{
 			var pos = Cursor.Visible ? Cursor.Transform.Position : ActiveCamera.LookingAt;
@@ -409,7 +473,7 @@ namespace CadCat.DataStructures
 
 		public IEnumerable<CatPoint> GetPoints()
 		{
-			return points.Concat(hiddenPoints);
+			return points;
 		}
 
 		public void Render(BaseRenderer renderer)
@@ -440,7 +504,7 @@ namespace CadCat.DataStructures
 					if (!point.Visible)
 						continue;
 					renderingPoints[0] = point.Position;
-					renderer.SelectedColor = point.IsSelected ? Colors.LimeGreen : Colors.White;
+					renderer.SelectedColor = Colors.BlueViolet;// point.IsSelected ? Colors.LimeGreen : Colors.White;
 					renderer.Transform();
 					renderer.DrawPoints();
 

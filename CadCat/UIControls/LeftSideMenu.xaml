@@ -39,6 +39,9 @@
                 <Button ToolTip="Bezier Patch" Command="{Binding CreateBezierPatchCommand}">
                     P
                 </Button>
+                <Button ToolTip="Gregory Patch" Command="{Binding CreateGregoryPatchCommand}">
+                    G
+                </Button>
                 <Button ToolTip="Torus" Command="{Binding CreateTorusCommand}">T</Button>
                 <Button ToolTip="Cube" Command="{Binding CreateCubeCommand}">
                     <materialDesign:PackIcon Kind="CubeOutline" />
