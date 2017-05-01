@@ -355,7 +355,7 @@ namespace CadCat.GeometryModels
 
 		}
 
-		private Vector4 EvalueateH(double t)
+		private Vector4 EvaluateH(double t)
 		{
 			return new Vector4(
 				1 + t * t * (2 * t - 3),
@@ -365,24 +365,55 @@ namespace CadCat.GeometryModels
 				);
 		}
 
+		private Vector4 EvaluateB(double t)
+		{
+			var tm = 1 - t;
+			return new Vector4(
+				tm * tm * tm,
+				3 * t * tm * tm,
+				3 * t * t * tm,
+				t * t * t
+				);
+		}
+
 		private Vector3 EvaluatePointValue(double u, double v)
 		{
-			var result = new Vector3();
+			if (System.Math.Abs(System.Math.Abs(u - 0.5) - 0.5) < double.Epsilon && System.Math.Abs(System.Math.Abs(v - 0.5) - 0.5) < double.Epsilon)
+			{
+				if (u > 0.5)
+				{
+					if (v > 0.5)
+						return p33.Position;
+					return p03.Position;
+				}
+				if (v > 0.5)
+					return p30.Position;
+				return p00.Position;
+			}
 
-			var uh = EvalueateH(u);
-			var vh = EvalueateH(v);
-
-			Vector3 firstRow = p00.Position * vh.X + p30.Position * vh.Y + (p10.Position - p00.Position) * vh.Z + (p30.Position - p20.Position) * vh.W;
-			Vector3 secondRow = p03.Position * vh.X + p33.Position * vh.Y + (p13.Position - p03.Position) * vh.Z +
-								(p33.Position - p23.Position) * vh.W;
-			Vector3 thirdRow = (p01.Position - p00.Position) * vh.X + (p31.Position - p30.Position) * vh.Y;
-
-			Vector3 fourthRow = (p03.Position - p02.Position) * vh.X + (p33.Position - p32.Position) * vh.Y;
+			var uh = EvaluateH(u);
+			var vh = EvaluateH(v);
 
 
-			result = firstRow * uh.X + secondRow * uh.Y + thirdRow * uh.Z + fourthRow * uh.W;
 
 
+			//Vector3 firstRow = p00.Position * vh.X + p10.Position * vh.Y + p20.Position * vh.Z + p30.Position * vh.W;
+
+			//Vector3 secondRow = p01.Position * vh.X + (p01P.Position * u + p10P.Position * v) / (u + v) * vh.Y + (p20P.Position * (1 - v) + p31P.Position * u) / (1 - v + u) * vh.Z + p31.Position * vh.W;
+
+			//Vector3 thirdRow = p02.Position * vh.X + (p02P.Position * (1 - u) + p13P.Position * v) / (1 - u + v) * vh.Y + (p23P.Position * (1 - v) + p32P.Position * (1 - u)) / (2 - u - v) * vh.Z + p31.Position * vh.W;
+
+			//Vector3 fourthRow = p03.Position * vh.X + p13.Position * vh.Y + p23.Position * vh.Z + p33.Position * vh.W;
+
+
+			Vector3 firstRow = p00.Position * vh.X + p30.Position * vh.Y + (p10.Position - p00.Position) * 3 * vh.Z + (p30.Position - p20.Position) * 3 * vh.W;
+			Vector3 secondRow = p03.Position * vh.X + p33.Position * vh.Y + (p13.Position - p03.Position) * 3 * vh.Z +
+								(p33.Position - p23.Position) * 3 * vh.W;
+			Vector3 thirdRow = (p01.Position - p00.Position) * 3 * vh.X + (p31.Position - p30.Position) * 3 * vh.Y + ((p01P.Position - p00.Position) * 3 * u + (p10P.Position - p00.Position) * 3 * v) / (u + v) * vh.Z + ((p20P.Position - p30.Position) * 3 * (1 - v) + (p31P.Position - p30.Position) * 3 * u) / (1 - v + u) * vh.W;
+
+			Vector3 fourthRow = (p03.Position - p02.Position) * 3 * vh.X + (p33.Position - p32.Position) * 3 * vh.Y + ((p02P.Position - p03.Position) * 3 * (1 - u) + (p13P.Position - p03.Position) * 3 * v) / (1 - u + v) * vh.Z + ((p23P.Position - p33.Position) * 3 * (1 - v) + (p32P.Position - p33.Position) * 3 * (1 - u)) / (2 - u - v) * vh.W;
+
+			var result = firstRow * uh.X + secondRow * uh.Y + thirdRow * uh.Z + fourthRow * uh.W;
 			return result;
 		}
 		private void PointOnChanged(CatPoint sender)

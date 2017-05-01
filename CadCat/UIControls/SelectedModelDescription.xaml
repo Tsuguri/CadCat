@@ -197,6 +197,18 @@
                             </Grid>
                         </StackPanel>
                     </DataTemplate>
+                    <DataTemplate DataType="{x:Type models:GregoryPatch}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock VerticalAlignment="Center" Grid.Column="0">Div</TextBlock>
+                            <control:NumericSlider Grid.Column="1" Value="{Binding WidthDiv}" IncrementMultiplier="0.1" />
+                            <control:NumericSlider Grid.Column="2" Value="{Binding HeightDiv}" IncrementMultiplier="0.1" />
+                        </Grid>
+                    </DataTemplate>
                 </ContentControl.Resources>
             </ContentControl>
             <ContentControl Content="{Binding SelectedModel}">
