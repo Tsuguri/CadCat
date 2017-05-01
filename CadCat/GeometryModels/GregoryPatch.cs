@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using System.Xml;
 using CadCat.DataStructures;
 using CadCat.Math;
 using CadCat.Rendering;
@@ -218,7 +219,191 @@ namespace CadCat.GeometryModels
 
 	}
 
+	class SingleGregoryPatch
+	{
 
+		private bool changed = false;
+
+		private GregoryPatch parent;
+
+		private CatPoint p00;
+		private CatPoint p01;
+		private CatPoint p02;
+		private CatPoint p03;
+
+		private CatPoint p10;
+		private CatPoint p20;
+		private CatPoint p30;
+
+		private CatPoint p13;
+		private CatPoint p23;
+		private CatPoint p31;
+		private CatPoint p32;
+		private CatPoint p33;
+
+		private CatPoint p01P;
+		private CatPoint p02P;
+		private CatPoint p13P;
+		private CatPoint p23P;
+		private CatPoint p10P;
+		private CatPoint p20P;
+		private CatPoint p31P;
+		private CatPoint p32P;
+
+		private readonly List<Vector3> mesh = new List<Vector3>();
+		private readonly List<int> meshIndices = new List<int>();
+
+		public SingleGregoryPatch(GregoryPatch parent, AdjacentHalfPatch left, AdjacentHalfPatch right, CatPoint centerPoint)
+		{
+			p00 = left.RightNearest[3];
+			p00.OnChanged += PointOnChanged;
+			p10 = left.RightNearest[2];
+			p10.OnChanged += PointOnChanged;
+			p20 = left.RightNearest[1];
+			p20.OnChanged += PointOnChanged;
+			p30 = left.RightNearest[0];
+			p30.OnChanged += PointOnChanged;
+
+			p01 = right.LeftNearest[1];
+			p01.OnChanged += PointOnChanged;
+			p02 = right.LeftNearest[2];
+			p02.OnChanged += PointOnChanged;
+			p03 = right.LeftNearest[3];
+			p03.OnChanged += PointOnChanged;
+
+			p13 = right.LeftBack[3];
+			p13.OnChanged += PointOnChanged;
+			p23 = right.P1I;
+			p23.OnChanged += PointOnChanged;
+			p33 = centerPoint;
+			p33.OnChanged += PointOnChanged;
+
+			p31 = left.RightBack[0];
+			p31.OnChanged += PointOnChanged;
+			p32 = left.P1I;
+			p32.OnChanged += PointOnChanged;
+
+			p01P = right.LeftBack[1];
+			p01P.OnChanged += PointOnChanged;
+			p02P = right.LeftBack[2];
+			p02P.OnChanged += PointOnChanged;
+			p13P = right.NormalL2;
+			p13P.OnChanged += PointOnChanged;
+			p23P = right.NormalL1;
+			p23P.OnChanged += PointOnChanged;
+
+			p10P = left.RightBack[2];
+			p10P.OnChanged += PointOnChanged;
+			p20P = left.RightBack[1];
+			p20P.OnChanged += PointOnChanged;
+			p31P = left.NormalR2;
+			p31P.OnChanged += PointOnChanged;
+			p32P = left.NormalR1;
+			p32P.OnChanged += PointOnChanged;
+
+			this.parent = parent;
+			parent.PropertyChanged += Parent_PropertyChanged;
+
+			RecalculateMesh();
+		}
+
+		private void Parent_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == nameof(GregoryPatch.HeightDiv) || e.PropertyName == nameof(GregoryPatch.WidthDiv))
+				changed = true;
+		}
+
+		private void RecalculateMesh()
+		{
+			changed = false;
+			int widthdiv = parent.WidthDiv;
+			int heightdiv = parent.HeightDiv;
+
+			mesh.Clear();
+			mesh.Capacity = System.Math.Max(mesh.Capacity, (widthdiv + 1) * (heightdiv + 1));
+			meshIndices.Clear();
+			double widthStep = 1.0 / widthdiv;
+			double heightStep = 1.0 / heightdiv;
+			int widthPoints = widthdiv + 1;
+			int heightPoints = heightdiv + 1;
+
+			for (int i = 0; i < widthPoints; i++)
+				for (int j = 0; j < heightPoints; j++)
+				{
+					mesh.Insert(i * heightPoints + j, EvaluatePointValue(i * widthStep, j * heightStep));
+				}
+
+			for (int i = 0; i < widthPoints - 1; i++)
+				for (int j = 0; j < heightPoints - 1; j++)
+				{
+					meshIndices.Add(i * heightPoints + j);
+					meshIndices.Add(i * heightPoints + j + 1);
+					meshIndices.Add(i * heightPoints + j);
+					meshIndices.Add((i + 1) * heightPoints + j);
+				}
+			for (int i = 0; i < widthPoints - 1; i++)
+			{
+				meshIndices.Add(heightPoints * (i + 1) - 1);
+				meshIndices.Add(heightPoints * (i + 2) - 1);
+			}
+			for (int j = 0; j < heightPoints - 1; j++)
+			{
+				meshIndices.Add((widthPoints - 1) * heightPoints + j);
+				meshIndices.Add((widthPoints - 1) * heightPoints + j + 1);
+			}
+
+
+		}
+
+		private Vector4 EvalueateH(double t)
+		{
+			return new Vector4(
+				1 + t * t * (2 * t - 3),
+				t * t * (3 - 2 * t),
+				t * (1 + t * (t - 2)),
+				t * t * (t - 1)
+				);
+		}
+
+		private Vector3 EvaluatePointValue(double u, double v)
+		{
+			var result = new Vector3();
+
+			var uh = EvalueateH(u);
+			var vh = EvalueateH(v);
+
+			Vector3 firstRow = p00.Position * vh.X + p30.Position * vh.Y + (p10.Position - p00.Position) * vh.Z + (p30.Position - p20.Position) * vh.W;
+			Vector3 secondRow = p03.Position * vh.X + p33.Position * vh.Y + (p13.Position - p03.Position) * vh.Z +
+								(p33.Position - p23.Position) * vh.W;
+			Vector3 thirdRow = (p01.Position - p00.Position) * vh.X + (p31.Position - p30.Position) * vh.Y;
+
+			Vector3 fourthRow = (p03.Position - p02.Position) * vh.X + (p33.Position - p32.Position) * vh.Y;
+
+
+			result = firstRow * uh.X + secondRow * uh.Y + thirdRow * uh.Z + fourthRow * uh.W;
+
+
+			return result;
+		}
+		private void PointOnChanged(CatPoint sender)
+		{
+			changed = true;
+		}
+
+		public void Render(BaseRenderer renderer)
+		{
+			if (changed)
+				RecalculateMesh();
+
+			renderer.Points = mesh;
+			renderer.Indices = meshIndices;
+			renderer.UseIndices = true;
+			renderer.SelectedColor = Colors.Crimson;
+
+			renderer.Transform();
+			renderer.DrawLines();
+		}
+	}
 
 	class GregoryPatch : Patch
 	{
@@ -226,6 +411,7 @@ namespace CadCat.GeometryModels
 		private SceneData data;
 		private List<AdjacentHalfPatch> adjacentPatches;
 		private CatPoint centerPoint;
+		private List<SingleGregoryPatch> gregoryPatches;
 		public GregoryPatch(PatchCycle cycle, SceneData data)
 		{
 			this.cycle = cycle;
@@ -254,7 +440,13 @@ namespace CadCat.GeometryModels
 			centerPoint.Position = sum;
 			adjacentPatches.ForEach(x => x.CalculateP1());
 
+			gregoryPatches = new List<SingleGregoryPatch>(cycle.Patches.Count);
 
+
+			for (int i = 0; i < adjacentPatches.Count; i++)
+			{
+				gregoryPatches.Add(new SingleGregoryPatch(this, adjacentPatches[i], adjacentPatches[(i + 1) % adjacentPatches.Count], centerPoint));
+			}
 
 		}
 
@@ -265,8 +457,10 @@ namespace CadCat.GeometryModels
 			adjacentPatches.ForEach(x => x.UpdateNormals());
 
 			base.Render(renderer);
+			if (ShowPolygon)
+				adjacentPatches.ForEach(x => x.Render(renderer));
 
-			adjacentPatches.ForEach(x => x.Render(renderer));
+			gregoryPatches.ForEach(x => x.Render(renderer));
 		}
 
 		public override string GetName()
