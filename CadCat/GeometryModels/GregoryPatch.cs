@@ -44,6 +44,8 @@ namespace CadCat.GeometryModels
 
 		private List<CatPoint> renderPoints;
 
+
+
 		private static List<int> indices = new List<int>
 		{
 			0,1,
@@ -217,6 +219,19 @@ namespace CadCat.GeometryModels
 			renderer.DrawLines();
 		}
 
+		public void UpdatePointVisibility(bool value)
+		{
+			foreach (var catPoint in LeftNearest.Concat(LeftBack).Concat(RightNearest).Concat(RightBack))
+			{
+				catPoint.Visible = value;
+			}
+
+			P1I.Visible = value;
+			NormalL1.Visible = value;
+			NormalL2.Visible = value;
+			NormalR1.Visible = value;
+			NormalR2.Visible = value;
+		}
 	}
 
 	class SingleGregoryPatch
@@ -443,6 +458,25 @@ namespace CadCat.GeometryModels
 		private List<AdjacentHalfPatch> adjacentPatches;
 		private CatPoint centerPoint;
 		private List<SingleGregoryPatch> gregoryPatches;
+
+		private bool showPoints = true;
+
+		public bool ShowPoints
+		{
+			get
+			{
+				return showPoints;
+			}
+			set
+			{
+				showPoints = value;
+				OnPropertyChanged();
+				adjacentPatches.ForEach(x => x.UpdatePointVisibility(value));
+				centerPoint.Visible = value;
+
+			}
+		}
+
 		public GregoryPatch(PatchCycle cycle, SceneData data)
 		{
 			this.cycle = cycle;

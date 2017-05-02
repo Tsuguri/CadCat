@@ -204,9 +204,21 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="40"/>
+                                <RowDefinition Height="40"/>
+                                <RowDefinition Height="40"/>
+                            </Grid.RowDefinitions>
                             <TextBlock VerticalAlignment="Center" Grid.Column="0">Div</TextBlock>
-                            <control:NumericSlider Grid.Column="1" Value="{Binding WidthDiv}" IncrementMultiplier="0.1" />
-                            <control:NumericSlider Grid.Column="2" Value="{Binding HeightDiv}" IncrementMultiplier="0.1" />
+                            <control:NumericSlider Grid.Row="0" Grid.Column="1" Value="{Binding WidthDiv}" IncrementMultiplier="0.1" />
+                            <control:NumericSlider Grid.Row="0" Grid.Column="2" Value="{Binding HeightDiv}" IncrementMultiplier="0.1" />
+                            <TextBlock Grid.Column="1" Grid.Row="1">Show Polygon</TextBlock>
+                            <ToggleButton Grid.Column="0" Grid.Row="1" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
+                                          ToolTip="MaterialDesignSwitchAccentToggleButton" IsChecked="{Binding ShowPolygon}" />
+
+                            <ToggleButton Grid.Column="0" Grid.Row="2" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
+                                          ToolTip="MaterialDesignSwitchAccentToggleButton" IsChecked="{Binding ShowPoints}" />
+                            <TextBlock VerticalAlignment="Center" Grid.Column="1" Grid.Row="2">Points Visible</TextBlock>
                         </Grid>
                     </DataTemplate>
                 </ContentControl.Resources>
