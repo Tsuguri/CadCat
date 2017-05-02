@@ -32,7 +32,8 @@ namespace CadCat
 
 		public override void WriteLine(string message)
 		{
-			Debugger.Break();
+			if (!message.Contains("onvert"))
+				Debugger.Break();
 		}
 	}
 }
