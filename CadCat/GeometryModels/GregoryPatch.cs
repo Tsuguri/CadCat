@@ -232,6 +232,34 @@ namespace CadCat.GeometryModels
 			NormalR1.Visible = value;
 			NormalR2.Visible = value;
 		}
+
+		public void CleanUp()
+		{
+			//public CatPoint[] LeftNearest;
+			//public CatPoint[] LeftBack;
+			//public CatPoint[] RightNearest;
+			//public CatPoint[] RightBack;
+
+			scene.RemovePoint(NormalL2);
+			scene.RemovePoint(NormalR2);
+			scene.RemovePoint(NormalL1);
+			scene.RemovePoint(NormalR1);
+			scene.RemovePoint(P1I);
+
+			foreach (var catPoint in LeftBack.Concat(RightBack))
+			{
+				scene.RemovePoint(catPoint);
+			}
+
+			scene.RemovePoint(centerPoint);
+			scene.RemovePoint(LeftNearest[1]);
+			scene.RemovePoint(LeftNearest[2]);
+			scene.RemovePoint(LeftNearest[3]);
+			scene.RemovePoint(RightNearest[1]);
+			scene.RemovePoint(RightNearest[2]);
+
+
+		}
 	}
 
 	class SingleGregoryPatch
@@ -526,6 +554,12 @@ namespace CadCat.GeometryModels
 				adjacentPatches.ForEach(x => x.Render(renderer));
 
 			gregoryPatches.ForEach(x => x.Render(renderer));
+		}
+
+		public override void CleanUp()
+		{
+			base.CleanUp();
+			adjacentPatches.ForEach(x => x.CleanUp());
 		}
 
 		public override string GetName()
