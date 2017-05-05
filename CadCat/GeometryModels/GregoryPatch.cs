@@ -37,9 +37,9 @@ namespace CadCat.GeometryModels
 		public CatPoint leftP1;
 		public CatPoint rightP1;
 
-		public CatPoint NormalL2;
+		//public CatPoint NormalL2;
 		public CatPoint NormalL1;
-		public CatPoint NormalR2;
+		//public CatPoint NormalR2;
 		public CatPoint NormalR1;
 
 		private List<CatPoint> renderPoints;
@@ -62,9 +62,9 @@ namespace CadCat.GeometryModels
 			6,12,
 			12,13,
 			12,14,
-			12,16,
-			6,15,
-			6,17
+			12,15,
+			6,4,
+			6,8
 		};
 
 		private CatPoint centerPoint;
@@ -78,9 +78,9 @@ namespace CadCat.GeometryModels
 			this.scene = scene;
 			this.centerPoint = centerPoint;
 			LeftNearest = new CatPoint[4];
-			LeftBack = new CatPoint[4];
+			LeftBack = new CatPoint[3];
 			RightNearest = new CatPoint[4];
-			RightBack = new CatPoint[4];
+			RightBack = new CatPoint[3];
 
 			LeftNearest[0] = halfPatch.Nearest[0];
 
@@ -96,13 +96,13 @@ namespace CadCat.GeometryModels
 			for (int i = 0; i < 2; i++)
 				RightNearest[i + 1] = scene.CreateHiddenCatPoint(new Vector3());
 
-			for (int i = 0; i < 3; i++)
+			for (int i = 0; i < 2; i++)
 			{
 				LeftBack[i] = scene.CreateHiddenCatPoint(new Vector3());
 				RightBack[i + 1] = scene.CreateHiddenCatPoint(new Vector3());
 			}
 
-			LeftBack[3] = RightBack[0] = scene.CreateHiddenCatPoint(new Vector3());
+			LeftBack[2] = RightBack[0] = scene.CreateHiddenCatPoint(new Vector3());
 
 			for (int i = 0; i < 4; i++)
 			{
@@ -115,20 +115,20 @@ namespace CadCat.GeometryModels
 			ActualizePositions();
 
 			NormalL1 = scene.CreateHiddenCatPoint(new Vector3());
-			NormalL2 = scene.CreateHiddenCatPoint(new Vector3());
+			//NormalL2 = scene.CreateHiddenCatPoint(new Vector3());
 			NormalR1 = scene.CreateHiddenCatPoint(new Vector3());
-			NormalR2 = scene.CreateHiddenCatPoint(new Vector3());
+			//NormalR2 = scene.CreateHiddenCatPoint(new Vector3());
 
 
 			renderPoints = new List<CatPoint>
 			{
 				LeftNearest[0],
 				LeftNearest[1],
-				LeftBack[1],
+				LeftBack[0],
 				LeftNearest[2],
-				LeftBack[2],
+				LeftBack[1],
 				LeftNearest[3],
-				LeftBack[3],
+				LeftBack[2],
 				RightNearest[1],
 				RightBack[1],
 				RightNearest[2],
@@ -136,9 +136,9 @@ namespace CadCat.GeometryModels
 				RightNearest[3],
 				P1I,centerPoint,
 				NormalL1,
-				NormalL2,
 				NormalR1,
-				NormalR2
+				//NormalL2,
+				//NormalR2
 			};
 
 
@@ -154,13 +154,13 @@ namespace CadCat.GeometryModels
 		{
 			changed = false;
 
-			LeftBack[0].Position = data.Nearest[0].Position * 2 - data.Back[0].Position;
-			RightBack[3].Position = data.Nearest[3].Position * 2 - data.Back[3].Position;
+			//LeftBack[0].Position = data.Nearest[0].Position * 2 - data.Back[0].Position;
+			//RightBack[3].Position = data.Nearest[3].Position * 2 - data.Back[3].Position;
 
 			LeftNearest[1].Position = (data.Nearest[0].Position + data.Nearest[1].Position) / 2;
 			RightNearest[2].Position = (data.Nearest[2].Position + data.Nearest[3].Position) / 2;
 
-			LeftBack[1].Position = LeftNearest[1].Position * 2 - (data.Back[0].Position + data.Back[1].Position) / 2;
+			LeftBack[0].Position = LeftNearest[1].Position * 2 - (data.Back[0].Position + data.Back[1].Position) / 2;
 			RightBack[2].Position = RightNearest[2].Position * 2 - (data.Back[3].Position + data.Back[2].Position) / 2;
 
 			var tmpNrCenter = (data.Nearest[1].Position + data.Nearest[2].Position) / 2;
@@ -168,14 +168,13 @@ namespace CadCat.GeometryModels
 
 			LeftNearest[2].Position = (LeftNearest[1].Position + tmpNrCenter) / 2;
 			RightNearest[1].Position = (RightNearest[2].Position + tmpNrCenter) / 2;
-			LeftBack[2].Position = (LeftBack[1].Position + tmpNrCenter * 2 - tmpBckCenter) / 2;
+			LeftBack[1].Position = (LeftBack[0].Position + tmpNrCenter * 2 - tmpBckCenter) / 2;
 			RightBack[1].Position = (RightBack[2].Position + tmpNrCenter * 2 - tmpBckCenter) / 2;
 
 			LeftNearest[3].Position = (LeftNearest[2].Position + RightNearest[1].Position) / 2;
-			LeftBack[3].Position = (LeftBack[2].Position + RightBack[1].Position) / 2;
+			LeftBack[2].Position = (LeftBack[1].Position + RightBack[1].Position) / 2;
 
-			Q = (LeftBack[3].Position * 3 - LeftNearest[3].Position) / 2;
-			CalculateP1();
+			Q = (LeftBack[2].Position * 3 - LeftNearest[3].Position) / 2;
 		}
 
 		public void Update()
@@ -190,11 +189,11 @@ namespace CadCat.GeometryModels
 			var g2 = (RightNearest[1].Position - LeftNearest[2].Position) / 2;
 			var g1 = (g0 + g2) / 2;
 
-			var first = (g0 * (2 / 3.0f) + g1 * (1 / 3.0f)) * (2 / 3.0f) + (g1 * (2 / 3.0f) + g2 * (1 / 3.0f)) * (1 / 3.0f);
+			//var first = (g0 * (2 / 3.0f) + g1 * (1 / 3.0f)) * (2 / 3.0f) + (g1 * (2 / 3.0f) + g2 * (1 / 3.0f)) * (1 / 3.0f);
 			var second = (g0 * (1 / 3.0f) + g1 * (2 / 3.0f)) * (1 / 3.0f) + (g1 * (1 / 3.0f) + g2 * (2 / 3.0f)) * (2 / 3.0f);
 
-			NormalL2.Position = LeftBack[3].Position - first;
-			NormalR2.Position = LeftBack[3].Position + first;
+		//	NormalL2.Position = LeftBack[3].Position - first;
+			//NormalR2.Position = LeftBack[3].Position + first;
 
 			NormalL1.Position = P1I.Position - second;
 			NormalR1.Position = P1I.Position + second;
@@ -228,20 +227,11 @@ namespace CadCat.GeometryModels
 
 			P1I.Visible = value;
 			NormalL1.Visible = value;
-			NormalL2.Visible = value;
 			NormalR1.Visible = value;
-			NormalR2.Visible = value;
 		}
 
 		public void CleanUp()
 		{
-			//public CatPoint[] LeftNearest;
-			//public CatPoint[] LeftBack;
-			//public CatPoint[] RightNearest;
-			//public CatPoint[] RightBack;
-
-			scene.RemovePoint(NormalL2);
-			scene.RemovePoint(NormalR2);
 			scene.RemovePoint(NormalL1);
 			scene.RemovePoint(NormalR1);
 			scene.RemovePoint(P1I);
@@ -252,9 +242,9 @@ namespace CadCat.GeometryModels
 			}
 
 			scene.RemovePoint(centerPoint);
+			scene.RemovePoint(LeftNearest[0]);
 			scene.RemovePoint(LeftNearest[1]);
 			scene.RemovePoint(LeftNearest[2]);
-			scene.RemovePoint(LeftNearest[3]);
 			scene.RemovePoint(RightNearest[1]);
 			scene.RemovePoint(RightNearest[2]);
 
@@ -314,7 +304,7 @@ namespace CadCat.GeometryModels
 			p03 = right.LeftNearest[3];
 			p03.OnChanged += PointOnChanged;
 
-			p13 = right.LeftBack[3];
+			p13 = right.LeftBack[2];
 			p13.OnChanged += PointOnChanged;
 			p23 = right.P1I;
 			p23.OnChanged += PointOnChanged;
@@ -326,11 +316,11 @@ namespace CadCat.GeometryModels
 			p32 = left.P1I;
 			p32.OnChanged += PointOnChanged;
 
-			p01P = right.LeftBack[1];
+			p01P = right.LeftBack[0];
 			p01P.OnChanged += PointOnChanged;
-			p02P = right.LeftBack[2];
+			p02P = right.LeftBack[1];
 			p02P.OnChanged += PointOnChanged;
-			p13P = right.NormalL2;
+			p13P = right.LeftBack[2];
 			p13P.OnChanged += PointOnChanged;
 			p23P = right.NormalL1;
 			p23P.OnChanged += PointOnChanged;
@@ -339,7 +329,7 @@ namespace CadCat.GeometryModels
 			p10P.OnChanged += PointOnChanged;
 			p20P = left.RightBack[1];
 			p20P.OnChanged += PointOnChanged;
-			p31P = left.NormalR2;
+			p31P = left.RightBack[1];
 			p31P.OnChanged += PointOnChanged;
 			p32P = left.NormalR1;
 			p32P.OnChanged += PointOnChanged;
@@ -509,7 +499,7 @@ namespace CadCat.GeometryModels
 		{
 			this.cycle = cycle;
 			this.data = data;
-			centerPoint = data.CreateCatPoint(new Vector3(), false);
+			centerPoint = data.CreateHiddenCatPoint(new Vector3());
 
 			adjacentPatches = new List<AdjacentHalfPatch>(cycle.Patches.Count);
 
@@ -545,8 +535,12 @@ namespace CadCat.GeometryModels
 
 		public override void Render(BaseRenderer renderer)
 		{
-			adjacentPatches.ForEach(x => x.CalculateP1());
 			adjacentPatches.ForEach(x => x.Update());
+			Vector3 sum = new Vector3();
+			adjacentPatches.ForEach(x => sum += x.Q);
+			sum /= adjacentPatches.Count;
+			centerPoint.Position = sum;
+			adjacentPatches.ForEach(x => x.CalculateP1());
 			adjacentPatches.ForEach(x => x.UpdateNormals());
 
 			base.Render(renderer);
