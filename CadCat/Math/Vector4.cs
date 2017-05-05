@@ -6,7 +6,7 @@ namespace CadCat.Math
 	using Real = System.Double;
 
 	public struct Vector4
-    {
+	{
 		public Real X, Y, Z, W;
 
 		public Vector4(Real x, Real y, Real z, Real w)
@@ -25,7 +25,7 @@ namespace CadCat.Math
 			W = point;
 		}
 
-		public Vector4(Vector2 v2, Real z, Real w=1.0)
+		public Vector4(Vector2 v2, Real z, Real w = 1.0)
 		{
 			X = v2.X;
 			Y = v2.Y;
@@ -47,22 +47,32 @@ namespace CadCat.Math
 			return new Vector3(X, Y, Z);
 		}
 
-	    public Matrix4 MatrixMultiply(Vector4 vec2)
-	    {
-		    var mat = new Matrix4();
-			for(int i=0;i<4;i++)
-			for (int j = 0; j < 4; j++)
-				mat[i, j] = this[i] * vec2[j];
-		    return mat;
-	    }
+		public Matrix4 MatrixMultiply(Vector4 vec2)
+		{
+			var mat = new Matrix4();
+			for (int i = 0; i < 4; i++)
+				for (int j = 0; j < 4; j++)
+					mat[i, j] = this[i] * vec2[j];
+			return mat;
+		}
 
-	    public static Vector4 operator /(Vector4 vec, double val)
-	    {
-		    return new Vector4(vec.X/val, vec.Y/val,vec.Z/val,vec.W/val);
-	    }
+		public static Vector4 operator /(Vector4 vec, double val)
+		{
+			return new Vector4(vec.X / val, vec.Y / val, vec.Z / val, vec.W / val);
+		}
+
+		public static Vector4 operator *(Vector4 vec, double val)
+		{
+			return new Vector4(vec.X * val, vec.Y * val, vec.Z * val, vec.W * val);
+		}
+
+		public static Vector4 operator +(Vector4 vec, Vector4 vec2)
+		{
+			return new Vector4(vec.X + vec2.X, vec.Y + vec2.Y, vec.Z + vec2.Z, vec.W + vec2.W);
+		}
 
 		public double this[int index]
-	    {
+		{
 			get
 			{
 				switch (index)
@@ -99,6 +109,6 @@ namespace CadCat.Math
 						throw new ArgumentException("Index out of boundary values");
 				}
 			}
-	    }
-    }
+		}
+	}
 }

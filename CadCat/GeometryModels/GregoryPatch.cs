@@ -111,6 +111,7 @@ namespace CadCat.GeometryModels
 			}
 			centerPoint.OnChanged += AdjacentHalfPatch_OnChanged;
 			P1I = scene.CreateHiddenCatPoint(new Vector3());
+			P1I.W = 6;
 			changed = true;
 			ActualizePositions();
 
@@ -192,7 +193,7 @@ namespace CadCat.GeometryModels
 			//var first = (g0 * (2 / 3.0f) + g1 * (1 / 3.0f)) * (2 / 3.0f) + (g1 * (2 / 3.0f) + g2 * (1 / 3.0f)) * (1 / 3.0f);
 			var second = (g0 * (1 / 3.0f) + g1 * (2 / 3.0f)) * (1 / 3.0f) + (g1 * (1 / 3.0f) + g2 * (2 / 3.0f)) * (2 / 3.0f);
 
-		//	NormalL2.Position = LeftBack[3].Position - first;
+			//	NormalL2.Position = LeftBack[3].Position - first;
 			//NormalR2.Position = LeftBack[3].Position + first;
 
 			NormalL1.Position = P1I.Position - second;
@@ -320,7 +321,7 @@ namespace CadCat.GeometryModels
 			p01P.OnChanged += PointOnChanged;
 			p02P = right.LeftBack[1];
 			p02P.OnChanged += PointOnChanged;
-			p13P = right.LeftBack[2];
+			p13P = right.LeftBack[1];
 			p13P.OnChanged += PointOnChanged;
 			p23P = right.NormalL1;
 			p23P.OnChanged += PointOnChanged;
@@ -424,30 +425,37 @@ namespace CadCat.GeometryModels
 				return p00.Position;
 			}
 
-			var uh = EvaluateH(u);
-			var vh = EvaluateH(v);
+			var uh = EvaluateB(u);
+			var vh = EvaluateB(v);
 
 
 
 
-			//Vector3 firstRow = p00.Position * vh.X + p10.Position * vh.Y + p20.Position * vh.Z + p30.Position * vh.W;
 
-			//Vector3 secondRow = p01.Position * vh.X + (p01P.Position * u + p10P.Position * v) / (u + v) * vh.Y + (p20P.Position * (1 - v) + p31P.Position * u) / (1 - v + u) * vh.Z + p31.Position * vh.W;
+			// baza berensteina:
 
-			//Vector3 thirdRow = p02.Position * vh.X + (p02P.Position * (1 - u) + p13P.Position * v) / (1 - u + v) * vh.Y + (p23P.Position * (1 - v) + p32P.Position * (1 - u)) / (2 - u - v) * vh.Z + p31.Position * vh.W;
+			Vector4 firstRow = p00.WPos * vh.X + p10.WPos * vh.Y + p20.WPos * vh.Z + p30.WPos * vh.W;
+			Vector4 secondRow = p01.WPos * vh.X + (p01P.WPos * u + p10P.WPos * v) / (u + v) * vh.Y + (p20P.WPos * (1 - v) + p31P.WPos * u) / (1 - v + u) * vh.Z + p31.WPos * vh.W;
+			Vector4 thirdRow = p02.WPos * vh.X + (p02P.WPos * (1 - u) + p13P.WPos * v) / (1 - u + v) * vh.Y + (p23P.WPos * (1 - v) + p32P.WPos * (1 - u)) / (2 - u - v) * vh.Z + p32.WPos * vh.W;
 
-			//Vector3 fourthRow = p03.Position * vh.X + p13.Position * vh.Y + p23.Position * vh.Z + p33.Position * vh.W;
+			Vector4 fourthRow = p03.WPos * vh.X + p13.WPos * vh.Y + p23.WPos * vh.Z + p33.WPos * vh.W;
+
+			//baza Hermita:
+
+			//Vector3 firstRow = p00.Position * vh.X + p30.Position * vh.Y + (p10.Position - p00.Position) * 3 * vh.Z + (p30.Position - p20.Position) * 3 * vh.W;
+			//Vector3 secondRow = p03.Position * vh.X + p33.Position * vh.Y + (p13.Position - p03.Position) * 3 * vh.Z +
+			//					(p33.Position - p23.Position) * 3 * vh.W;
+			//Vector3 thirdRow = (p01.Position - p00.Position) * 3 * vh.X + (p31.Position - p30.Position) * 3 * vh.Y + ((p01P.Position - p00.Position) * 3 * u + (p10P.Position - p00.Position) * 3 * v) / (u + v) * vh.Z + ((p20P.Position - p30.Position) * 3 * (1 - v) + (p31P.Position - p30.Position) * 3 * u) / (1 - v + u) * vh.W;
+
+			//Vector3 fourthRow = (p03.Position - p02.Position) * 3 * vh.X + (p33.Position - p32.Position) * 3 * vh.Y + ((p02P.Position - p03.Position) * 3 * (1 - u) + (p13P.Position - p03.Position) * 3 * v) / (1 - u + v) * vh.Z + ((p23P.Position - p33.Position) * 3 * (1 - v) + (p32P.Position - p33.Position) * 3 * (1 - u)) / (2 - u - v) * vh.W;
 
 
-			Vector3 firstRow = p00.Position * vh.X + p30.Position * vh.Y + (p10.Position - p00.Position) * 3 * vh.Z + (p30.Position - p20.Position) * 3 * vh.W;
-			Vector3 secondRow = p03.Position * vh.X + p33.Position * vh.Y + (p13.Position - p03.Position) * 3 * vh.Z +
-								(p33.Position - p23.Position) * 3 * vh.W;
-			Vector3 thirdRow = (p01.Position - p00.Position) * 3 * vh.X + (p31.Position - p30.Position) * 3 * vh.Y + ((p01P.Position - p00.Position) * 3 * u + (p10P.Position - p00.Position) * 3 * v) / (u + v) * vh.Z + ((p20P.Position - p30.Position) * 3 * (1 - v) + (p31P.Position - p30.Position) * 3 * u) / (1 - v + u) * vh.W;
 
-			Vector3 fourthRow = (p03.Position - p02.Position) * 3 * vh.X + (p33.Position - p32.Position) * 3 * vh.Y + ((p02P.Position - p03.Position) * 3 * (1 - u) + (p13P.Position - p03.Position) * 3 * v) / (1 - u + v) * vh.Z + ((p23P.Position - p33.Position) * 3 * (1 - v) + (p32P.Position - p33.Position) * 3 * (1 - u)) / (2 - u - v) * vh.W;
+
+
 
 			var result = firstRow * uh.X + secondRow * uh.Y + thirdRow * uh.Z + fourthRow * uh.W;
-			return result;
+			return result.ToNormalizedVector3();
 		}
 		private void PointOnChanged(CatPoint sender)
 		{
@@ -522,7 +530,6 @@ namespace CadCat.GeometryModels
 			sum /= adjacentPatches.Count;
 			centerPoint.Position = sum;
 			adjacentPatches.ForEach(x => x.CalculateP1());
-
 			gregoryPatches = new List<SingleGregoryPatch>(cycle.Patches.Count);
 
 

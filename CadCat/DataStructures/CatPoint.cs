@@ -1,4 +1,5 @@
 ﻿using System.CodeDom;
+using System.Configuration;
 using CadCat.Math;
 using System.Diagnostics;
 
@@ -23,6 +24,7 @@ namespace CadCat.DataStructures
 		Vector3 position;
 		string name;
 		bool isSelected = false;
+		private double w = 1.0;
 
 		public CatPoint(Vector3 position)
 		{
@@ -108,6 +110,18 @@ namespace CadCat.DataStructures
 			}
 		}
 
+		public double W
+		{
+			get { return w; }
+			set
+			{
+				w = value;
+				OnPropertyChanged();
+			}
+		}
+
+		public Vector4 WPos => new Vector4(Position * W, w);
+
 		public bool IsSelected
 		{
 			get
@@ -134,7 +148,7 @@ namespace CadCat.DataStructures
 			}
 		}
 
-		public bool Removeable => DependentUnremovable==0;
+		public bool Removeable => DependentUnremovable == 0;
 
 		public uint DependentUnremovable { get; set; } = 0;
 
