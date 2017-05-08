@@ -208,6 +208,9 @@
                                 <RowDefinition Height="40"/>
                                 <RowDefinition Height="40"/>
                                 <RowDefinition Height="40"/>
+                                <RowDefinition Height="40"/>
+                                <RowDefinition Height="40"/>
+                                <RowDefinition Height="40"/>
                             </Grid.RowDefinitions>
                             <TextBlock VerticalAlignment="Center" Grid.Column="0">Div</TextBlock>
                             <control:NumericSlider Grid.Row="0" Grid.Column="1" Value="{Binding WidthDiv}" IncrementMultiplier="0.1" />
@@ -219,6 +222,12 @@
                             <ToggleButton Grid.Column="0" Grid.Row="2" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
                                           ToolTip="MaterialDesignSwitchAccentToggleButton" IsChecked="{Binding ShowPoints}" />
                             <TextBlock VerticalAlignment="Center" Grid.Column="1" Grid.Row="2">Points Visible</TextBlock>
+                            <control:NumericSlider Grid.Row="3" Grid.Column="1" Value="{Binding LW}" IncrementMultiplier="0.1" />
+                            <TextBlock VerticalAlignment="Center" Grid.Column="0" Grid.Row="3">P1 LW</TextBlock>
+                            <control:NumericSlider Grid.Row="4" Grid.Column="1" Value="{Binding RW}" IncrementMultiplier="0.1" />
+                            <TextBlock VerticalAlignment="Center" Grid.Column="0" Grid.Row="4">P1 RW</TextBlock>
+                            <control:NumericSlider Grid.Row="5" Grid.Column="1" Value="{Binding W2}" IncrementMultiplier="0.1" />
+                            <TextBlock VerticalAlignment="Center" Grid.Column="0" Grid.Row="5">Central W</TextBlock>
                         </Grid>
                     </DataTemplate>
                 </ContentControl.Resources>

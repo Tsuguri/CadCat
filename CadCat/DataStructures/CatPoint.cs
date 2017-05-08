@@ -115,7 +115,10 @@ namespace CadCat.DataStructures
 			get { return w; }
 			set
 			{
+				var tmp = w;
 				w = value;
+				if (tmp != value)
+					OnChanged?.Invoke(this);
 				OnPropertyChanged();
 			}
 		}

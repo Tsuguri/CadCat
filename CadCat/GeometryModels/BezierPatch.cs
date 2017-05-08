@@ -242,7 +242,7 @@ namespace CadCat.GeometryModels
 			if (catPoints.Contains(points[15]))
 				contained++;
 
-			return contained == 2;
+			return contained >= 2;
 		}
 
 		public bool ContainsInCorner(CatPoint catPoint)

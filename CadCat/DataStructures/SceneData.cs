@@ -336,7 +336,19 @@ namespace CadCat.DataStructures
 
 			var patches = Models.Where(x => x is BezierPatch).Cast<BezierPatch>().Where(x => x.ContainsTwoInCorners(selectedPoints)).ToList();
 
-			var cycle = CreatePatchCycle(selectedPoints, patches);
+
+			var pts = selectedPoints.Where(x =>
+				{
+					int counter = 0;
+					patches.ForEach(y =>
+					{
+						if (y.ContainsInCorner(x))
+							counter++;
+					});
+					return counter >= 2;
+				})
+				.ToList();
+			var cycle = CreatePatchCycle(pts, patches);
 			if (cycle == null)
 			{
 				var sampleMessageDialog = new MessageHost

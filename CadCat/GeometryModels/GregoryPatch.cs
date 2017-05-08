@@ -111,15 +111,12 @@ namespace CadCat.GeometryModels
 			}
 			centerPoint.OnChanged += AdjacentHalfPatch_OnChanged;
 			P1I = scene.CreateHiddenCatPoint(new Vector3());
-			P1I.W = 6;
+			//P1I.W = 6;
 			changed = true;
 			ActualizePositions();
 
 			NormalL1 = scene.CreateHiddenCatPoint(new Vector3());
-			//NormalL2 = scene.CreateHiddenCatPoint(new Vector3());
 			NormalR1 = scene.CreateHiddenCatPoint(new Vector3());
-			//NormalR2 = scene.CreateHiddenCatPoint(new Vector3());
-
 
 			renderPoints = new List<CatPoint>
 			{
@@ -138,8 +135,6 @@ namespace CadCat.GeometryModels
 				P1I,centerPoint,
 				NormalL1,
 				NormalR1,
-				//NormalL2,
-				//NormalR2
 			};
 
 
@@ -154,9 +149,6 @@ namespace CadCat.GeometryModels
 		private void ActualizePositions()
 		{
 			changed = false;
-
-			//LeftBack[0].Position = data.Nearest[0].Position * 2 - data.Back[0].Position;
-			//RightBack[3].Position = data.Nearest[3].Position * 2 - data.Back[3].Position;
 
 			LeftNearest[1].Position = (data.Nearest[0].Position + data.Nearest[1].Position) / 2;
 			RightNearest[2].Position = (data.Nearest[2].Position + data.Nearest[3].Position) / 2;
@@ -190,11 +182,7 @@ namespace CadCat.GeometryModels
 			var g2 = (RightNearest[1].Position - LeftNearest[2].Position) / 2;
 			var g1 = (g0 + g2) / 2;
 
-			//var first = (g0 * (2 / 3.0f) + g1 * (1 / 3.0f)) * (2 / 3.0f) + (g1 * (2 / 3.0f) + g2 * (1 / 3.0f)) * (1 / 3.0f);
 			var second = (g0 * (1 / 3.0f) + g1 * (2 / 3.0f)) * (1 / 3.0f) + (g1 * (1 / 3.0f) + g2 * (2 / 3.0f)) * (2 / 3.0f);
-
-			//	NormalL2.Position = LeftBack[3].Position - first;
-			//NormalR2.Position = LeftBack[3].Position + first;
 
 			NormalL1.Position = P1I.Position - second;
 			NormalR1.Position = P1I.Position + second;
@@ -481,9 +469,9 @@ namespace CadCat.GeometryModels
 	{
 		private PatchCycle cycle;
 		private SceneData data;
-		private List<AdjacentHalfPatch> adjacentPatches;
-		private CatPoint centerPoint;
-		private List<SingleGregoryPatch> gregoryPatches;
+		private readonly List<AdjacentHalfPatch> adjacentPatches;
+		private readonly CatPoint centerPoint;
+		private readonly List<SingleGregoryPatch> gregoryPatches;
 
 		private bool showPoints = true;
 
@@ -503,6 +491,49 @@ namespace CadCat.GeometryModels
 			}
 		}
 
+		private double lw = 1.0;
+		public double LW
+		{
+			get { return lw; }
+			set
+			{
+				lw = value;
+				adjacentPatches.ForEach(x =>
+				{
+					x.NormalL1.W = lw;
+				});
+				OnPropertyChanged();
+			}
+		}
+		private double rw = 1.0;
+		public double RW
+		{
+			get { return rw; }
+			set
+			{
+				rw = value;
+				adjacentPatches.ForEach(x =>
+				{
+					x.NormalR1.W = rw;
+				});
+				OnPropertyChanged();
+			}
+		}
+
+		private double w2 = 1.0;
+		public double W2
+		{
+			get { return w2; }
+			set
+			{
+				w2 = value;
+				adjacentPatches.ForEach(x =>
+				{
+					x.P1I.W = w2;
+				});
+				OnPropertyChanged();
+			}
+		}
 		public GregoryPatch(PatchCycle cycle, SceneData data)
 		{
 			this.cycle = cycle;
