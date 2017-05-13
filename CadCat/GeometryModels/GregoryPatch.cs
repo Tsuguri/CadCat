@@ -231,9 +231,9 @@ namespace CadCat.GeometryModels
 			}
 
 			scene.RemovePoint(centerPoint);
-			scene.RemovePoint(LeftNearest[0]);
 			scene.RemovePoint(LeftNearest[1]);
 			scene.RemovePoint(LeftNearest[2]);
+			scene.RemovePoint(LeftNearest[3]);
 			scene.RemovePoint(RightNearest[1]);
 			scene.RemovePoint(RightNearest[2]);
 

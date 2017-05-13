@@ -63,6 +63,7 @@ namespace CadCat.GeometryModels
 				for (int j = 0; j < 4; j++)
 				{
 					var pt = scene.CreateHiddenCatPoint(new Math.Vector3(i, System.Math.Sin(Math.Utils.Pi * (i * 0.5 + j * 0.1) / 2.0), j));
+					pt.DependentUnremovable += 1;
 					points[i * 4 + j] = pt;
 					pt.OnChanged += OnBezierPointChanged;
 				}
@@ -78,6 +79,8 @@ namespace CadCat.GeometryModels
 				for (int j = 0; j < 4; j++)
 				{
 					points[i * 4 + j] = pts[i, j];
+					//pts[i, j].DependentUnremovable += 1;
+
 					pts[i, j].OnChanged += OnBezierPointChanged;
 					pts[i, j].OnReplace += OnBezierPointReplaced;
 				}
@@ -97,7 +100,11 @@ namespace CadCat.GeometryModels
 					points[i] = newPoint;
 			changed = true;
 			point.OnChanged -= OnBezierPointChanged;
+			if (owner)
+				point.DependentUnremovable -= 1;
 			newPoint.OnChanged += OnBezierPointChanged;
+			if (owner)
+				newPoint.DependentUnremovable += 1;
 		}
 
 
@@ -214,6 +221,7 @@ namespace CadCat.GeometryModels
 			{
 				foreach (var pt in points)
 				{
+					pt.DependentUnremovable -= 1;
 					scene.RemovePoint(pt);
 				}
 			}
@@ -286,6 +294,8 @@ namespace CadCat.GeometryModels
 					return i;
 			return -1;
 		}
+
+
 
 		public HalfPatchData GetDataBetweenPoints(CatPoint first, CatPoint second)
 		{

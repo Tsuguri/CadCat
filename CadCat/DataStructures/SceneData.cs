@@ -348,7 +348,17 @@ namespace CadCat.DataStructures
 					return counter >= 2;
 				})
 				.ToList();
-			var cycle = CreatePatchCycle(pts, patches);
+			PatchCycle cycle;
+
+			try
+			{
+				cycle = CreatePatchCycle(pts, patches);
+
+			}
+			catch (Exception e)
+			{
+				cycle = null;
+			}
 			if (cycle == null)
 			{
 				var sampleMessageDialog = new MessageHost
@@ -1101,6 +1111,7 @@ namespace CadCat.DataStructures
 
 			Models.Clear();
 			Points.Clear();
+			hiddenPoints.Clear();
 		}
 
 	}
