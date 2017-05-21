@@ -18,6 +18,8 @@ namespace CadCat.GeometryModels
 		private readonly List<CatPoint> catPoints;
 		private readonly SceneData scene;
 
+		private bool uLooped;
+		private bool vLooped;
 		private bool showPolygon = true;
 		private bool showPoints = true;
 
@@ -99,11 +101,12 @@ namespace CadCat.GeometryModels
 
 		}
 
-		public Surface(Proxys.SurfaceType surfacetype, Patch[,] patches, List<CatPoint> catPoints, SceneData scene)
+		public Surface(Proxys.SurfaceType surfacetype, Patch[,] patches, List<CatPoint> catPoints, SceneData scene, bool uLooped, bool vLooped)
 		{
 			this.surfacetype = surfacetype;
 			this.patches = new List<Patch>();
-
+			this.uLooped = uLooped;
+			this.vLooped = vLooped;
 			foreach (var patch in patches)
 			{
 				this.patches.Add(patch);
@@ -241,6 +244,24 @@ namespace CadCat.GeometryModels
 		public ParametrizedPoint GetClosestPointParams(Vector3 point)
 		{
 			throw new NotImplementedException();
+		}
+
+		public Vector2? ConfirmParams(double u, double v)
+		{
+			if ((u < 0.0 || u > PatchesU) && !uLooped)
+				return null;
+			if ((v < 0.0 || v > PatchesV) && !vLooped)
+				return null;
+			Vector2 ret = new Vector2(u,v);
+			if (ret.X < 0)
+				ret.X += PatchesU;
+			if (ret.X > PatchesU)
+				ret.X -= PatchesU;
+			if (ret.Y < 0)
+				ret.Y -= PatchesV;
+			if (ret.Y > PatchesV)
+				ret.Y -= PatchesV;
+			return ret;
 		}
 
 		public IEnumerable<ParametrizedPoint> GetPointsForSearch(int firstParamDiv, int secondParamDiv)

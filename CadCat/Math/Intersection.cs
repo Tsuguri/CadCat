@@ -13,7 +13,7 @@ namespace CadCat.Math
 		private static SceneData data;
 		public static void Intersect(IIntersectable P, IIntersectable Q, SceneData scene)
 		{
-
+			List<Vector4> points = new List<Vector4>();
 			double d = 0.01;
 			data = scene;
 			var pPoints = P.GetPointsForSearch(8, 8).ToList();
@@ -96,30 +96,42 @@ namespace CadCat.Math
 				 return new Vector4(p - q, temp);
 			 };
 
-			for (int i = 0; i < 100; i++)
-				try
+			bool end = false;
+			while (!end)
+			{
+				Vector4 point = startPoint;
+				points.Add(startPoint);
+				Vector4 prevPoint;
+				do
 				{
+					prevPoint = point;
+					var jacob = jacobian(point, false);
+					var funRes = function(point, P.GetPosition(point.X, point.Y), jacob.Item2);
 
-					Vector4 point = startPoint;
-					Vector4 prevPoint;
-					do
+					var nextP = point - jacob.Item1.Inversed() * funRes;
+					point = nextP;
+					var pP = P.ConfirmParams(nextP.X, nextP.Y);
+					var qP = Q.ConfirmParams(nextP.Z, nextP.W);
+					if (qP == null || pP == null)
 					{
-						prevPoint = point;
-						var jacob = jacobian(point, false);
-						var funRes = function(point, P.GetPosition(point.X, point.Y), jacob.Item2);
+						end = true;
+						break;
+					}
+					point = new Vector4(pP.Value.X, pP.Value.Y, qP.Value.X, qP.Value.Y);
 
-						var nextP = point - jacob.Item1.Inversed() * funRes;
-						point = nextP;
-						scene.CreateHiddenCatPoint(P.GetPosition(point.X, point.Y));
-					} while ((P.GetPosition(point.X, point.Y) - P.GetPosition(prevPoint.X, prevPoint.Y)).Length() > 0.0001);
-					startPoint = point;
-				}
-				catch (Exception e)
-				{
-
-				}
+					scene.CreateHiddenCatPoint(P.GetPosition(point.X, point.Y));
+				} while ((P.GetPosition(point.X, point.Y) - P.GetPosition(prevPoint.X, prevPoint.Y)).Length() > 0.0001);
+				startPoint = point;
+			}
 
 
+
+
+		}
+
+		private static List<Vector4> Newton()
+		{
+			
 		}
 
 		private static Vector4 SimpleGradient(Func<Vector4, double> distanceFun, Func<Vector4, Vector4> grad,

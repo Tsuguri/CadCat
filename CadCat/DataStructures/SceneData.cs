@@ -1072,7 +1072,7 @@ namespace CadCat.DataStructures
 				}
 
 				var surfacePoints = patches.SelectMany(x => x.EnumerateCatPoints()).Distinct().ToList();
-				var surface = new Surface(SurfaceType.Bezier, ptches, surfacePoints, this)
+				var surface = new Surface(SurfaceType.Bezier, ptches, surfacePoints, this, false, false)
 				{
 					Name = bezierSurfaceC0.Name,
 					PatchesU = bezierSurfaceC0.PatchesU,
@@ -1107,7 +1107,7 @@ namespace CadCat.DataStructures
 				}
 
 				var surfacePoints = patches.SelectMany(x => x.EnumerateCatPoints()).Distinct().ToList();
-				var surface = new Surface(SurfaceType.BSpline, ptches, surfacePoints, this)
+				var surface = new Surface(SurfaceType.BSpline, ptches, surfacePoints, this, false, false)
 				{
 					Name = bezierSurfaceC2.Name,
 					PatchesU = bezierSurfaceC2.PatchesU,
