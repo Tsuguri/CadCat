@@ -27,6 +27,9 @@ namespace CadCat.GeometryModels.Proxys
 		//private List<ModelLine> lines;
 		private readonly List<int> indices = new List<int>();
 		private readonly List<int> outlineIndices = new List<int>();
+		/// <summary>
+		/// dane są trzymane wierszami - wiersz0, wiersz1...
+		/// </summary>
 		private readonly List<Math.Vector3> points = new List<Vector3>();
 
 
@@ -198,10 +201,10 @@ namespace CadCat.GeometryModels.Proxys
 				Real heightStep = Height / (heightPoints - 1);
 
 
-				for (int i = 0; i < widthPoints; i++)
+				for (int i = 0; i < widthPoints; i++) // for po kolumnach
 				{
 					Real x = widthStep * i - Width / 2;
-					for (int j = 0; j < heightPoints; j++)
+					for (int j = 0; j < heightPoints; j++) // for po wierszach
 					{
 						Real y = heightStep * j - Height / 2;
 						points.Insert(i * heightPoints + j, new Vector3(x, y));
@@ -303,14 +306,14 @@ namespace CadCat.GeometryModels.Proxys
 
 			int widthPoints = UDensity * 3 + 1;
 			int heightPoints = VDensity * 3 + 1;
-			var catPoints = new CatPoint[widthPoints, heightPoints];
+			var catPoints = new CatPoint[heightPoints, widthPoints];
 			var matrix = GetMatrix(false, new Vector3());
 			if (!Curved)
 				for (int i = 0; i < widthPoints; i++)
 					for (int j = 0; j < heightPoints; j++)
 					{
 						var pt = points[i * heightPoints + j];
-						catPoints[i, j] = scene.CreateCatPoint((matrix * new Vector4(pt)).ClipToVector3());
+						catPoints[j, i] = scene.CreateCatPoint((matrix * new Vector4(pt)).ClipToVector3());
 					}
 			else
 			{
@@ -333,11 +336,11 @@ namespace CadCat.GeometryModels.Proxys
 						}
 						else
 							pt = points[i * heightPoints + j];
-						catPoints[i, j] = scene.CreateCatPoint((matrix * new Vector4(pt)).ClipToVector3());
+						catPoints[j, i] = scene.CreateCatPoint((matrix * new Vector4(pt)).ClipToVector3());
 					}
 				if (cylinder)
 					for (int j = 0; j < heightPoints; j++)
-						catPoints[widthPoints - 1, j] = catPoints[0, j];
+						catPoints[j, widthPoints - 1] = catPoints[j, 0];
 			}
 			scene.RemoveModel(this);
 			var subArray = new CatPoint[4, 4];
@@ -347,14 +350,14 @@ namespace CadCat.GeometryModels.Proxys
 				{
 					for (int x = 0; x < 4; x++)
 						for (int y = 0; y < 4; y++)
-							subArray[x, y] = catPoints[i * 3 + x, j * 3 + y];
+							subArray[y, x] = catPoints[j * 3 + y, i * 3 + x];
 					var patch = new BezierPatch(subArray)
 					{
 						UPos = i,
 						VPos = j
 					};
 					scene.AddNewModel(patch);
-					ptchs[i, j] = patch;
+					ptchs[j, i] = patch;
 
 				}
 			var catPointsList = new List<CatPoint>(catPoints.GetLength(0) * catPoints.GetLength(1));
@@ -372,55 +375,55 @@ namespace CadCat.GeometryModels.Proxys
 			int widthPoints = UDensity + 3;
 			int heightPoints = VDensity + 3;
 
-			var pts = new Vector3[widthPoints - 2, heightPoints - 2];
+			var pts = new Vector3[heightPoints - 2, widthPoints - 2];
 
 			for (int i = 0; i < UDensity + 1; i++)
 				for (int j = 0; j < VDensity + 1; j++)
-					pts[i, j] = points[i * 3 * (VDensity * 3 + 1) + j * 3];
+					pts[j, i] = points[i * 3 * (VDensity * 3 + 1) + j * 3];
 
-			var catPoints = new CatPoint[widthPoints, heightPoints];
+			var catPoints = new CatPoint[heightPoints, widthPoints];
 			var matrix = GetMatrix(false, new Vector3());
 			if (!Curved)
 			{
 				for (int i = 1; i < widthPoints - 1; i++)
 					for (int j = 1; j < heightPoints - 1; j++)
 					{
-						var pt = pts[(i - 1), (j - 1)];
-						catPoints[i, j] = scene.CreateCatPoint((matrix * new Vector4(pt)).ClipToVector3());
+						var pt = pts[(j - 1), (i - 1)];
+						catPoints[j, i] = scene.CreateCatPoint((matrix * new Vector4(pt)).ClipToVector3());
 					}
 
 				for (int i = 1; i < widthPoints - 1; i++)
 				{
 					int j = 0;
-					var pt = pts[i - 1, 0] * 2 - pts[i - 1, 1];
-					catPoints[i, j] = scene.CreateCatPoint((matrix * new Vector4(pt)).ClipToVector3());
+					var pt = pts[0, i - 1] * 2 - pts[1, i - 1];
+					catPoints[j, i] = scene.CreateCatPoint((matrix * new Vector4(pt)).ClipToVector3());
 					j = heightPoints - 1;
-					pt = pts[i - 1, j - 2] * 2 - pts[i - 1, j - 3];
-					catPoints[i, j] = scene.CreateCatPoint((matrix * new Vector4(pt)).ClipToVector3());
+					pt = pts[j - 2, i - 1] * 2 - pts[j - 3, i - 1];
+					catPoints[j, i] = scene.CreateCatPoint((matrix * new Vector4(pt)).ClipToVector3());
 				}
 				for (int j = 1; j < heightPoints - 1; j++)
 				{
 					int i = 0;
-					var pt = pts[0, j - 1] * 2 - pts[1, j - 1];
-					catPoints[i, j] = scene.CreateCatPoint((matrix * new Vector4(pt)).ClipToVector3());
+					var pt = pts[j - 1, 0] * 2 - pts[j - 1, 1];
+					catPoints[j, i] = scene.CreateCatPoint((matrix * new Vector4(pt)).ClipToVector3());
 					i = widthPoints - 1;
-					pt = pts[i - 2, j - 1] * 2 - pts[i - 3, j - 1];
-					catPoints[i, j] = scene.CreateCatPoint((matrix * new Vector4(pt)).ClipToVector3());
+					pt = pts[j - 1, i - 2] * 2 - pts[j - 1, i - 3];
+					catPoints[j, i] = scene.CreateCatPoint((matrix * new Vector4(pt)).ClipToVector3());
 				}
 
 				catPoints[0, 0] = scene.CreateCatPoint((matrix * new Vector4(pts[0, 0] * 2 - pts[1, 1])).ClipToVector3());
-				catPoints[widthPoints - 1, heightPoints - 1] = scene.CreateCatPoint(
+				catPoints[heightPoints - 1, widthPoints - 1] = scene.CreateCatPoint(
 					(matrix * new Vector4(pts[pts.GetLength(0) - 1, pts.GetLength(1) - 1] * 2 -
 										  pts[pts.GetLength(0) - 2, pts.GetLength(1) - 2])).ClipToVector3());
 
-				catPoints[widthPoints - 1, 0] =
-					scene.CreateCatPoint((matrix * new Vector4(pts[pts.GetLength(0) - 1, 0] * 2 - pts[pts.GetLength(0) - 2, 1]))
-						.ClipToVector3());
-				catPoints[0, heightPoints - 1] =
+				catPoints[0, widthPoints - 1] =
 					scene.CreateCatPoint((matrix * new Vector4(pts[0, pts.GetLength(1) - 1] * 2 - pts[1, pts.GetLength(1) - 2]))
 						.ClipToVector3());
+				catPoints[heightPoints - 1, 0] =
+					scene.CreateCatPoint((matrix * new Vector4(pts[pts.GetLength(0) - 1, 0] * 2 - pts[pts.GetLength(0) - 2, 1]))
+						.ClipToVector3());
 			}
-			else
+			else // TODO: fix curved
 			{
 				int curvePoints = widthPoints - (IsCylinder ? 3 : 0);
 				Real angleStep = CurvatureAngle / curvePoints;
@@ -428,24 +431,24 @@ namespace CadCat.GeometryModels.Proxys
 				//r * (4sqrt(2) / (6n))
 				Real newRadius = Radius * (1 + 2 * System.Math.Sqrt(2) / (3.0 * (double)(UDensity - 2)));
 
-				for (int i = 0; i < curvePoints; i++)
+				for (int i = 0; i < curvePoints; i++)//u
 				{
 					Real angle = Utils.DegToRad(i * angleStep - CurvatureAngle / 2);
 					Real x = newRadius * System.Math.Sin(angle);
-					for (int j = 0; j < heightPoints; j++)
+					for (int j = 0; j < heightPoints; j++)//v
 					{
 						Real y = heightStep * j - Height / 2;
 						Real z = newRadius * System.Math.Cos(angle);
-						catPoints[i, j] = scene.CreateCatPoint((matrix * new Vector4(x, y, z, 1.0)).ClipToVector3());
+						catPoints[j, i] = scene.CreateCatPoint((matrix * new Vector4(x, y, z, 1.0)).ClipToVector3());
 					}
 				}
 
 				if (IsCylinder)
 					for (int j = 0; j < heightPoints; j++)
 					{
-						catPoints[widthPoints - 3, j] = catPoints[0, j];
-						catPoints[widthPoints - 2, j] = catPoints[1, j];
-						catPoints[widthPoints - 1, j] = catPoints[2, j];
+						catPoints[j, widthPoints - 3] = catPoints[j, 0];
+						catPoints[j, widthPoints - 2] = catPoints[j, 1];
+						catPoints[j, widthPoints - 1] = catPoints[j, 2];
 
 					}
 			}
@@ -453,12 +456,12 @@ namespace CadCat.GeometryModels.Proxys
 			scene.RemoveModel(this);
 			var subArray = new CatPoint[4, 4];
 			var ptches = new Patch[VDensity, UDensity];
-			for (int i = 0; i < UDensity; i++)
-				for (int j = 0; j < VDensity; j++)
+			for (int i = 0; i < UDensity; i++)//u
+				for (int j = 0; j < VDensity; j++)//v
 				{
 					for (int x = 0; x < 4; x++)
 						for (int y = 0; y < 4; y++)
-							subArray[x, y] = catPoints[i + x, j + y];
+							subArray[y, x] = catPoints[j + x, i + y];
 					var patch = new BSplinePatch(subArray)
 					{ UPos = i, VPos = j };
 					scene.AddNewModel(patch);
@@ -470,7 +473,7 @@ namespace CadCat.GeometryModels.Proxys
 			{
 				catPointsList.Add(catPoint);
 			}
-			scene.AddNewModel(new Surface(SurfaceType.BSpline, ptches, catPointsList, scene, IsCylinder, false) { PatchesU = VDensity, PatchesV = UDensity });
+			scene.AddNewModel(new Surface(SurfaceType.BSpline, ptches, catPointsList, scene, IsCylinder, false) { PatchesU = UDensity, PatchesV = VDensity });
 
 
 		}

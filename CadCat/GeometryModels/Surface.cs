@@ -113,8 +113,8 @@ namespace CadCat.GeometryModels
 			}
 			this.catPoints = catPoints;
 			this.scene = scene;
-			this.PatchesU = patches.GetLength(0);
-			this.PatchesV = patches.GetLength(1);
+			this.PatchesU = patches.GetLength(1);
+			this.PatchesV = patches.GetLength(0);
 
 			this.catPoints.ForEach(x =>
 			{
