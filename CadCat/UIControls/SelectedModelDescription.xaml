@@ -29,6 +29,7 @@
                                 <RowDefinition Height="25"/>
                                 <RowDefinition Height="25"/>
                                 <RowDefinition Height="25"/>
+                                <RowDefinition Height="25"/>
                             </Grid.RowDefinitions>
                             <TextBlock Grid.Column="0" Grid.Row="0">R</TextBlock>
                             <control:NumericSlider Grid.Column="1" Grid.Row="0" Value="{Binding R}" IncrementMultiplier="0.1" />
@@ -38,6 +39,9 @@
                             <control:NumericSlider Grid.Column="1" Grid.Row="2" Value="{Binding RDensity}" />
                             <TextBlock Grid.Column="0" Grid.Row="3">rDensity</TextBlock>
                             <control:NumericSlider Grid.Column="1" Grid.Row="3" Value="{Binding rDensity}" />
+                            <ToggleButton Grid.Column="0" Grid.Row="4" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
+                                          ToolTip="MaterialDesignSwitchAccentToggleButton" IsChecked="{Binding DrawNormals}" />
+                            <TextBlock VerticalAlignment="Center" Grid.Column="1" Grid.Row="4">Normals Visible</TextBlock>
                         </Grid>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type models:Cube}">
