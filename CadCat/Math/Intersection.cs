@@ -81,8 +81,8 @@ namespace CadCat.Math
 				  };
 
 
-				  var np = Vector3.CrossProduct(du, dv);
-				  var nq = Vector3.CrossProduct(ds, dt);
+				  var np = Vector3.CrossProduct(du, dv).Normalized();
+				  var nq = Vector3.CrossProduct(ds, dt).Normalized();
 				  var t = (invert ? Vector3.CrossProduct(nq, np) : Vector3.CrossProduct(np, nq)).Normalized();
 				  jacob[3, 0] = Vector3.DotProduct(du, t);
 				  jacob[3, 1] = Vector3.DotProduct(dv, t);
@@ -100,14 +100,14 @@ namespace CadCat.Math
 
 			var pts = Newton(P, Q, startPoint, function, jacobian, false);
 
-			//if ((pts.Last() - pts.First()).Length() > 0.001)
-			//{
-			//	var pts2 = Newton(P, Q, startPoint, function, jacobian, true);
-			//	pts2.Reverse();
-			//	pts.AddRange(pts2);
-			//}
+			if ((pts.Last() - pts.First()).Length() > 0.001)
+			{
+				var pts2 = Newton(P, Q, startPoint, function, jacobian, true);
+				pts2.Reverse();
+				pts.AddRange(pts2);
+			}
 
-			//pts.ForEach(x => scene.CreateHiddenCatPoint(P.GetPosition(x.X, x.Y)));
+			pts.ForEach(x => scene.CreateHiddenCatPoint(P.GetPosition(x.X, x.Y)));
 
 
 		}
@@ -116,7 +116,7 @@ namespace CadCat.Math
 		{
 			var points = new List<Vector4>();
 			bool end = false;
-			while (!end && points.Count < 20)
+			while (!end)
 			{
 				Vector4 point = startPoint;
 				points.Add(startPoint);
@@ -126,10 +126,10 @@ namespace CadCat.Math
 				{
 					prevPoint = point;
 					var jacob = jacobian(point, inverse);
-					var funRes = function(startPoint, P.GetPosition(point.X, point.Y), jacob.Item2);
+					var funRes = function(point, P.GetPosition(startPoint.X, startPoint.Y), jacob.Item2);
 
 					var nextP = point - jacob.Item1.Inversed() * funRes;
-					point = nextP;
+					//point = nextP;
 					var pP = P.ConfirmParams(nextP.X, nextP.Y);
 					var qP = Q.ConfirmParams(nextP.Z, nextP.W);
 					if (qP == null || pP == null)
@@ -139,11 +139,15 @@ namespace CadCat.Math
 					}
 					i++;
 					point = new Vector4(pP.Value.X, pP.Value.Y, qP.Value.X, qP.Value.Y);
-					points.Add(point);
 
-				} while ((P.GetPosition(point.X, point.Y) - P.GetPosition(prevPoint.X, prevPoint.Y)).Length() > 0.0001);
+				} while ((P.GetPosition(point.X, point.Y) - P.GetPosition(prevPoint.X, prevPoint.Y)).Length() > 0.0001 && i<1000);
+
+				if ((point - startPoint).Length() < 0.0001)
+					break;
+
 				startPoint = point;
-				points.Add(point);
+
+				
 			}
 			return points;
 		}

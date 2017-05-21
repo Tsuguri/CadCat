@@ -234,7 +234,7 @@ namespace CadCat.GeometryModels
 					sum += (points[(i + 1) * 4 + j].Position - points[i * 4 + j].Position) * tempMtx[i, j];
 				}
 
-			return sum;
+			return sum * 1;
 		}
 
 		private Vector3 EvaluateVDerivative(double u, double v)
@@ -250,7 +250,7 @@ namespace CadCat.GeometryModels
 					sum += (points[i * 4 + j + 1].Position - points[i * 4 + j].Position) * tempMtx[i, j];
 				}
 
-			return sum;
+			return sum * 1;
 		}
 
 		private Vector4 EvaluateBSpline(double t, int degree)

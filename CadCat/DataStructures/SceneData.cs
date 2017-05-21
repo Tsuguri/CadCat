@@ -1084,7 +1084,7 @@ namespace CadCat.DataStructures
 			foreach (var bezierSurfaceC2 in scene.BezierSurfacesC2)
 			{
 				var patches = new List<Patch>();
-				var ptches = new Patch[bezierSurfaceC2.PatchesU, bezierSurfaceC2.PatchesV];
+				var ptches = new Patch[bezierSurfaceC2.PatchesV, bezierSurfaceC2.PatchesU];
 
 				foreach (var bezierSurfaceC2Patch in bezierSurfaceC2.Patches)
 				{
@@ -1103,7 +1103,7 @@ namespace CadCat.DataStructures
 					};
 					AddNewModel(patch);
 					patches.Add(patch);
-					ptches[bezierSurfaceC2Patch.PatchU, bezierSurfaceC2Patch.PatchV] = patch;
+					ptches[bezierSurfaceC2Patch.PatchV, bezierSurfaceC2Patch.PatchU] = patch;
 				}
 
 				var surfacePoints = patches.SelectMany(x => x.EnumerateCatPoints()).Distinct().ToList();

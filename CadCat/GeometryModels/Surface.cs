@@ -179,7 +179,7 @@ namespace CadCat.GeometryModels
 			double uNormalized = firstParam - U;
 			double vNormalized = secondParam - V;
 
-			if (U == PatchesU && uNormalized < 0.0001 || V == PatchesV && vNormalized < 0.0001f)
+			if (U == PatchesU && uNormalized < 0.005 || V == PatchesV && vNormalized < 0.005f)
 			{
 				var newU = U == PatchesU ? U - 1 : U;
 				var newUnormalized = U == PatchesU ? 1.0f : uNormalized;
