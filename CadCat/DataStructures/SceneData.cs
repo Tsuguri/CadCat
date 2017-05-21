@@ -996,7 +996,7 @@ namespace CadCat.DataStructures
 			LoadFromFile(openFileDialog.FileName);
 		}
 
-		private void LoadFromFile(string filename)
+		public void LoadFromFile(string filename)
 		{
 
 			var p = new XMLSerializer();

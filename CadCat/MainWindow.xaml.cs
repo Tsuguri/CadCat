@@ -54,6 +54,8 @@ namespace CadCat
 			image.SizeChanged += Image_SizeChanged;
 			resizeTimer = new DispatcherTimer {Interval = new TimeSpan(0, 0, 0, 0, 300)};
 
+
+			data.LoadFromFile("C:\\Users\\Adam\\Desktop\\TwoSurfaces.xml");
 			RunTimer();
 
 		}

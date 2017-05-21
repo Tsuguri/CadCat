@@ -49,6 +49,8 @@ namespace CadCat.Math
 				return new Vector4(Vector3.DotProduct(diff, du), Vector3.DotProduct(diff, dv), -Vector3.DotProduct(diff, ds), -Vector3.DotProduct(diff, dt)) * 2.0;
 			};
 
+			//scene.CreateCatPoint(pPoint.Position, false);
+			//scene.CreateCatPoint(qPoint.Position, false);
 			var startPoint = SimpleGradient(distanceFun, distanceGradient, pPoint, qPoint, P, Q);
 
 			scene.CreateHiddenCatPoint(P.GetPosition(startPoint.X, startPoint.Y));
@@ -96,17 +98,35 @@ namespace CadCat.Math
 				 return new Vector4(p - q, temp);
 			 };
 
+			var pts = Newton(P, Q, startPoint, function, jacobian, false);
+
+			//if ((pts.Last() - pts.First()).Length() > 0.001)
+			//{
+			//	var pts2 = Newton(P, Q, startPoint, function, jacobian, true);
+			//	pts2.Reverse();
+			//	pts.AddRange(pts2);
+			//}
+
+			//pts.ForEach(x => scene.CreateHiddenCatPoint(P.GetPosition(x.X, x.Y)));
+
+
+		}
+
+		private static List<Vector4> Newton(IIntersectable P, IIntersectable Q, Vector4 startPoint, Func<Vector4, Vector3, Vector3, Vector4> function, Func<Vector4, bool, Tuple<Matrix4, Vector3>> jacobian, bool inverse)
+		{
+			var points = new List<Vector4>();
 			bool end = false;
-			while (!end)
+			while (!end && points.Count < 20)
 			{
 				Vector4 point = startPoint;
 				points.Add(startPoint);
 				Vector4 prevPoint;
+				int i = 0;
 				do
 				{
 					prevPoint = point;
-					var jacob = jacobian(point, false);
-					var funRes = function(point, P.GetPosition(point.X, point.Y), jacob.Item2);
+					var jacob = jacobian(point, inverse);
+					var funRes = function(startPoint, P.GetPosition(point.X, point.Y), jacob.Item2);
 
 					var nextP = point - jacob.Item1.Inversed() * funRes;
 					point = nextP;
@@ -117,21 +137,15 @@ namespace CadCat.Math
 						end = true;
 						break;
 					}
+					i++;
 					point = new Vector4(pP.Value.X, pP.Value.Y, qP.Value.X, qP.Value.Y);
+					points.Add(point);
 
-					scene.CreateHiddenCatPoint(P.GetPosition(point.X, point.Y));
 				} while ((P.GetPosition(point.X, point.Y) - P.GetPosition(prevPoint.X, prevPoint.Y)).Length() > 0.0001);
 				startPoint = point;
+				points.Add(point);
 			}
-
-
-
-
-		}
-
-		private static List<Vector4> Newton()
-		{
-			
+			return points;
 		}
 
 		private static Vector4 SimpleGradient(Func<Vector4, double> distanceFun, Func<Vector4, Vector4> grad,
@@ -141,7 +155,7 @@ namespace CadCat.Math
 
 			var startingpoint = new Vector4(pPoint.Parametrization.X, pPoint.Parametrization.Y, qPoint.Parametrization.X, qPoint.Parametrization.Y);
 
-			var point = startingpoint + grad(startingpoint) * alpha;
+			var point = startingpoint - grad(startingpoint) * alpha;
 			var distance = distanceFun(point);
 			double dist = distance;
 			Vector4 pt = point;
@@ -152,10 +166,20 @@ namespace CadCat.Math
 				{
 					point = pt;
 					distance = dist;
-
+					var tmpAlpha = alpha;
 					var grd = grad(point);
-					pt = point - grd * alpha;
-					dist = distanceFun(pt);
+					do
+					{
+						pt = point - grd * tmpAlpha;
+
+						//pt = new Vector4(P.ClipParams(pt.X, pt.Y), Q.ClipParams(pt.Z, pt.W));
+						dist = distanceFun(pt);
+						tmpAlpha /= 2;
+
+					} while (dist > distance);
+					//data.CreateHiddenCatPoint(P.GetPosition(pt.X, pt.Y));
+					//data.CreateHiddenCatPoint(Q.GetPosition(pt.Z, pt.W));
+
 				} while (System.Math.Abs(distance - dist) > double.Epsilon);
 			}
 			catch (Exception e)

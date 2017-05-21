@@ -170,7 +170,7 @@ namespace CadCat.GeometryModels
 		public bool FirstParamLooped => false;
 		public bool SecondParamLooped => false;
 
-		
+
 
 		public Vector3 GetPosition(double firstParam, double secondParam)
 		{
@@ -252,26 +252,45 @@ namespace CadCat.GeometryModels
 				return null;
 			if ((v < 0.0 || v > PatchesV) && !vLooped)
 				return null;
-			Vector2 ret = new Vector2(u,v);
+			Vector2 ret = new Vector2(u, v);
 			if (ret.X < 0)
 				ret.X += PatchesU;
 			if (ret.X > PatchesU)
 				ret.X -= PatchesU;
 			if (ret.Y < 0)
-				ret.Y -= PatchesV;
+				ret.Y += PatchesV;
 			if (ret.Y > PatchesV)
 				ret.Y -= PatchesV;
 			return ret;
 		}
 
+		public Vector2 ClipParams(double u, double v)
+		{
+			double uu = 0, vv = 0;
+			if (!uLooped)
+				uu = System.Math.Min(System.Math.Max(0, u), PatchesU);
+			if (!vLooped)
+				vv = System.Math.Min(System.Math.Max(0, v), PatchesV);
+			if (uLooped && u < 0)
+				uu = u + PatchesU;
+			if (uLooped && u > PatchesU)
+				uu = u - PatchesU;
+			if (vLooped && v < 0)
+				vv = v + PatchesV;
+			if (vLooped && v > PatchesV)
+				vv = v - PatchesV;
+			return new Vector2(uu, vv);
+
+		}
+
 		public IEnumerable<ParametrizedPoint> GetPointsForSearch(int firstParamDiv, int secondParamDiv)
 		{
-			float uDiv = PatchesU / (float)(firstParamDiv - 1);
-			float vDiv = PatchesU / (float)(secondParamDiv - 1);
+			float uDiv = PatchesU / (float)(firstParamDiv + 2);
+			float vDiv = PatchesU / (float)(secondParamDiv + 2);
 
-			for (int i = 0; i < firstParamDiv; i++)
+			for (int i = 1; i < firstParamDiv+1; i++)
 			{
-				for (int j = 0; j < secondParamDiv; j++)
+				for (int j = 1; j < secondParamDiv+1; j++)
 				{
 					yield return new ParametrizedPoint { Parametrization = new Vector2(i * uDiv, j * vDiv), Position = GetPosition(i * uDiv, j * vDiv) };
 				}

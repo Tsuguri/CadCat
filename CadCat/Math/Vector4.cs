@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Dynamic;
+using System.Windows.Automation.Peers;
 
 namespace CadCat.Math
 {
@@ -33,6 +34,14 @@ namespace CadCat.Math
 			W = w;
 		}
 
+		public Vector4(Vector2 vec1, Vector2 vec2)
+		{
+			X = vec1.X;
+			Y = vec1.Y;
+			Z = vec2.X;
+			W = vec2.Y;
+		}
+
 		public Vector3 ToNormalizedVector3()
 		{
 			Vector3 vec = new Vector3();
@@ -40,6 +49,16 @@ namespace CadCat.Math
 			vec.Y = Y / W;
 			vec.Z = Z / W;
 			return vec;
+		}
+
+		public double Length()
+		{
+			return System.Math.Sqrt(LengthSquared());
+		}
+
+		public double LengthSquared()
+		{
+			return X * X + Y * Y * Z * Z + W * W;
 		}
 
 		public Vector3 ClipToVector3()

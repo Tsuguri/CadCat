@@ -26,6 +26,7 @@ namespace CadCat.ModelInterfaces
 
 		ParametrizedPoint GetClosestPointParams(Vector3 point);
 		Vector2? ConfirmParams(double u, double v);
+		Vector2 ClipParams(double u, double v);
 
 		IEnumerable<ParametrizedPoint> GetPointsForSearch(int firstParamDiv, int secondParamDiv);
 
