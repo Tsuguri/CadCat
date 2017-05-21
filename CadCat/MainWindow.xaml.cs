@@ -65,7 +65,7 @@ namespace CadCat
 				ptch.VDensity = 10;
 				ptch.Width = 3;
 				ptch.Height = 5;
-				ptch.Type = SurfaceType.BSpline;
+				ptch.Type = SurfaceType.Bezier;
 				ptch.Convert(data);
 
 				Surface bspline = null;

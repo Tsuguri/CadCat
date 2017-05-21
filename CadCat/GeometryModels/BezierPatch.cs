@@ -78,7 +78,7 @@ namespace CadCat.GeometryModels
 			for (int i = 0; i < 4; i++)
 				for (int j = 0; j < 4; j++)
 				{
-					points[i * 4 + j] = pts[i, j];
+					points[i  + j * 4] = pts[i, j];
 					//pts[i, j].DependentUnremovable += 1;
 
 					pts[i, j].OnChanged += OnBezierPointChanged;

@@ -306,6 +306,8 @@ namespace CadCat.GeometryModels.Proxys
 
 			int widthPoints = UDensity * 3 + 1;
 			int heightPoints = VDensity * 3 + 1;
+			if (changed || points.Count == 0)
+				GenerateModel();
 			var catPoints = new CatPoint[heightPoints, widthPoints];
 			var matrix = GetMatrix(false, new Vector3());
 			if (!Curved)
