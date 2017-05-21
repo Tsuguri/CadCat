@@ -276,7 +276,7 @@ namespace CadCat.DataStructures
 			AddNewModel(new Cube());
 		}
 
-		private void CreateBezier()
+		internal void CreateBezier()
 		{
 			if (GetFilteredSelected().Count() < 2)
 			{
@@ -329,7 +329,7 @@ namespace CadCat.DataStructures
 			}
 		}
 
-		private void CreateBezierPatch()
+		internal void CreateBezierPatch()
 		{
 			AddNewModel(new TempSurface());
 		}
@@ -1050,7 +1050,7 @@ namespace CadCat.DataStructures
 			foreach (var bezierSurfaceC0 in scene.BezierSurfacesC0)
 			{
 				var patches = new List<Patch>();
-				var ptches = new Patch[bezierSurfaceC0.PatchesU, bezierSurfaceC0.PatchesV];
+				var ptches = new Patch[bezierSurfaceC0.PatchesV, bezierSurfaceC0.PatchesU];
 				foreach (var bezierSurfaceC0Patch in bezierSurfaceC0.Patches)
 				{
 					var pts = new CatPoint[4, 4];
@@ -1068,7 +1068,7 @@ namespace CadCat.DataStructures
 					};
 					AddNewModel(patch);
 					patches.Add(patch);
-					ptches[bezierSurfaceC0Patch.PatchU, bezierSurfaceC0Patch.PatchV] = patch;
+					ptches[bezierSurfaceC0Patch.PatchV, bezierSurfaceC0Patch.PatchU] = patch;
 				}
 
 				var surfacePoints = patches.SelectMany(x => x.EnumerateCatPoints()).Distinct().ToList();

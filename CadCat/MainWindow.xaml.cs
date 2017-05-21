@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -6,7 +7,8 @@ using CadCat.Rendering;
 using CadCat.DataStructures;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-
+using CadCat.GeometryModels.Proxys;
+using CadCat.GeometryModels;
 
 namespace CadCat
 {
@@ -52,8 +54,49 @@ namespace CadCat
 			ctx.Thickness = 1;
 			data.ActiveCamera = cam;
 			image.SizeChanged += Image_SizeChanged;
-			resizeTimer = new DispatcherTimer {Interval = new TimeSpan(0, 0, 0, 0, 300)};
+			resizeTimer = new DispatcherTimer { Interval = new TimeSpan(0, 0, 0, 0, 300) };
 
+			data.CreateBezierPatch();
+			var ptch = data.Models[0] as TempSurface;
+			
+			if (ptch != null)
+			{
+				ptch.UDensity = 5;
+				ptch.VDensity = 10;
+				ptch.Width = 3;
+				ptch.Height = 5;
+				ptch.Type = SurfaceType.BSpline;
+				ptch.Convert(data);
+
+				Surface bspline = null;
+				foreach (var model in data.Models)
+				{
+					if (model is Surface)
+					{
+						bspline = model as Surface;
+						break;
+					}
+				}
+
+				if (bspline != null)
+				{
+					var max = bspline.SecondParamLimit;
+					var step = max / 30.0;
+
+					for (int i = 0; i < 30; i++)
+					{
+						var p = bspline.GetPosition(0.1, i * step);
+						var tang = bspline.GetFirstParamDerivative(0, i * step);
+						var fir  = data.CreateCatPoint(p, false);
+						fir.IsSelected = true;
+						var sec = data.CreateCatPoint(p + tang, false);
+						sec.IsSelected = true;
+						data.CreateBezier();
+						fir.IsSelected = false;
+						sec.IsSelected = false;
+					}
+				}
+			}
 
 			//data.LoadFromFile("C:\\Users\\Adam\\Desktop\\TwoBeziers.xml");
 			RunTimer();
@@ -90,7 +133,7 @@ namespace CadCat
 			timer.Tick += (o, e) =>
 			{
 				var point = Mouse.GetPosition(image);
-				
+
 				if (point.X < 0 || point.Y < 0 || point.X > imageSize.Width || point.Y > imageSize.Height)
 					point.X = point.Y = -1;
 				else

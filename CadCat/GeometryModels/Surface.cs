@@ -185,14 +185,14 @@ namespace CadCat.GeometryModels
 				var newUnormalized = U == PatchesU ? 1.0f : uNormalized;
 				var newV = V == PatchesV ? V - 1 : V;
 				var newVNormalized = V == PatchesV ? 1.0f : vNormalized;
-				return orderedPatches[newU, newV].GetPoint(newUnormalized, newVNormalized);
+				return orderedPatches[newV, newU].GetPoint(newUnormalized, newVNormalized);
 			}
 
 			if (U >= PatchesU || V >= PatchesV)
 			{
 				throw new ArgumentException("Invalid argument, parametrization out of scope!");
 			}
-			return orderedPatches[U, V].GetPoint(uNormalized, vNormalized);
+			return orderedPatches[V, U].GetPoint(uNormalized, vNormalized);
 		}
 
 		public Vector3 GetFirstParamDerivative(double firstParam, double secondParam)
@@ -215,7 +215,7 @@ namespace CadCat.GeometryModels
 			{
 				throw new ArgumentException("Invalid argument, parametrization out of scope!");
 			}
-			return orderedPatches[U, V].GetUDerivative(uNormalized, vNormalized);
+			return orderedPatches[V, U].GetUDerivative(uNormalized, vNormalized);
 		}
 
 		public Vector3 GetSecondParamDerivative(double firstParam, double secondParam)
@@ -238,7 +238,7 @@ namespace CadCat.GeometryModels
 			{
 				throw new ArgumentException("Invalid argument, parametrization out of scope!");
 			}
-			return orderedPatches[U, V].GetVDerivative(uNormalized, vNormalized);
+			return orderedPatches[V, U].GetVDerivative(uNormalized, vNormalized);
 		}
 
 		public ParametrizedPoint GetClosestPointParams(Vector3 point)
@@ -286,11 +286,11 @@ namespace CadCat.GeometryModels
 		public IEnumerable<ParametrizedPoint> GetPointsForSearch(int firstParamDiv, int secondParamDiv)
 		{
 			float uDiv = PatchesU / (float)(firstParamDiv + 2);
-			float vDiv = PatchesU / (float)(secondParamDiv + 2);
+			float vDiv = PatchesV / (float)(secondParamDiv + 2);
 
-			for (int i = 1; i < firstParamDiv+1; i++)
+			for (int i = 1; i < firstParamDiv + 1; i++)
 			{
-				for (int j = 1; j < secondParamDiv+1; j++)
+				for (int j = 1; j < secondParamDiv + 1; j++)
 				{
 					yield return new ParametrizedPoint { Parametrization = new Vector2(i * uDiv, j * vDiv), Position = GetPosition(i * uDiv, j * vDiv) };
 				}

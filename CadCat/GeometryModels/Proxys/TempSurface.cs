@@ -344,7 +344,7 @@ namespace CadCat.GeometryModels.Proxys
 			}
 			scene.RemoveModel(this);
 			var subArray = new CatPoint[4, 4];
-			var ptchs = new Patch[UDensity, VDensity];
+			var ptchs = new Patch[VDensity, UDensity];
 			for (int i = 0; i < UDensity; i++)
 				for (int j = 0; j < VDensity; j++)
 				{
@@ -375,6 +375,8 @@ namespace CadCat.GeometryModels.Proxys
 			int widthPoints = UDensity + 3;
 			int heightPoints = VDensity + 3;
 
+			if (changed || points.Count < 1)
+				GenerateModel();
 			var pts = new Vector3[heightPoints - 2, widthPoints - 2];
 
 			for (int i = 0; i < UDensity + 1; i++)

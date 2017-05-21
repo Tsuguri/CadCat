@@ -82,7 +82,7 @@ namespace CadCat.GeometryModels
 			for (int i = 0; i < 4; i++)
 				for (int j = 0; j < 4; j++)
 				{
-					points[i + j * 4] = pts[i, j];
+					points[j * 4 + i] = pts[i, j]; // i -U, j- V
 					pts[i, j].OnChanged += OnBezierPointChanged;
 					pts[i, j].OnReplace += OnBezierPointReplaced;
 				}
@@ -215,7 +215,7 @@ namespace CadCat.GeometryModels
 			for (int i = 0; i < 4; i++)
 				for (int j = 0; j < 4; j++)
 				{
-					sum += points[i * 4 + j].Position * tempMtx[i, j];
+					sum += points[i + j * 4].Position * tempMtx[i, j];
 				}
 
 			return sum;
@@ -231,7 +231,7 @@ namespace CadCat.GeometryModels
 			for (int i = 0; i < 3; i++)
 				for (int j = 0; j < 4; j++)
 				{
-					sum += (points[(i + 1) * 4 + j].Position - points[i * 4 + j].Position) * tempMtx[i, j];
+					sum += (points[(i + 1) + j * 4].Position - points[i + j * 4].Position) * tempMtx[i, j];
 				}
 
 			return sum * 1;
@@ -247,7 +247,7 @@ namespace CadCat.GeometryModels
 			for (int i = 0; i < 4; i++)
 				for (int j = 0; j < 3; j++)
 				{
-					sum += (points[i * 4 + j + 1].Position - points[i * 4 + j].Position) * tempMtx[i, j];
+					sum += (points[i + (j + 1) * 4].Position - points[i + j * 4].Position) * tempMtx[i, j];
 				}
 
 			return sum * 1;
