@@ -187,10 +187,45 @@ namespace CadCat.GeometryModels
 			temp[1, 2] = EvaluateBerenstein(2, v);
 			temp[1, 3] = EvaluateBerenstein(3, v);
 
+			return SumFunctions();
+		}
+
+		private Vector3 EvaluateUDerivative(double u, double v)
+		{
+			temp[0, 0] = EvalueateBerensteinDerivative(0, u);
+			temp[0, 1] = EvalueateBerensteinDerivative(1, u);
+			temp[0, 2] = EvalueateBerensteinDerivative(2, u);
+			temp[0, 3] = EvalueateBerensteinDerivative(3, u);
+
+			temp[1, 0] = EvaluateBerenstein(0, v);
+			temp[1, 1] = EvaluateBerenstein(1, v);
+			temp[1, 2] = EvaluateBerenstein(2, v);
+			temp[1, 3] = EvaluateBerenstein(3, v);
+
+			return SumFunctions();
+		}
+
+		private Vector3 EvaluateVDerivative(double u, double v)
+		{
+			temp[0, 0] = EvaluateBerenstein(0, u);
+			temp[0, 1] = EvaluateBerenstein(1, u);
+			temp[0, 2] = EvaluateBerenstein(2, u);
+			temp[0, 3] = EvaluateBerenstein(3, u);
+
+			temp[1, 0] = EvalueateBerensteinDerivative(0, v);
+			temp[1, 1] = EvalueateBerensteinDerivative(1, v);
+			temp[1, 2] = EvalueateBerensteinDerivative(2, v);
+			temp[1, 3] = EvalueateBerensteinDerivative(3, v);
+
+			return SumFunctions();
+		}
+
+		private Vector3 SumFunctions()
+		{
 			var sum = new Vector3();
 			for (int i = 0; i < 4; i++)
-				for (int j = 0; j < 4; j++)
-					sum += points[i * 4 + j].Position * temp[0, i] * temp[1, j];
+			for (int j = 0; j < 4; j++)
+				sum += points[i * 4 + j].Position * temp[0, i] * temp[1, j];
 
 
 			return sum;
@@ -209,6 +244,24 @@ namespace CadCat.GeometryModels
 					return 3 * neg * val * val;
 				case 3:
 					return val * val * val;
+				default:
+					throw new ArgumentException("bad n value");
+			}
+		}
+
+		private double EvalueateBerensteinDerivative(int n, double val)
+		{
+			double neg = 1 - val;
+			switch (n)
+			{
+				case 0:
+					return -3 * neg * neg;
+				case 1:
+					return 3 * (1 - 4 * val + 3 * val * val);
+				case 2:
+					return 3 * (2 * val - 3 * val * val);
+				case 3:
+					return 3 * val * val;
 				default:
 					throw new ArgumentException("bad n value");
 			}
@@ -410,6 +463,21 @@ namespace CadCat.GeometryModels
 
 
 			return new HalfPatchData(back, nearest);
+		}
+
+		public override Vector3 GetPoint(double u, double v)
+		{
+			return EvaluatePointValue(u, v);
+		}
+
+		public override Vector3 GetUDerivative(double u, double v)
+		{
+			return EvaluateUDerivative(u, v);
+		}
+
+		public override Vector3 GetVDerivative(double u, double v)
+		{
+			return EvaluateVDerivative(u, v);
 		}
 	}
 }

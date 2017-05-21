@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CadCat.Math;
+using Xceed.Wpf.Toolkit.PropertyGrid.Editors;
 
 namespace CadCat.GeometryModels
 {
@@ -20,6 +22,21 @@ namespace CadCat.GeometryModels
 				OnPropertyChanged();
 			}
 		}
+
+
+		private bool showNormal = true;
+
+		public bool ShowNormal
+		{
+			get { return showNormal; }
+			set
+			{
+				showNormal = value;
+				OnPropertyChanged();
+			}
+		}
+
+
 		private int heightDiv = 3;
 		private int widthDiv = 3;
 
@@ -54,5 +71,9 @@ namespace CadCat.GeometryModels
 				}
 			}
 		}
+
+		public abstract Vector3 GetPoint(double u, double v);
+		public abstract Vector3 GetUDerivative(double u, double v);
+		public abstract Vector3 GetVDerivative(double u, double v);
 	}
 }

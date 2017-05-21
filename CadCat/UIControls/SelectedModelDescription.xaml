@@ -142,7 +142,7 @@
                             <TextBlock Text="Curvature" Grid.Column="0"  Grid.Row="3" Visibility="{Binding Curved, Converter={StaticResource BoolToVis},Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
                             <control:NumericSlider Value="{Binding CurvatureAngle}" Grid.Column="1" Grid.Row="3" Visibility="{Binding Curved, Converter={StaticResource BoolToVis},Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
                             <TextBlock Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="4" Visibility="{Binding IsCylinder, Converter={StaticResource BoolToVis},Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">Cyclic surface</TextBlock>
-                        
+
                         </Grid>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type models:BezierPatch}">
@@ -159,7 +159,7 @@
                             <ToggleButton Grid.Column="0" Grid.Row="0" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
                                           ToolTip="MaterialDesignSwitchAccentToggleButton" IsChecked="{Binding ShowPolygon}" />
                             <TextBlock VerticalAlignment="Center" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="0">Polygon Visible</TextBlock>
-                            
+
                             <TextBlock VerticalAlignment="Center" Grid.Column="0" Grid.Row="1">Div</TextBlock>
                             <control:NumericSlider Grid.Column="1" Grid.Row="1" Value="{Binding WidthDiv}" IncrementMultiplier="0.1" />
                             <control:NumericSlider Grid.Column="2" Grid.Row="1" Value="{Binding HeightDiv}" IncrementMultiplier="0.1" />
@@ -167,23 +167,27 @@
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type models:Surface}">
                         <StackPanel>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="40" />
-                                <RowDefinition Height="40" />
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="60" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <ToggleButton Grid.Column="0" Grid.Row="0" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="40" />
+                                    <RowDefinition Height="40" />
+                                    <RowDefinition Height="40" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="60" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ToggleButton Grid.Column="0" Grid.Row="0" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
                                           ToolTip="MaterialDesignSwitchAccentToggleButton" IsChecked="{Binding ShowPolygon}" />
-                            <TextBlock VerticalAlignment="Center" Grid.Column="1" Grid.Row="0">Polygon Visible</TextBlock>
+                                <TextBlock VerticalAlignment="Center" Grid.Column="1" Grid.Row="0">Polygon Visible</TextBlock>
 
-                            <ToggleButton Grid.Column="0" Grid.Row="1" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
+                                <ToggleButton Grid.Column="0" Grid.Row="1" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
                                           ToolTip="MaterialDesignSwitchAccentToggleButton" IsChecked="{Binding ShowPoints}" />
-                            <TextBlock VerticalAlignment="Center" Grid.Column="1" Grid.Row="1">Points Visible</TextBlock>
-                        </Grid>
+                                <TextBlock VerticalAlignment="Center" Grid.Column="1" Grid.Row="1">Points Visible</TextBlock>
+                                <ToggleButton Grid.Column="0" Grid.Row="1" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
+                                              ToolTip="MaterialDesignSwitchAccentToggleButton" IsChecked="{Binding ShowNormals}" />
+                                <TextBlock VerticalAlignment="Center" Grid.Column="1" Grid.Row="1">Normals Visible</TextBlock>
+                            </Grid>
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="40" />

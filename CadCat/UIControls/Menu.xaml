@@ -25,5 +25,8 @@
         <MenuItem Header="Points">
             <MenuItem Header="Merge selected" Command="{Binding MergePointsCommand}" />
         </MenuItem>
+        <MenuItem Header="Surfaces">
+            <MenuItem Header="Intersect" Command="{Binding IntersectSurfacesCommand}" />
+        </MenuItem>
     </Menu>
 </UserControl>

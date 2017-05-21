@@ -200,6 +200,7 @@ namespace CadCat.DataStructures
 		private ICommand changeObjectTypeCommand;
 		private ICommand convertToPointsCommand;
 		private ICommand mergePointsCommand;
+		private ICommand intersectSurfacesCommand;
 
 
 		private ICommand goToSelectedCommand;
@@ -246,6 +247,10 @@ namespace CadCat.DataStructures
 
 		public ICommand ConvertToPointsCommand => convertToPointsCommand ??
 												  (convertToPointsCommand = new CommandHandler(ConvertToPoints));
+
+		public ICommand IntersectSurfacesCommand => intersectSurfacesCommand ??
+													(intersectSurfacesCommand = new CommandHandler(IntersectSurfaces));
+
 		#endregion
 
 		#region CreatingModels
@@ -370,7 +375,7 @@ namespace CadCat.DataStructures
 				DialogHost.Show(sampleMessageDialog, "RootDialog");
 			}
 			else
-				AddNewModel(new GregoryPatch(cycle,this));
+				AddNewModel(new GregoryPatch(cycle, this));
 		}
 
 		private PatchCycle CreatePatchCycle(List<CatPoint> points, List<BezierPatch> patches)
@@ -811,8 +816,15 @@ namespace CadCat.DataStructures
 		{
 			var mod = SelectedModel as IConvertibleToPoints;
 			mod?.Convert(this);
+		}
 
+		private void IntersectSurfaces()
+		{
+			var selected = models.Where(x => x.IsSelected).ToList();
 
+			var sel = selected.Select(x => x as IIntersectable).Distinct().ToList();
+
+			Intersection.Intersect(sel[0], sel[1], this);
 		}
 
 		private void SortModels()
@@ -1038,6 +1050,7 @@ namespace CadCat.DataStructures
 			foreach (var bezierSurfaceC0 in scene.BezierSurfacesC0)
 			{
 				var patches = new List<Patch>();
+				var ptches = new Patch[bezierSurfaceC0.PatchesU, bezierSurfaceC0.PatchesV];
 				foreach (var bezierSurfaceC0Patch in bezierSurfaceC0.Patches)
 				{
 					var pts = new CatPoint[4, 4];
@@ -1055,10 +1068,11 @@ namespace CadCat.DataStructures
 					};
 					AddNewModel(patch);
 					patches.Add(patch);
+					ptches[bezierSurfaceC0Patch.PatchU, bezierSurfaceC0Patch.PatchV] = patch;
 				}
 
 				var surfacePoints = patches.SelectMany(x => x.EnumerateCatPoints()).Distinct().ToList();
-				var surface = new Surface(SurfaceType.Bezier, patches, surfacePoints, this)
+				var surface = new Surface(SurfaceType.Bezier, ptches, surfacePoints, this)
 				{
 					Name = bezierSurfaceC0.Name,
 					PatchesU = bezierSurfaceC0.PatchesU,
@@ -1070,27 +1084,30 @@ namespace CadCat.DataStructures
 			foreach (var bezierSurfaceC2 in scene.BezierSurfacesC2)
 			{
 				var patches = new List<Patch>();
-				foreach (var bezierSurfaceC0Patch in bezierSurfaceC2.Patches)
+				var ptches = new Patch[bezierSurfaceC2.PatchesU, bezierSurfaceC2.PatchesV];
+
+				foreach (var bezierSurfaceC2Patch in bezierSurfaceC2.Patches)
 				{
 					var pts = new CatPoint[4, 4];
 					for (int i = 0; i < 4; i++)
 						for (int j = 0; j < 4; j++)
-							pts[i, j] = catPoints[bezierSurfaceC0Patch.Points[i, j]];
+							pts[i, j] = catPoints[bezierSurfaceC2Patch.Points[i, j]];
 					var patch = new BSplinePatch(pts)
 					{
 						ShowPolygon = false,
-						HeightDiv = bezierSurfaceC0Patch.SurfaceDivisionsV,
-						WidthDiv = bezierSurfaceC0Patch.SurfaceDivisionsU,
-						Name = bezierSurfaceC0Patch.Name,
-						UPos = bezierSurfaceC0Patch.PatchU,
-						VPos = bezierSurfaceC0Patch.PatchV
+						HeightDiv = bezierSurfaceC2Patch.SurfaceDivisionsV,
+						WidthDiv = bezierSurfaceC2Patch.SurfaceDivisionsU,
+						Name = bezierSurfaceC2Patch.Name,
+						UPos = bezierSurfaceC2Patch.PatchU,
+						VPos = bezierSurfaceC2Patch.PatchV
 					};
 					AddNewModel(patch);
 					patches.Add(patch);
+					ptches[bezierSurfaceC2Patch.PatchU, bezierSurfaceC2Patch.PatchV] = patch;
 				}
 
 				var surfacePoints = patches.SelectMany(x => x.EnumerateCatPoints()).Distinct().ToList();
-				var surface = new Surface(SurfaceType.BSpline, patches, surfacePoints, this)
+				var surface = new Surface(SurfaceType.BSpline, ptches, surfacePoints, this)
 				{
 					Name = bezierSurfaceC2.Name,
 					PatchesU = bezierSurfaceC2.PatchesU,

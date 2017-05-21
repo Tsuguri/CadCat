@@ -113,6 +113,7 @@
     <Compile Include="GeometryModels\PointModel.cs" />
     <Compile Include="GeometryModels\Surface.cs" />
     <Compile Include="GeometryModels\Proxys\TempSurface.cs" />
+    <Compile Include="Math\Intersection.cs" />
     <Compile Include="Math\Plane.cs" />
     <Compile Include="ModelInterfaces\IChangeablePointCount.cs" />
     <Compile Include="GeometryModels\Model.cs" />
@@ -126,6 +127,7 @@
     <Compile Include="Math\Vector3.cs" />
     <Compile Include="Math\Vector4.cs" />
     <Compile Include="ModelInterfaces\IConvertibleToPoints.cs" />
+    <Compile Include="ModelInterfaces\Intersectable.cs" />
     <Compile Include="ModelInterfaces\ITypeChangeable.cs" />
     <Compile Include="ModelInterfaces\Test.cs" />
     <Compile Include="Rendering\Camera.cs" />

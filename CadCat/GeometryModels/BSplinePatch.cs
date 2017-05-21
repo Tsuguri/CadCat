@@ -17,7 +17,9 @@ namespace CadCat.GeometryModels
 	{
 		private readonly CatPoint[] points = new CatPoint[16];
 		private readonly List<Vector3> mesh = new List<Vector3>();
+		private readonly List<Vector3> normals = new List<Vector3>();
 		private readonly List<int> meshIndices = new List<int>();
+		private readonly List<int> normalindices = new List<int>();
 		private readonly SceneData scene;
 
 		private readonly bool owner;
@@ -131,6 +133,14 @@ namespace CadCat.GeometryModels
 				renderer.Transform();
 				renderer.DrawLines();
 			}
+			if (ShowNormal)
+			{
+				renderer.Indices = normalindices;
+				renderer.Points = normals;
+				renderer.Transform();
+				renderer.DrawLines();
+			}
+
 
 			renderer.Indices = meshIndices;
 			renderer.Points = mesh;
@@ -143,7 +153,10 @@ namespace CadCat.GeometryModels
 		{
 			mesh.Clear();
 			mesh.Capacity = System.Math.Max(mesh.Capacity, (WidthDiv + 1) * (HeightDiv + 1));
+			normals.Clear();
+			normals.Capacity = System.Math.Max(normals.Capacity, (WidthDiv + 1) * (HeightDiv + 1) * 2);
 			meshIndices.Clear();
+			normalindices.Clear();
 			double widthStep = 1.0 / WidthDiv;
 			double heightStep = 1.0 / HeightDiv;
 			int widthPoints = WidthDiv + 1;
@@ -152,7 +165,14 @@ namespace CadCat.GeometryModels
 			for (int i = 0; i < widthPoints; i++)
 				for (int j = 0; j < heightPoints; j++)
 				{
-					mesh.Insert(i * heightPoints + j, EvaluatePointValue(i * widthStep, j * heightStep));
+					var pt = EvaluatePointValue(i * widthStep, j * heightStep);
+					var normal = Vector3.CrossProduct(EvaluateUDerivative(i * widthStep, j * heightStep),
+						EvaluateVDerivative(i * widthStep, j * heightStep));
+					mesh.Insert(i * heightPoints + j, pt);
+					normals.Insert((i * heightPoints + j) * 2, pt);
+					normals.Insert((i * heightPoints + j) * 2 + 1, pt + normal);
+					normalindices.Add((i * heightPoints + j) * 2);
+					normalindices.Add((i * heightPoints + j) * 2 + 1);
 				}
 
 			for (int i = 0; i < widthPoints - 1; i++)
@@ -177,32 +197,67 @@ namespace CadCat.GeometryModels
 		}
 
 		private static double[,] temp = new double[2, 4];
-
+		private static Matrix4 tempMtx;
 		private Vector3 EvaluatePointValue(double u, double v)
 		{
+
+			var uVal = EvaluateBSpline(u, 3);
+			var vVal = EvaluateBSpline(v, 3);
+			tempMtx = uVal.MatrixMultiply(vVal);
+
+
+			return Sum();
+		}
+
+		private Vector3 Sum()
+		{
 			var sum = new Vector3();
-
-			var uVal = EvaluateBSpline(u);
-			var vVal = EvaluateBSpline(v);
-			var values = vVal.MatrixMultiply(uVal);
-
-
 			for (int i = 0; i < 4; i++)
 				for (int j = 0; j < 4; j++)
 				{
-					sum += points[i + j * 4].Position * values[i, j];
+					sum += points[i * 4 + j].Position * tempMtx[i, j];
 				}
 
 			return sum;
 		}
 
+		private Vector3 EvaluateUDerivative(double u, double v)
+		{
+			var uVal = EvaluateBSpline(u, 2);// wyniki w xyz
+			var vVal = EvaluateBSpline(v, 3);
+			tempMtx = uVal.MatrixMultiply(vVal);
 
+			var sum = new Vector3();
+			for (int i = 0; i < 3; i++)
+				for (int j = 0; j < 4; j++)
+				{
+					sum += (points[(i + 1) * 4 + j].Position - points[i * 4 + j].Position) * tempMtx[i, j];
+				}
 
-		private Vector4 EvaluateBSpline(double t)
+			return sum;
+		}
+
+		private Vector3 EvaluateVDerivative(double u, double v)
+		{
+			var uVal = EvaluateBSpline(u, 3);
+			var vVal = EvaluateBSpline(v, 2);// wyniki w xyz
+			tempMtx = uVal.MatrixMultiply(vVal);
+
+			var sum = new Vector3();
+			for (int i = 0; i < 4; i++)
+				for (int j = 0; j < 3; j++)
+				{
+					sum += (points[i * 4 + j + 1].Position - points[i * 4 + j].Position) * tempMtx[i, j];
+				}
+
+			return sum;
+		}
+
+		private Vector4 EvaluateBSpline(double t, int degree)
 		{
 			var N = new Vector4 { [0] = 1.0 };
 			double tm = 1.0 - t;
-			for (int j = 1; j <= 3; j++)
+			for (int j = 1; j <= degree; j++)
 			{
 				double saved = 0.0;
 				for (int k = 1; k <= j; k++)
@@ -237,6 +292,21 @@ namespace CadCat.GeometryModels
 		public override string GetName()
 		{
 			return "BSpline patch " + base.GetName();
+		}
+
+		public override Vector3 GetPoint(double u, double v)
+		{
+			return EvaluatePointValue(u, v);
+		}
+
+		public override Vector3 GetUDerivative(double u, double v)
+		{
+			return EvaluateUDerivative(u, v);
+		}
+
+		public override Vector3 GetVDerivative(double u, double v)
+		{
+			return EvaluateVDerivative(u, v);
 		}
 	}
 }

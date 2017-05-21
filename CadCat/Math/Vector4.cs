@@ -71,6 +71,11 @@ namespace CadCat.Math
 			return new Vector4(vec.X + vec2.X, vec.Y + vec2.Y, vec.Z + vec2.Z, vec.W + vec2.W);
 		}
 
+		public static Vector4 operator -(Vector4 vec, Vector4 vec2)
+		{
+			return new Vector4(vec.X - vec2.X, vec.Y - vec2.Y, vec.Z - vec2.Z, vec.W - vec2.W);
+		}
+
 		public double this[int index]
 		{
 			get

@@ -598,5 +598,20 @@ namespace CadCat.GeometryModels
 		{
 			return "Gregory patch: " + base.GetName();
 		}
+
+		public override Vector3 GetPoint(double u, double v)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override Vector3 GetUDerivative(double u, double v)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override Vector3 GetVDerivative(double u, double v)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

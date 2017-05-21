@@ -342,6 +342,7 @@ namespace CadCat.GeometryModels.Proxys
 			scene.RemoveModel(this);
 			var subArray = new CatPoint[4, 4];
 			var patches = new List<Patch>();
+			var ptchs = new Patch[UDensity, VDensity];
 			for (int i = 0; i < UDensity; i++)
 				for (int j = 0; j < VDensity; j++)
 				{
@@ -355,6 +356,7 @@ namespace CadCat.GeometryModels.Proxys
 					};
 					scene.AddNewModel(patch);
 					patches.Add(patch);
+					ptchs[i, j] = patch;
 
 				}
 			var catPointsList = new List<CatPoint>(catPoints.GetLength(0) * catPoints.GetLength(1));
@@ -362,7 +364,7 @@ namespace CadCat.GeometryModels.Proxys
 			{
 				catPointsList.Add(catPoint);
 			}
-			scene.AddNewModel(new Surface(SurfaceType.Bezier, patches, catPointsList, scene) { PatchesU = UDensity, PatchesV = VDensity });
+			scene.AddNewModel(new Surface(SurfaceType.Bezier, ptchs, catPointsList, scene) { PatchesU = UDensity, PatchesV = VDensity });
 
 		}
 
@@ -452,6 +454,7 @@ namespace CadCat.GeometryModels.Proxys
 
 			scene.RemoveModel(this);
 			var subArray = new CatPoint[4, 4];
+			var ptches = new Patch[UDensity, VDensity];
 			var patches = new List<Patch>();
 			for (int i = 0; i < UDensity; i++)
 				for (int j = 0; j < VDensity; j++)
@@ -463,6 +466,7 @@ namespace CadCat.GeometryModels.Proxys
 					{ UPos = i, VPos = j };
 					scene.AddNewModel(patch);
 					patches.Add(patch);
+					ptches[i, j] = patch;
 
 				}
 			var catPointsList = new List<CatPoint>(catPoints.GetLength(0) * catPoints.GetLength(1));
@@ -470,7 +474,7 @@ namespace CadCat.GeometryModels.Proxys
 			{
 				catPointsList.Add(catPoint);
 			}
-			scene.AddNewModel(new Surface(SurfaceType.BSpline, patches, catPointsList, scene) {PatchesU = VDensity, PatchesV = UDensity});
+			scene.AddNewModel(new Surface(SurfaceType.BSpline, ptches, catPointsList, scene) {PatchesU = VDensity, PatchesV = UDensity});
 
 
 		}
