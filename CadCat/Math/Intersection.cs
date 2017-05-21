@@ -81,8 +81,8 @@ namespace CadCat.Math
 				  };
 
 
-				  var np = Vector3.CrossProduct(du, dv).Normalized();
-				  var nq = Vector3.CrossProduct(ds, dt).Normalized();
+				  var np = Vector3.CrossProduct(du, dv);//.Normalized();
+				  var nq = Vector3.CrossProduct(ds, dt);//.Normalized();
 				  var t = (invert ? Vector3.CrossProduct(nq, np) : Vector3.CrossProduct(np, nq)).Normalized();
 				  jacob[3, 0] = Vector3.DotProduct(du, t);
 				  jacob[3, 1] = Vector3.DotProduct(dv, t);
@@ -115,6 +115,7 @@ namespace CadCat.Math
 		private static List<Vector4> Newton(IIntersectable P, IIntersectable Q, Vector4 startPoint, Func<Vector4, Vector3, Vector3, Vector4> function, Func<Vector4, bool, Tuple<Matrix4, Vector3>> jacobian, bool inverse)
 		{
 			var points = new List<Vector4>();
+			var startestPoint = startPoint;
 			bool end = false;
 			while (!end)
 			{
@@ -141,10 +142,11 @@ namespace CadCat.Math
 					point = new Vector4(pP.Value.X, pP.Value.Y, qP.Value.X, qP.Value.Y);
 
 				} while ((P.GetPosition(point.X, point.Y) - P.GetPosition(prevPoint.X, prevPoint.Y)).Length() > 0.0001 && i<1000);
-
 				if ((point - startPoint).Length() < 0.0001)
 					break;
 
+				if (points.Count > 1 && (point - startestPoint).Length() < 0.001)
+					break;
 				startPoint = point;
 
 				
@@ -181,8 +183,8 @@ namespace CadCat.Math
 						tmpAlpha /= 2;
 
 					} while (dist > distance);
-					//data.CreateHiddenCatPoint(P.GetPosition(pt.X, pt.Y));
-					//data.CreateHiddenCatPoint(Q.GetPosition(pt.Z, pt.W));
+					data.CreateHiddenCatPoint(P.GetPosition(pt.X, pt.Y));
+					data.CreateHiddenCatPoint(Q.GetPosition(pt.Z, pt.W));
 
 				} while (System.Math.Abs(distance - dist) > double.Epsilon);
 			}

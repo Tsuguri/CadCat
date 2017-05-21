@@ -202,7 +202,7 @@ namespace CadCat.GeometryModels
 			temp[1, 2] = EvaluateBerenstein(2, v);
 			temp[1, 3] = EvaluateBerenstein(3, v);
 
-			return SumFunctions();
+			return SumFunctions() * 3;
 		}
 
 		private Vector3 EvaluateVDerivative(double u, double v)
@@ -217,7 +217,7 @@ namespace CadCat.GeometryModels
 			temp[1, 2] = EvalueateBerensteinDerivative(2, v);
 			temp[1, 3] = EvalueateBerensteinDerivative(3, v);
 
-			return SumFunctions();
+			return SumFunctions() * 3;
 		}
 
 		private Vector3 SumFunctions()

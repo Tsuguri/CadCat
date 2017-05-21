@@ -184,9 +184,9 @@
                                 <ToggleButton Grid.Column="0" Grid.Row="1" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
                                           ToolTip="MaterialDesignSwitchAccentToggleButton" IsChecked="{Binding ShowPoints}" />
                                 <TextBlock VerticalAlignment="Center" Grid.Column="1" Grid.Row="1">Points Visible</TextBlock>
-                                <ToggleButton Grid.Column="0" Grid.Row="1" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
+                                <ToggleButton Grid.Column="0" Grid.Row="2" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
                                               ToolTip="MaterialDesignSwitchAccentToggleButton" IsChecked="{Binding ShowNormals}" />
-                                <TextBlock VerticalAlignment="Center" Grid.Column="1" Grid.Row="1">Normals Visible</TextBlock>
+                                <TextBlock VerticalAlignment="Center" Grid.Column="1" Grid.Row="2">Normals Visible</TextBlock>
                             </Grid>
                             <Grid>
                                 <Grid.RowDefinitions>

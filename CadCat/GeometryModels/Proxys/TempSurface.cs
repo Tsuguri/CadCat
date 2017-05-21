@@ -452,7 +452,7 @@ namespace CadCat.GeometryModels.Proxys
 
 			scene.RemoveModel(this);
 			var subArray = new CatPoint[4, 4];
-			var ptches = new Patch[UDensity, VDensity];
+			var ptches = new Patch[VDensity, UDensity];
 			for (int i = 0; i < UDensity; i++)
 				for (int j = 0; j < VDensity; j++)
 				{
