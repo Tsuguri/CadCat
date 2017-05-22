@@ -11,7 +11,7 @@ namespace CadCat.Math
 	public class Intersection
 	{
 		private static SceneData data;
-		public static void Intersect(IIntersectable P, IIntersectable Q, SceneData scene)
+		public static List<Vector4> Intersect(IIntersectable P, IIntersectable Q, SceneData scene)
 		{
 			double d = 0.01;
 			data = scene;
@@ -48,17 +48,14 @@ namespace CadCat.Math
 				return new Vector4(Vector3.DotProduct(diff, du), Vector3.DotProduct(diff, dv), -Vector3.DotProduct(diff, ds), -Vector3.DotProduct(diff, dt)) * 2.0;
 			};
 
-			//scene.CreateCatPoint(pPoint.Position, false);
-			//scene.CreateCatPoint(qPoint.Position, false);
-			var sw = new System.Diagnostics.Stopwatch();
-			var sw2 = new System.Diagnostics.Stopwatch();
-			var sw3 = new System.Diagnostics.Stopwatch();
 
-			sw3.Start();
 			var startPoint = SimpleGradient(distanceFun, distanceGradient, pPoint, qPoint, P, Q);
-			sw3.Stop();
 
-			scene.CreateHiddenCatPoint(P.GetPosition(startPoint.X, startPoint.Y));
+
+			if (startPoint == null)
+				return null;
+
+			//scene.CreateHiddenCatPoint(P.GetPosition(startPoint.X, startPoint.Y));
 
 			Func<Vector4, bool, Tuple<Matrix4, Vector3>> jacobian = (Vector4 arg, bool invert) =>
 			  {
@@ -103,24 +100,20 @@ namespace CadCat.Math
 				 return new Vector4(p - q, temp);
 			 };
 
-			sw.Start();
-			var pts = Newton(P, Q, startPoint, function, jacobian, false);
-			sw.Stop();
+
+			var pts = Newton(P, Q, startPoint.Value, function, jacobian, false);
+
 			if (pts.Count < 2)
-				return;
+				return null;
 			var first = pts[0];
 			var last = pts[pts.Count - 1];
 			if ((P.GetPosition(first.X, first.Y) - P.GetPosition(last.X, last.Y)).Length() > 0.007)
 			{
-				var pts2 = Newton(P, Q, startPoint, function, jacobian, true);
+				var pts2 = Newton(P, Q, startPoint.Value, function, jacobian, true);
 				pts2.Reverse();
 				pts.AddRange(pts2);
 			}
-			sw2.Start();
-			pts.ForEach(x => scene.CreateHiddenCatPoint(P.GetPosition(x.X, x.Y)));
-			sw2.Stop();
-
-
+			return pts;
 		}
 
 		private static List<Vector4> Newton(IIntersectable P, IIntersectable Q, Vector4 startPoint, Func<Vector4, Vector3, Vector3, Vector4> function, Func<Vector4, bool, Tuple<Matrix4, Vector3>> jacobian, bool inverse)
@@ -151,7 +144,7 @@ namespace CadCat.Math
 					point = new Vector4(pP.Value.X, pP.Value.Y, qP.Value.X, qP.Value.Y);
 
 				} while ((P.GetPosition(point.X, point.Y) - P.GetPosition(prevPoint.X, prevPoint.Y)).Length() > 0.0001 && i < 1000);
-				if ((point - startPoint).Length() < 0.0001)
+				if (points.Count > 0 && (P.GetPosition(point.X,point.Y)- P.GetPosition(startPoint.X, startPoint.Y)).Length() < 0.0001)
 					break;
 
 				if (points.Count > 1 && (P.GetPosition(point.X, point.Y) - P.GetPosition(points[0].X, points[0].Y)).Length() < 0.007)
@@ -165,7 +158,7 @@ namespace CadCat.Math
 			return points;
 		}
 
-		private static Vector4 SimpleGradient(Func<Vector4, double> distanceFun, Func<Vector4, Vector4> grad,
+		private static Vector4? SimpleGradient(Func<Vector4, double> distanceFun, Func<Vector4, Vector4> grad,
 			ParametrizedPoint pPoint, ParametrizedPoint qPoint, IIntersectable P, IIntersectable Q)
 		{
 			double alpha = 0.01;
@@ -200,7 +193,7 @@ namespace CadCat.Math
 					var pPos = P.ConfirmParams(pt.X, pt.Y);
 					var qPos = Q.ConfirmParams(pt.Z, pt.W);
 					if (qPos == null || pPos == null)
-						return new Vector4(-1, -1, -1, -1);
+						return null;
 					pt = new Vector4(pPos.Value, qPos.Value);
 					//data.CreateHiddenCatPoint(P.GetPosition(pt.X, pt.Y));
 					//data.CreateHiddenCatPoint(Q.GetPosition(pt.Z, pt.W));
@@ -209,7 +202,7 @@ namespace CadCat.Math
 			}
 			catch (Exception e)
 			{
-				return new Vector4(-1, -1, -1, -1);
+				return null;
 			}
 
 			return pt;

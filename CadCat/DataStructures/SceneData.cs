@@ -824,7 +824,35 @@ namespace CadCat.DataStructures
 
 			var sel = selected.Select(x => x as IIntersectable).Distinct().ToList();
 
-			Intersection.Intersect(sel[0], sel[1], this);
+			List<Vector4> intersection = null;
+			if (sel.Count != 2)
+			{
+				intersection = null;
+			}
+			else
+			{
+			//	try
+				//{
+
+				intersection = Intersection.Intersect(sel[0], sel[1], this);
+				//}
+				//catch(Exception e)
+				//{
+				//	intersection = null;
+				//}
+			}
+
+			if(intersection!=null)
+				intersection.ForEach(x => CreateHiddenCatPoint(sel[0].GetPosition(x.X, x.Y)));
+			else
+			{
+				var sampleMessageDialog = new MessageHost
+				{
+					Message = { Text = "Proper intersection could not be found." }
+				};
+
+				DialogHost.Show(sampleMessageDialog, "RootDialog");
+			}
 		}
 
 		private void SortModels()
