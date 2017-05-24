@@ -842,8 +842,12 @@ namespace CadCat.DataStructures
 				//}
 			}
 
-			if (intersection != null)
-				intersection.ForEach(x => CreateHiddenCatPoint(sel[0].GetPosition(x.X, x.Y)));
+			if (intersection != null && intersection.Count>2)
+			{
+				//intersection.ForEach(x => CreateHiddenCatPoint(sel[0].GetPosition(x.X, x.Y)));
+				var curv = new CuttingCurve(intersection,sel[0], sel[1], this);
+				AddNewModel(curv);
+			}
 			else
 			{
 				var sampleMessageDialog = new MessageHost

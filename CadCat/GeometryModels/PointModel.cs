@@ -5,7 +5,7 @@ using CadCat.DataStructures;
 
 namespace CadCat.GeometryModels
 {
-	class PointModel : Model
+	public class PointModel : Model
 	{
 		public class PointWrapper : Utilities.BindableObject
 		{
