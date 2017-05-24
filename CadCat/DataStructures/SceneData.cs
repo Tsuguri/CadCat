@@ -79,6 +79,27 @@ namespace CadCat.DataStructures
 
 		#endregion
 
+		#region Intersections
+
+		private double cuttingCurveApproximation = 0.1;
+
+		public double CuttingCurveApproximation
+		{
+			get
+			{
+				return cuttingCurveApproximation;
+			}
+			set
+			{
+				if ( System.Math.Abs(cuttingCurveApproximation - value) > double.Epsilon && value >= 0.01 && value < 0.4)
+				{
+					cuttingCurveApproximation = value;
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		#endregion
 
 		#region Models
 
@@ -824,28 +845,12 @@ namespace CadCat.DataStructures
 
 			var sel = selected.Select(x => x as IIntersectable).Distinct().ToList();
 
-			List<Vector4> intersection = null;
-			if (sel.Count != 2)
-			{
-				intersection = null;
-			}
-			else
-			{
-				//	try
-				//{
-
-				intersection = Intersection.Intersect(sel[0], sel[1], this);
-				//}
-				//catch(Exception e)
-				//{
-				//	intersection = null;
-				//}
-			}
+			var intersection = sel.Count != 2 ? null : Intersection.Intersect(sel[0], sel[1], this);
 
 			if (intersection != null && intersection.Count>2)
 			{
 				//intersection.ForEach(x => CreateHiddenCatPoint(sel[0].GetPosition(x.X, x.Y)));
-				var curv = new CuttingCurve(intersection,sel[0], sel[1], this);
+				var curv = new CuttingCurve(intersection,sel[0], sel[1], this, CuttingCurveApproximation);
 				AddNewModel(curv);
 			}
 			else

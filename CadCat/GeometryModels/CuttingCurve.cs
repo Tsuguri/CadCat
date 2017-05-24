@@ -16,14 +16,13 @@ namespace CadCat.GeometryModels
 		private IIntersectable Q;
 		private IIntersectable P;
 		private List<Vector4> points;
-		private List<CatPoint> catPoints;
+		private readonly List<CatPoint> catPoints;
 		private readonly SceneData scene;
 		private readonly List<int> indices = new List<int>();
 		public CuttingCurve(List<Vector4> points, IIntersectable P, IIntersectable Q, SceneData scene, double minimumStep = 0.1)
 		{
 			this.Q = Q;
 			this.P = P;
-			this.points = points;
 			this.scene = scene;
 
 			this.points = new List<Vector4>(points.Count / 2);
@@ -38,6 +37,8 @@ namespace CadCat.GeometryModels
 					this.points.Add(points[i]);
 				}
 			}
+			if (this.points.Count < 2)
+				this.points.Add(points[points.Count - 1]);
 
 			catPoints = new List<CatPoint>(this.points.Count);
 			foreach (var point in this.points)
@@ -47,12 +48,12 @@ namespace CadCat.GeometryModels
 			}
 			indices.Clear();
 			indices.Add(0);
-			for(int i = 1; i < this.points.Count-1; i++)
+			for (int i = 1; i < this.points.Count - 1; i++)
 			{
 				indices.Add(i);
 				indices.Add(i);
 			}
-			indices.Add(this.points.Count-1);
+			indices.Add(this.points.Count - 1);
 		}
 
 		public override void CleanUp()

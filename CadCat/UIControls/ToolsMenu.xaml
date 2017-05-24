@@ -84,6 +84,19 @@
 
                 </Grid>
             </Expander>
+            <Expander Header="Intersection Options">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Column="0" Grid.Row="0">Curve step</TextBlock>
+                    <local:NumericSlider Grid.Column="1" Grid.Row="0" Value="{Binding CuttingCurveApproximation}" IncrementMultiplier="0.01" />
+                </Grid>
+            </Expander>
         </StackPanel>
     </ScrollViewer>
 </UserControl>
