@@ -136,7 +136,7 @@ namespace CadCat.Math
 			if (!cyclic)
 			{
 				var pts2 = Newton(P, Q, startPoint.Value, function, jacobian, true, d, out cyclic);
-				pts2.Reverse();
+				pts.Reverse();
 				pts.AddRange(pts2);
 			}
 			return pts;

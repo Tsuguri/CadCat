@@ -53,9 +53,14 @@
 			return new Vector2(vec1.X * vec2.X, vec1.Y * vec2.Y);
 		}
 
+		public double Cross(Vector2 vec)
+		{
+			return X * vec.Y - vec.X * Y;
+		}
+
 		public override string ToString()
 		{
-			return "v2: "+X + " " + Y;
+			return "v2: " + X + " " + Y;
 		}
 	}
 }
