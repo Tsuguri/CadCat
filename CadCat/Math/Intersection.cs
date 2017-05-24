@@ -22,15 +22,40 @@ namespace CadCat.Math
 			var pPoint = new ParametrizedPoint();
 			var qPoint = new ParametrizedPoint();
 
-			foreach (var pP in pPoints)
+			if (scene.Cursor.Visible)
 			{
+				var cursorPos = scene.Cursor.Transform.Position;
+				foreach (var pP in pPoints)
+				{
+					if ((pP.Position - cursorPos).LengthSquared() < closestDistance)
+					{
+						closestDistance = (pP.Position - cursorPos).LengthSquared();
+						pPoint = pP;
+					}
+				}
+				closestDistance = double.MaxValue;
 				foreach (var qP in qPoints)
 				{
-					if ((qP.Position - pP.Position).LengthSquared() < closestDistance)
+					if ((qP.Position - cursorPos).LengthSquared() < closestDistance)
 					{
-						closestDistance = (qP.Position - pP.Position).LengthSquared();
-						pPoint = pP;
+						closestDistance = (qP.Position - cursorPos).LengthSquared();
 						qPoint = qP;
+					}
+				}
+
+			}
+			else
+			{
+				foreach (var pP in pPoints)
+				{
+					foreach (var qP in qPoints)
+					{
+						if ((qP.Position - pP.Position).LengthSquared() < closestDistance)
+						{
+							closestDistance = (qP.Position - pP.Position).LengthSquared();
+							pPoint = pP;
+							qPoint = qP;
+						}
 					}
 				}
 			}
@@ -84,8 +109,8 @@ namespace CadCat.Math
 
 
 				  var np = Vector3.CrossProduct(du, dv);//.Normalized();
-				  var nq = Vector3.CrossProduct(ds, dt);//.Normalized();
-				  var t = (invert ? Vector3.CrossProduct(nq, np) : Vector3.CrossProduct(np, nq)).Normalized();
+					  var nq = Vector3.CrossProduct(ds, dt);//.Normalized();
+					  var t = (invert ? Vector3.CrossProduct(nq, np) : Vector3.CrossProduct(np, nq)).Normalized();
 				  jacob[3, 0] = Vector3.DotProduct(du, t);
 				  jacob[3, 1] = Vector3.DotProduct(dv, t);
 
@@ -144,7 +169,7 @@ namespace CadCat.Math
 					point = new Vector4(pP.Value.X, pP.Value.Y, qP.Value.X, qP.Value.Y);
 
 				} while ((P.GetPosition(point.X, point.Y) - P.GetPosition(prevPoint.X, prevPoint.Y)).Length() > 0.0001 && i < 1000);
-				if (points.Count > 0 && (P.GetPosition(point.X,point.Y)- P.GetPosition(startPoint.X, startPoint.Y)).Length() < 0.0001)
+				if (points.Count > 0 && (P.GetPosition(point.X, point.Y) - P.GetPosition(startPoint.X, startPoint.Y)).Length() < 0.0001)
 					break;
 
 				if (points.Count > 1 && (P.GetPosition(point.X, point.Y) - P.GetPosition(points[0].X, points[0].Y)).Length() < 0.007)
