@@ -12,7 +12,7 @@ namespace CadCat.GeometryModels
 	public abstract class Patch : Model
 	{
 		protected bool changed;
-		private bool showPolygon = true;
+		private bool showPolygon = false;
 
 		public bool ShowPolygon
 		{
@@ -25,7 +25,7 @@ namespace CadCat.GeometryModels
 		}
 
 
-		private bool showNormal = true;
+		private bool showNormal = false;
 
 		public bool ShowNormal
 		{

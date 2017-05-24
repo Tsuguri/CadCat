@@ -20,8 +20,8 @@ namespace CadCat.GeometryModels
 
 		private bool uLooped;
 		private bool vLooped;
-		private bool showPolygon = true;
-		private bool showPoints = true;
+		private bool showPolygon;
+		private bool showPoints;
 
 		private ICommand bothDivUpCommand;
 		private ICommand bothDivDownCommand;
@@ -123,6 +123,7 @@ namespace CadCat.GeometryModels
 			});
 
 			this.orderedPatches = patches;
+			ShowPoints = ShowPoints;
 		}
 
 		private void BothDivUp()
