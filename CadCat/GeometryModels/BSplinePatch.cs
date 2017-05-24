@@ -16,6 +16,7 @@ namespace CadCat.GeometryModels
 	class BSplinePatch : Patch
 	{
 		private readonly CatPoint[] points = new CatPoint[16];
+		private readonly CatPoint[,] pointsOrdererd = new CatPoint[4, 4];
 		private readonly List<Vector3> mesh = new List<Vector3>();
 		private readonly List<Vector3> normals = new List<Vector3>();
 		private readonly List<int> meshIndices = new List<int>();
@@ -82,9 +83,15 @@ namespace CadCat.GeometryModels
 			for (int i = 0; i < 4; i++)
 				for (int j = 0; j < 4; j++)
 				{
-					points[j * 4 + i] = pts[i, j]; // i -U, j- V
+					points[i * 4 + j] = pts[i, j]; // i -U, j- V
 					pts[i, j].OnChanged += OnBezierPointChanged;
 					pts[i, j].OnReplace += OnBezierPointReplaced;
+				}
+
+			for (int i = 0; i < 4; i++)
+				for (int j = 0; j < 4; j++)
+				{
+					pointsOrdererd[i, j] = pts[i, j];
 				}
 			changed = true;
 			owner = false;
@@ -215,7 +222,7 @@ namespace CadCat.GeometryModels
 			for (int i = 0; i < 4; i++)
 				for (int j = 0; j < 4; j++)
 				{
-					sum += points[i + j * 4].Position * tempMtx[i, j];
+					sum += pointsOrdererd[j, i].Position * tempMtx[i, j];
 				}
 
 			return sum;
@@ -231,7 +238,7 @@ namespace CadCat.GeometryModels
 			for (int i = 0; i < 3; i++)
 				for (int j = 0; j < 4; j++)
 				{
-					sum += (points[(i + 1) + j * 4].Position - points[i + j * 4].Position) * tempMtx[i, j];
+					sum += (pointsOrdererd[j, i + 1].Position - pointsOrdererd[j, i].Position) * tempMtx[i, j];
 				}
 
 			return sum * 1;
@@ -247,7 +254,7 @@ namespace CadCat.GeometryModels
 			for (int i = 0; i < 4; i++)
 				for (int j = 0; j < 3; j++)
 				{
-					sum += (points[i + (j + 1) * 4].Position - points[i + j * 4].Position) * tempMtx[i, j];
+					sum += (pointsOrdererd[j + 1, i].Position - pointsOrdererd[j, i].Position) * tempMtx[i, j];
 				}
 
 			return sum * 1;
@@ -307,6 +314,12 @@ namespace CadCat.GeometryModels
 		public override Vector3 GetVDerivative(double u, double v)
 		{
 			return EvaluateVDerivative(u, v);
+		}
+
+		public override CatPoint GetCatPoint(int u, int v)
+		{
+			//points[j * 4 + i] = pts[i, j]
+			return pointsOrdererd[v, u];
 		}
 	}
 }

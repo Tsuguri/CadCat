@@ -479,5 +479,10 @@ namespace CadCat.GeometryModels
 		{
 			return EvaluateVDerivative(u, v);
 		}
+
+		public override CatPoint GetCatPoint(int u, int v)
+		{
+			return points[v * 4 + u];
+		}
 	}
 }

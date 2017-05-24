@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CadCat.Math;
 using Xceed.Wpf.Toolkit.PropertyGrid.Editors;
+using CadCat.DataStructures;
 
 namespace CadCat.GeometryModels
 {
@@ -73,6 +74,7 @@ namespace CadCat.GeometryModels
 		}
 
 		public abstract Vector3 GetPoint(double u, double v);
+		public abstract CatPoint GetCatPoint(int u, int v);
 		public abstract Vector3 GetUDerivative(double u, double v);
 		public abstract Vector3 GetVDerivative(double u, double v);
 	}

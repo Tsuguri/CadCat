@@ -613,5 +613,10 @@ namespace CadCat.GeometryModels
 		{
 			throw new NotImplementedException();
 		}
+
+		public override CatPoint GetCatPoint(int u, int v)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }
