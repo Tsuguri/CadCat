@@ -888,7 +888,7 @@ namespace CadCat.DataStructures
 
 		private void DrawIntersectionInWindow()
 		{
-			var selected = models.Where(x => x is CuttingCurve).ToList();
+			var selected = models.Where(x => x.IsSelected && x is CuttingCurve).ToList();
 
 			if (selected.Count != 1)
 			{

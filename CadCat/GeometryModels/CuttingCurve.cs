@@ -156,55 +156,54 @@ namespace CadCat.GeometryModels
 			double tParam = Q.SecondParamLimit;
 			using (bitmap.GetBitmapContext())
 			{
-				for (int i = 0; i < points.Count - 1 + (cyclic ? 1 : 0); i++)
-				{
-					var from = points[i];
-					var to = points[(i + 1) % points.Count];
-					if (System.Math.Abs(from.X - to.X) < 0.1 && System.Math.Abs(from.Y - to.Y) < 0.1)
-						bitmap.DrawLineDDA((int)(from.X / uParam * halfWidth), (int)(from.Y / vParam * height), (int)(to.X / uParam * halfWidth), (int)(to.Y / vParam * height), Colors.DarkOrchid);
-					if (System.Math.Abs(from.Z - to.Z) < 0.1 && System.Math.Abs(from.W - to.W) < 0.1)
-						bitmap.DrawLineDDA((int)(from.Z / sParam * halfWidth + halfWidth), (int)(from.W / tParam * height), (int)(to.Z / sParam * halfWidth + halfWidth), (int)(to.W / tParam * height), Colors.DarkGreen);
-				}
-				bitmap.DrawLineDDA((int)halfWidth, 0, (int)halfWidth, (int)height, Colors.Red);
+				//for (int i = 0; i < points.Count - 1 + (cyclic ? 1 : 0); i++)
+				//{
+				//	var from = points[i];
+				//	var to = points[(i + 1) % points.Count];
+				//	if (System.Math.Abs(from.X - to.X) < 0.1 && System.Math.Abs(from.Y - to.Y) < 0.1)
+				//		bitmap.DrawLineDDA((int)(from.X / uParam * halfWidth), (int)(from.Y / vParam * height), (int)(to.X / uParam * halfWidth), (int)(to.Y / vParam * height), Colors.DarkOrchid);
+				//	//if (System.Math.Abs(from.Z - to.Z) < 0.1 && System.Math.Abs(from.W - to.W) < 0.1)
+				//	//	bitmap.DrawLineDDA((int)(from.Z / sParam * halfWidth + halfWidth), (int)(from.W / tParam * height), (int)(to.Z / sParam * halfWidth + halfWidth), (int)(to.W / tParam * height), Colors.DarkGreen);
+				//}
+				//bitmap.DrawLineDDA((int)halfWidth, 0, (int)halfWidth, (int)height, Colors.Red);
 
-				bitmap.DrawLineDDA(0, 0, (int)halfWidth, (int)height, IsIntersectableP ? Colors.Green : Colors.Red);
 				if (IsIntersectableP)
 				{
-					foreach (var tuple in pPolygonBoundary)
-					{
+					if (pPolygonBoundary != null)
+						foreach (var tuple in pPolygonBoundary)
+						{
+							bitmap.DrawLineDDA((int)(tuple.Item1.X / uParam * halfWidth), (int)(tuple.Item1.Y / vParam * height), (int)(tuple.Item2.X / uParam * halfWidth), (int)(tuple.Item2.Y / vParam * height), Colors.Gray);
+						}
 
-						//bitmap.DrawLineAa((int)(tuple.Item1.X / uParam * halfWidth), (int)(tuple.Item1.Y / vParam * height), (int)(tuple.Item2.X / uParam * halfWidth), (int)(tuple.Item2.Y / vParam * height), Colors.Gray, 5);
-						bitmap.DrawLineDDA((int)(tuple.Item1.X / uParam * halfWidth), (int)(tuple.Item1.Y / vParam * height), (int)(tuple.Item2.X / uParam * halfWidth), (int)(tuple.Item2.Y / vParam * height), Colors.Gray);
-					}
+					if (pPolygon != null)
+						for (int i = 0; i < pPolygon.Count - 1; i++)
+						{
+							var item1 = pPolygon[i];
+							var item2 = pPolygon[i + 1];
+							if (System.Math.Abs(item1.X - item2.X) < 0.1 && System.Math.Abs(item1.Y - item2.Y) < 0.1)
+								bitmap.DrawLineDDA((int)(item1.X / uParam * halfWidth), (int)(item1.Y / vParam * height), (int)(item2.X / uParam * halfWidth), (int)(item2.Y / vParam * height), Colors.Gray);
 
-					for (int i = 0; i < pPolygon.Count - 1; i++)
-					{
-						var Item1 = pPolygon[i];
-						var Item2 = pPolygon[i + 1];
-						bitmap.DrawLineDDA((int)(Item1.X / uParam * halfWidth), (int)(Item1.Y / vParam * height), (int)(Item2.X / uParam * halfWidth), (int)(Item2.Y / vParam * height), Colors.Gray);
-
-					}
-
-					if (testSet != null)
-					{
-						var uStep = P.FirstParamLimit / (testSet.GetLength(1) - 1.0);
-						var vStep = P.SecondParamLimit / (testSet.GetLength(0) - 1.0);
-						for (int i = 0; i < testSet.GetLength(1); i++)
-							for (int j = 0; j < testSet.GetLength(0); j++)
-							{
-								int x = (int)(i * uStep / uParam * halfWidth);
-								int y = (int)(j * vStep / vParam * height);
-								bitmap.DrawEllipse(x, y, x + 2, y + 2, testSet[j, i] ? Colors.Green : Colors.Red);
-							}
-					}
+						}
 				}
-				bitmap.DrawLineDDA((int)halfWidth, 0, (int)width, (int)height, IsIntersectableQ ? Colors.Green : Colors.Red);
+
 				if (IsIntersectableQ)
 				{
-					foreach (var tuple in qPolygonBoundary)
-					{
-						bitmap.DrawLineDDA((int)(tuple.Item1.X / sParam * halfWidth + halfWidth), (int)(tuple.Item1.Y / tParam * height), (int)(tuple.Item2.X / sParam * halfWidth + halfWidth), (int)(tuple.Item2.Y / tParam * height), Colors.Gray);
-					}
+					if (qPolygonBoundary != null)
+						foreach (var tuple in qPolygonBoundary)
+						{
+							bitmap.DrawLineDDA((int)(tuple.Item1.X / sParam * halfWidth + halfWidth), (int)(tuple.Item1.Y / tParam * height), (int)(tuple.Item2.X / sParam * halfWidth + halfWidth), (int)(tuple.Item2.Y / tParam * height), Colors.Gray);
+						}
+
+					if (qPolygon != null)
+						for (int i = 0; i < qPolygon.Count - 1; i++)
+						{
+							var item1 = qPolygon[i];
+							var item2 = qPolygon[i + 1];
+							if (System.Math.Abs(item1.X - item2.X) < 0.1 && System.Math.Abs(item1.Y - item2.Y) < 0.1)
+								bitmap.DrawLineDDA((int)(item1.X / uParam * halfWidth + halfWidth), (int)(item1.Y / vParam * height), (int)(item2.X / uParam * halfWidth + halfWidth), (int)(item2.Y / vParam * height), Colors.Gray);
+
+						}
+
 				}
 			}
 
@@ -225,22 +224,6 @@ namespace CadCat.GeometryModels
 			public int AssociatedVertexIndex;
 
 		}
-
-		private class BoundaryPart
-		{
-			public Vector2 From;
-			public Vector2 To;
-		}
-
-		//private double UIntersection(Vector2 from, Vector2 to, IIntersectable intersectable)
-		//{
-
-		//}
-
-		//private double VIntersection(Vector2 from, Vector2 to, IIntersectable intersectable)
-		//{
-
-		//}
 
 		private bool CalculatePolygon(bool p, out List<Vector2> polygon, out List<Tuple<Vector2, Vector2>> boundary)
 		{
@@ -351,7 +334,7 @@ namespace CadCat.GeometryModels
 
 			for (int i = 0; i < pts.Count; i++)
 			{
-				if ((pts[i] - pts[(i + 1)%pts.Count]).Length() > 0.1)
+				if ((pts[i] - pts[(i + 1) % pts.Count]).Length() > 0.1)
 				{
 					var pt1 = pts[i];
 					var pt2 = pts[(i + 1) % pts.Count];
@@ -360,8 +343,8 @@ namespace CadCat.GeometryModels
 						var right = pt1.X > pt2.X;
 						var avgheigh = (pt1.Y + pt2.Y) / 2;
 
-						leftEdge.Add(new BoundaryIntersection { X = 0, Y = avgheigh, type = right ? BoundaryIntersection.IntersectionType.Out : BoundaryIntersection.IntersectionType.In });
-						rightEdge.Add(new BoundaryIntersection { X = inters.FirstParamLimit, Y = avgheigh, type = !right ? BoundaryIntersection.IntersectionType.Out : BoundaryIntersection.IntersectionType.In });
+						leftEdge.Add(new BoundaryIntersection { X = 0, Y = avgheigh, type = !right ? BoundaryIntersection.IntersectionType.Out : BoundaryIntersection.IntersectionType.In });
+						rightEdge.Add(new BoundaryIntersection { X = inters.FirstParamLimit, Y = avgheigh, type = right ? BoundaryIntersection.IntersectionType.Out : BoundaryIntersection.IntersectionType.In });
 					}
 
 					if (System.Math.Abs(pt1.Y - pt2.Y) > 0.1)
@@ -375,14 +358,8 @@ namespace CadCat.GeometryModels
 			}
 
 			var boundaryIntersections = upperEdge.OrderBy(x => x.X).Concat(rightEdge.OrderBy(x => x.Y)).Concat(lowerEdge.OrderByDescending(x => x.X)).Concat(leftEdge.OrderByDescending(x => x.Y)).ToList();
-			//leftEdge = leftEdge.OrderByDescending(x => x.Y).ToList();
-			//rightEdge = rightEdge.OrderBy(x => x.Y).ToList();
-			//lowerEdge = lowerEdge.OrderByDescending(x => x.X).ToList();
 
-			if (boundaryIntersections.Count == 0)
-				return true;
-
-			if (!inters.FirstParamLooped || !inters.SecondParamLooped)
+			if (boundaryIntersections.Count == 0 || (!inters.FirstParamLooped || !inters.SecondParamLooped))
 			{
 				var up = Cut(upperEdge.OrderBy(x => x.X), new Vector2(-0.001, -0.001), new Vector2(inters.FirstParamLimit + 0.001, -0.001)).ToList();
 				boundary = up;
@@ -413,17 +390,17 @@ namespace CadCat.GeometryModels
 
 		}
 
-		private bool met;
+		//private bool met;
 
 		private IEnumerable<Tuple<Vector2, Vector2>> Cut(IEnumerable<BoundaryIntersection> edge, Vector2 from, Vector2 to)
 		{
-			var meet = met;
+			var meet = false;
 			var lst = new BoundaryIntersection() { X = from.X, Y = from.Y };
 			foreach (var bndr in edge)
 			{
 
 				meet = !meet;
-				met = meet;
+				//met = meet;
 				if (!meet)
 					lst = bndr;
 				else
