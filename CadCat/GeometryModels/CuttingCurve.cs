@@ -251,11 +251,13 @@ namespace CadCat.GeometryModels
 			var rightEdge = new List<BoundaryIntersection>();
 			var leftEdge = new List<BoundaryIntersection>();
 			var inters = p ? P : Q;
-			List<Vector2> pts;
-			pts = p ? points.Select(x => new Vector2(x.X, x.Y)).ToList() : points.Select(x => new Vector2(x.Z, x.W)).ToList();
+			var pts = p ? points.Select(x => new Vector2(x.X, x.Y)).ToList() : points.Select(x => new Vector2(x.Z, x.W)).ToList();
+			polygon = pts;
+			#region NonCyclic
 
 			if (!cyclic && (inters.FirstParamLooped || inters.SecondParamLooped))
 				return false;
+
 
 			if (!cyclic)
 			{
@@ -336,36 +338,78 @@ namespace CadCat.GeometryModels
 				if (leftEdge.Count + rightEdge.Count + upperEdge.Count + lowerEdge.Count != 2)
 					return false;
 
-				polygon = pts;
+
 				var up = Cut(upperEdge.OrderBy(x => x.X), new Vector2(-0.001, -0.001), new Vector2(inters.FirstParamLimit + 0.001, -0.001)).ToList();
-				var right = Cut(rightEdge.OrderBy(x => x.Y), new Vector2(inters.FirstParamLimit+0.001, -0.001),
-					new Vector2(inters.FirstParamLimit + 0.001, inters.SecondParamLimit + 0.001));
-				var down = Cut(lowerEdge.OrderByDescending(x => x.X), new Vector2(inters.FirstParamLimit + 0.001, inters.SecondParamLimit + 0.001),
-					new Vector2(-0.001, inters.SecondParamLimit + 0.001));
-				var left = Cut(leftEdge.OrderByDescending(x => x.X), new Vector2(-0.001, inters.SecondParamLimit + 0.001), new Vector2(-0.001, -0.001));
-				boundary = up;//.Concat(down).ToList();
-
-				//BoundaryIntersection lst = new BoundaryIntersection {X = 0, Y = 0};
-				//foreach (var bndr in upperEdge.OrderBy(x => x.X))
-				//{
-				//	meet = !meet;
-				//	if (!meet)
-				//		lst = bndr;
-				//	else
-				//	{
-				//		boundary.Add(new Tuple<Vector2, Vector2>(new Vector2(lst.X, lst.Y), new Vector2(bndr.X, bndr.Y)));
-				//	}
-				//}
-				//if (!meet)
-				//{
-				//	boundary.Add(new Tuple<Vector2, Vector2>(new Vector2(lst.X, lst.Y), new Vector2(inters.FirstParamLimit, 0)));
-				//	lst = new BoundaryIntersection() {X = inters.FirstParamLimit, Y = 0};
-				//}
-
+				boundary = up;
 
 				return true;
 			}
-			return false;
+
+			#endregion
+
+			#region Cyclic
+
+			for (int i = 0; i < pts.Count; i++)
+			{
+				if ((pts[i] - pts[(i + 1)%pts.Count]).Length() > 0.1)
+				{
+					var pt1 = pts[i];
+					var pt2 = pts[(i + 1) % pts.Count];
+					if (System.Math.Abs(pt1.X - pt2.X) > 0.1)
+					{
+						var right = pt1.X > pt2.X;
+						var avgheigh = (pt1.Y + pt2.Y) / 2;
+
+						leftEdge.Add(new BoundaryIntersection { X = 0, Y = avgheigh, type = right ? BoundaryIntersection.IntersectionType.Out : BoundaryIntersection.IntersectionType.In });
+						rightEdge.Add(new BoundaryIntersection { X = inters.FirstParamLimit, Y = avgheigh, type = !right ? BoundaryIntersection.IntersectionType.Out : BoundaryIntersection.IntersectionType.In });
+					}
+
+					if (System.Math.Abs(pt1.Y - pt2.Y) > 0.1)
+					{
+						var up = pt1.Y < pt2.Y;
+						var avgwidth = (pt1.X + pt2.X) / 2;
+						upperEdge.Add(new BoundaryIntersection { X = avgwidth, Y = 0, type = up ? BoundaryIntersection.IntersectionType.Out : BoundaryIntersection.IntersectionType.In });
+						lowerEdge.Add(new BoundaryIntersection { X = avgwidth, Y = inters.SecondParamLimit, type = !up ? BoundaryIntersection.IntersectionType.Out : BoundaryIntersection.IntersectionType.In });
+					}
+				}
+			}
+
+			var boundaryIntersections = upperEdge.OrderBy(x => x.X).Concat(rightEdge.OrderBy(x => x.Y)).Concat(lowerEdge.OrderByDescending(x => x.X)).Concat(leftEdge.OrderByDescending(x => x.Y)).ToList();
+			//leftEdge = leftEdge.OrderByDescending(x => x.Y).ToList();
+			//rightEdge = rightEdge.OrderBy(x => x.Y).ToList();
+			//lowerEdge = lowerEdge.OrderByDescending(x => x.X).ToList();
+
+			if (boundaryIntersections.Count == 0)
+				return true;
+
+			if (!inters.FirstParamLooped || !inters.SecondParamLooped)
+			{
+				var up = Cut(upperEdge.OrderBy(x => x.X), new Vector2(-0.001, -0.001), new Vector2(inters.FirstParamLimit + 0.001, -0.001)).ToList();
+				boundary = up;
+				return true;
+			}
+
+			//check dla dwucykliczności
+			var lastIntersection = boundaryIntersections.First().type;
+
+			foreach (var boundaryIntersection in boundaryIntersections.Skip(1))
+			{
+				if (lastIntersection == boundaryIntersection.type)
+					return false;
+				lastIntersection = boundaryIntersection.type;
+			}
+
+			boundary = Cut(upperEdge.OrderBy(x => x.X), new Vector2(-0.001, 0), new Vector2(inters.FirstParamLimit + 0.001, 0)).ToList();
+			boundary = boundary.Select(x =>
+			{
+				var tmp = x.Item1;
+				tmp.Y -= 0.001;
+				var tmp2 = x.Item2;
+				tmp2.Y -= 0.001;
+				return new Tuple<Vector2, Vector2>(tmp, tmp2);
+			}).ToList();
+			#endregion
+			return true;
 
 		}
 
@@ -415,12 +459,13 @@ namespace CadCat.GeometryModels
 			var lineTo = point;
 			lineTo.Y -= 2 * sender.SecondParamLimit;
 
-			int p = boundary.Count(tuple => IntersectLines(tuple.Item1, tuple.Item2, point, lineTo));
+			int p = boundary?.Count(tuple => IntersectLines(tuple.Item1, tuple.Item2, point, lineTo)) ?? 0;
 
 			for (int i = 0; i < poly.Count - 1; i++)
 			{
-				if (IntersectLines(poly[i], poly[i + 1], point, lineTo))
-					p++;
+				if ((poly[i] - poly[i + 1]).Length() < 0.1)
+					if (IntersectLines(poly[i], poly[i + 1], point, lineTo))
+						p++;
 			}
 
 			if (p % 2 == 0)
