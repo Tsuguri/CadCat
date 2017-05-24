@@ -238,6 +238,14 @@
                             <TextBlock VerticalAlignment="Center" Grid.Column="0" Grid.Row="5">Central W</TextBlock>
                         </Grid>
                     </DataTemplate>
+                    <DataTemplate DataType="{x:Type models:CuttingCurve}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="40"/>
+                            </Grid.RowDefinitions>
+                            <Button Command="{Binding ConvertToInterpolation}">Convert</Button>
+                        </Grid>
+                    </DataTemplate>
                 </ContentControl.Resources>
             </ContentControl>
             <ContentControl Content="{Binding SelectedModel}">

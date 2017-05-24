@@ -465,7 +465,7 @@ namespace CadCat.GeometryModels.Proxys
 				{
 					for (int x = 0; x < 4; x++)
 						for (int y = 0; y < 4; y++)
-							subArray[y, x] = catPoints[j + x, i + y];
+							subArray[y, x] = catPoints[j + y, i + x];
 					var patch = new BSplinePatch(subArray)
 					{ UPos = i, VPos = j };
 					scene.AddNewModel(patch);

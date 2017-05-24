@@ -92,9 +92,12 @@
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="30" />
+                        <RowDefinition Height="30" />
                     </Grid.RowDefinitions>
                     <TextBlock Grid.Column="0" Grid.Row="0">Curve step</TextBlock>
                     <local:NumericSlider Grid.Column="1" Grid.Row="0" Value="{Binding CuttingCurveApproximation}" IncrementMultiplier="0.01" />
+                    <TextBlock Grid.Column="0" Grid.Row="1">Newton step</TextBlock>
+                    <local:NumericSlider Grid.Column="1" Grid.Row="1" Value="{Binding NewtonStep}" IncrementMultiplier="0.01" />
                 </Grid>
             </Expander>
         </StackPanel>

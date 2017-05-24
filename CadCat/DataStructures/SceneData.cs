@@ -81,7 +81,22 @@ namespace CadCat.DataStructures
 
 		#region Intersections
 
-		private double cuttingCurveApproximation = 0.1;
+		private double newtonStep = 0.01;
+
+		public double NewtonStep
+		{
+			get { return newtonStep; }
+			set
+			{
+				if (System.Math.Abs(newtonStep - value) > double.Epsilon && value >= 0.005 && value < 0.2)
+				{
+					newtonStep = value;
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		private double cuttingCurveApproximation = 0.01;
 
 		public double CuttingCurveApproximation
 		{
@@ -844,13 +859,13 @@ namespace CadCat.DataStructures
 			var selected = models.Where(x => x.IsSelected).ToList();
 
 			var sel = selected.Select(x => x as IIntersectable).Distinct().ToList();
-
-			var intersection = sel.Count != 2 ? null : Intersection.Intersect(sel[0], sel[1], this);
+			bool cyclic = false;
+			var intersection = sel.Count != 2 ? null : Intersection.Intersect(sel[0], sel[1], this,NewtonStep, out cyclic);
 
 			if (intersection != null && intersection.Count>2)
 			{
 				//intersection.ForEach(x => CreateHiddenCatPoint(sel[0].GetPosition(x.X, x.Y)));
-				var curv = new CuttingCurve(intersection,sel[0], sel[1], this, CuttingCurveApproximation);
+				var curv = new CuttingCurve(intersection,sel[0], sel[1], this, cyclic, CuttingCurveApproximation);
 				AddNewModel(curv);
 			}
 			else

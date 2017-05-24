@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 using CadCat.DataStructures;
 using CadCat.ModelInterfaces;
 
@@ -11,9 +12,10 @@ namespace CadCat.Math
 	public class Intersection
 	{
 		private static SceneData data;
-		public static List<Vector4> Intersect(IIntersectable P, IIntersectable Q, SceneData scene)
+		public static List<Vector4> Intersect(IIntersectable P, IIntersectable Q, SceneData scene, double newtonStep, out bool cycleIntersection)
 		{
-			double d = 0.01;
+			double d = newtonStep;
+			cycleIntersection = false;
 			data = scene;
 			var pPoints = P.GetPointsForSearch(8, 8).ToList();
 			var qPoints = Q.GetPointsForSearch(8, 8).ToList();
@@ -109,8 +111,8 @@ namespace CadCat.Math
 
 
 				  var np = Vector3.CrossProduct(du, dv);//.Normalized();
-					  var nq = Vector3.CrossProduct(ds, dt);//.Normalized();
-					  var t = (invert ? Vector3.CrossProduct(nq, np) : Vector3.CrossProduct(np, nq)).Normalized();
+				  var nq = Vector3.CrossProduct(ds, dt);//.Normalized();
+				  var t = (invert ? Vector3.CrossProduct(nq, np) : Vector3.CrossProduct(np, nq)).Normalized();
 				  jacob[3, 0] = Vector3.DotProduct(du, t);
 				  jacob[3, 1] = Vector3.DotProduct(dv, t);
 
@@ -125,27 +127,27 @@ namespace CadCat.Math
 				 return new Vector4(p - q, temp);
 			 };
 
-
-			var pts = Newton(P, Q, startPoint.Value, function, jacobian, false);
+			bool cyclic;
+			var pts = Newton(P, Q, startPoint.Value, function, jacobian, false, d, out cyclic);
 
 			if (pts.Count < 2)
 				return null;
-			var first = pts[0];
-			var last = pts[pts.Count - 1];
-			if ((P.GetPosition(first.X, first.Y) - P.GetPosition(last.X, last.Y)).Length() > 0.007)
+			cycleIntersection = cyclic;
+			if (!cyclic)
 			{
-				var pts2 = Newton(P, Q, startPoint.Value, function, jacobian, true);
+				var pts2 = Newton(P, Q, startPoint.Value, function, jacobian, true, d, out cyclic);
 				pts2.Reverse();
 				pts.AddRange(pts2);
 			}
 			return pts;
 		}
 
-		private static List<Vector4> Newton(IIntersectable P, IIntersectable Q, Vector4 startPoint, Func<Vector4, Vector3, Vector3, Vector4> function, Func<Vector4, bool, Tuple<Matrix4, Vector3>> jacobian, bool inverse)
+		private static List<Vector4> Newton(IIntersectable P, IIntersectable Q, Vector4 startPoint, Func<Vector4, Vector3, Vector3, Vector4> function, Func<Vector4, bool, Tuple<Matrix4, Vector3>> jacobian, bool inverse, double step, out bool cyclic)
 		{
 			var points = new List<Vector4>();
 			//var startestPoint = startPoint;
 			bool end = false;
+			cyclic = false;
 			while (!end)
 			{
 				Vector4 point = startPoint;
@@ -169,11 +171,17 @@ namespace CadCat.Math
 					point = new Vector4(pP.Value.X, pP.Value.Y, qP.Value.X, qP.Value.Y);
 
 				} while ((P.GetPosition(point.X, point.Y) - P.GetPosition(prevPoint.X, prevPoint.Y)).Length() > 0.0001 && i < 1000);
-				if (points.Count > 0 && (P.GetPosition(point.X, point.Y) - P.GetPosition(startPoint.X, startPoint.Y)).Length() < 0.0001)
+				if (points.Count > 0 && (P.GetPosition(point.X, point.Y) - P.GetPosition(startPoint.X, startPoint.Y)).Length() <
+					0.0001)
 					break;
 
-				if (points.Count > 1 && (P.GetPosition(point.X, point.Y) - P.GetPosition(points[0].X, points[0].Y)).Length() < 0.007)
+				if (points.Count > 2 && (P.GetPosition(point.X, point.Y) - P.GetPosition(points[0].X, points[0].Y)).Length() < step)
+				{
+					points.Add(point);
+
+					cyclic = true;
 					break;
+				}
 				startPoint = point;
 				points.Add(startPoint);
 

@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Navigation;
 using CadCat.DataStructures;
 using CadCat.Math;
 using CadCat.ModelInterfaces;
 using CadCat.Rendering;
+using CadCat.Utilities;
 
 namespace CadCat.GeometryModels
 {
@@ -19,11 +22,17 @@ namespace CadCat.GeometryModels
 		private readonly List<CatPoint> catPoints;
 		private readonly SceneData scene;
 		private readonly List<int> indices = new List<int>();
-		public CuttingCurve(List<Vector4> points, IIntersectable P, IIntersectable Q, SceneData scene, double minimumStep = 0.1)
+		private bool cyclic;
+		private ICommand convertToInterpolationCurve;
+
+		public ICommand ConvertToInterpolation => convertToInterpolationCurve ?? (convertToInterpolationCurve = new CommandHandler(Convert));
+
+		public CuttingCurve(List<Vector4> points, IIntersectable P, IIntersectable Q, SceneData scene, bool cyclic, double minimumStep = 0.1)
 		{
 			this.Q = Q;
 			this.P = P;
 			this.scene = scene;
+			this.cyclic = cyclic;
 
 			this.points = new List<Vector4>(points.Count / 2);
 			Vector3 prevPoint = P.GetPosition(points[0].X, points[0].Y);
@@ -54,6 +63,12 @@ namespace CadCat.GeometryModels
 				indices.Add(i);
 			}
 			indices.Add(this.points.Count - 1);
+			Console.WriteLine($"Cyclic: {cyclic}");
+			if (cyclic)
+			{
+				indices.Add(this.points.Count - 1);
+				indices.Add(0);
+			}
 		}
 
 		public override void CleanUp()
@@ -81,6 +96,22 @@ namespace CadCat.GeometryModels
 		public override string GetName()
 		{
 			return "Cutting curve" + base.GetName();
+		}
+
+		private void Convert()
+		{
+			var cnt = points.Count / 5.0;
+			var pts = new List<Vector4>();
+			for (int i = 0; i < cnt; i++)
+			{
+				pts.Add(points[i * 5]);
+			}
+			if (cyclic)
+				pts.Add(points[0]);
+
+			var interp = new BsplineInterpolator(pts.Select(x => scene.CreateCatPoint(P.GetPosition(x.X, x.Y))), scene);
+			scene.AddNewModel(interp);
+			//scene.RemoveModel(this);
 		}
 	}
 }
