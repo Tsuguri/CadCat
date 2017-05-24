@@ -22,7 +22,7 @@ namespace CadCat.GeometryModels
 		private int bigAngleDensity = 16;
 		private int smallAngleDensity = 16;
 
-		private bool drawNormals = true;
+		private bool drawNormals;
 
 		public bool DrawNormals
 		{
@@ -106,6 +106,13 @@ namespace CadCat.GeometryModels
 			}
 		}
 
+
+		protected override void PositionChanged()
+		{
+			base.PositionChanged();
+			modelReady = false;
+		}
+
 		public Torus()
 		{
 		}
@@ -127,8 +134,7 @@ namespace CadCat.GeometryModels
 					var pt = CalculatePoint(bigAngle, smallAngle, bigRadius, smallRadius);
 					points.Insert(i * smallAngleDensity + j, pt);
 
-					var normal = GetSecondParamDerivative(bigAngle, smallAngle);//Vector3.CrossProduct(GetFirstParamDerivative(bigAngle, smallAngle),
-																			   //GetSecondParamDerivative(bigAngle, smallAngle));
+					var normal = Vector3.CrossProduct(UDeriv(bigAngle, smallAngle), VDeriv(bigAngle, smallAngle)).Normalized();
 					normalMesh.Add(pt);
 					normalMesh.Add(pt + normal);
 					normalIndices.Add((i * smallAngleDensity + j) * 2);
@@ -186,7 +192,7 @@ namespace CadCat.GeometryModels
 			if (!modelReady)
 				GenerateModel(bigRadius, smallRadius, bigAngleDensity, smallAngleDensity);
 			modelMat = Transform.CreateTransformMatrix();
-			normalMat = modelMat.Transposed().Inversed();
+			normalMat = modelMat.Inversed().Transposed();
 			renderer.UseIndices = true;
 
 			renderer.ModelMatrix = Transform.CreateTransformMatrix();
@@ -218,7 +224,7 @@ namespace CadCat.GeometryModels
 			return CalculateWorldPoint(firstParam, secondParam, bigRadius, smallRadius);
 		}
 
-		public Vector3 GetFirstParamDerivative(double firstParam, double secondParam)
+		private Vector3 UDeriv(double firstParam, double secondParam)
 		{
 			Math.Vector3 ret = new Math.Vector3
 			{
@@ -226,10 +232,15 @@ namespace CadCat.GeometryModels
 				Y = System.Math.Cos(firstParam) * (bigRadius + smallRadius * System.Math.Cos(secondParam)),
 				Z = 0
 			};
-			return normalMat * ret;
+			return ret;
 		}
 
-		public Vector3 GetSecondParamDerivative(double firstParam, double secondParam)
+		public Vector3 GetFirstParamDerivative(double firstParam, double secondParam)
+		{
+			return normalMat * UDeriv(firstParam, secondParam);
+		}
+
+		private Vector3 VDeriv(double firstParam, double secondParam)
 		{
 			Math.Vector3 ret = new Math.Vector3
 			{
@@ -237,7 +248,12 @@ namespace CadCat.GeometryModels
 				Y = System.Math.Sin(firstParam) * (-smallRadius * System.Math.Sin(secondParam)),
 				Z = smallRadius * System.Math.Cos(secondParam)
 			};
-			return normalMat * ret;
+			return ret;
+		}
+
+		public Vector3 GetSecondParamDerivative(double firstParam, double secondParam)
+		{
+			return normalMat * VDeriv(firstParam, secondParam);
 		}
 
 		public ParametrizedPoint GetClosestPointParams(Vector3 point)

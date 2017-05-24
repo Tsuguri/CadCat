@@ -149,6 +149,7 @@ namespace CadCat.GeometryModels
 			bitmap.Clear(Colors.White);
 			double width = bitmap.Width;
 			double halfWidth = width / 2;
+			width -= 1;
 			double height = bitmap.Height;
 			double uParam = P.FirstParamLimit;
 			double vParam = P.SecondParamLimit;
@@ -156,16 +157,15 @@ namespace CadCat.GeometryModels
 			double tParam = Q.SecondParamLimit;
 			using (bitmap.GetBitmapContext())
 			{
-				//for (int i = 0; i < points.Count - 1 + (cyclic ? 1 : 0); i++)
-				//{
-				//	var from = points[i];
-				//	var to = points[(i + 1) % points.Count];
-				//	if (System.Math.Abs(from.X - to.X) < 0.1 && System.Math.Abs(from.Y - to.Y) < 0.1)
-				//		bitmap.DrawLineDDA((int)(from.X / uParam * halfWidth), (int)(from.Y / vParam * height), (int)(to.X / uParam * halfWidth), (int)(to.Y / vParam * height), Colors.DarkOrchid);
-				//	//if (System.Math.Abs(from.Z - to.Z) < 0.1 && System.Math.Abs(from.W - to.W) < 0.1)
-				//	//	bitmap.DrawLineDDA((int)(from.Z / sParam * halfWidth + halfWidth), (int)(from.W / tParam * height), (int)(to.Z / sParam * halfWidth + halfWidth), (int)(to.W / tParam * height), Colors.DarkGreen);
-				//}
-				//bitmap.DrawLineDDA((int)halfWidth, 0, (int)halfWidth, (int)height, Colors.Red);
+				if (pPolygon != null)
+					for (int i = 0; i < pPolygon.Count - 1 + (cyclic ? 1 : 0); i++)
+					{
+						var item1 = pPolygon[i];
+						var item2 = pPolygon[(i + 1)%pPolygon.Count];
+						if (System.Math.Abs(item1.X - item2.X) < 0.1 && System.Math.Abs(item1.Y - item2.Y) < 0.1)
+							bitmap.DrawLineDDA((int)(item1.X / uParam * halfWidth), (int)(item1.Y / vParam * height), (int)(item2.X / uParam * halfWidth), (int)(item2.Y / vParam * height), Colors.Gray);
+
+					}
 
 				if (IsIntersectableP)
 				{
@@ -175,34 +175,28 @@ namespace CadCat.GeometryModels
 							bitmap.DrawLineDDA((int)(tuple.Item1.X / uParam * halfWidth), (int)(tuple.Item1.Y / vParam * height), (int)(tuple.Item2.X / uParam * halfWidth), (int)(tuple.Item2.Y / vParam * height), Colors.Gray);
 						}
 
-					if (pPolygon != null)
-						for (int i = 0; i < pPolygon.Count - 1; i++)
-						{
-							var item1 = pPolygon[i];
-							var item2 = pPolygon[i + 1];
-							if (System.Math.Abs(item1.X - item2.X) < 0.1 && System.Math.Abs(item1.Y - item2.Y) < 0.1)
-								bitmap.DrawLineDDA((int)(item1.X / uParam * halfWidth), (int)(item1.Y / vParam * height), (int)(item2.X / uParam * halfWidth), (int)(item2.Y / vParam * height), Colors.Gray);
 
-						}
 				}
+
+				if (qPolygon != null)
+					for (int i = 0; i < qPolygon.Count - 1 + (cyclic ? 1 : 0); i++)
+					{
+						var item1 = qPolygon[i];
+						var item2 = qPolygon[(i + 1)%qPolygon.Count];
+						if (System.Math.Abs(item1.X - item2.X) < 0.1 && System.Math.Abs(item1.Y - item2.Y) < 0.1)
+							bitmap.DrawLineDDA((int)(item1.X / sParam * (halfWidth-3) + halfWidth), (int)(item1.Y / tParam * height), (int)(item2.X / sParam * (halfWidth - 3) + halfWidth), (int)(item2.Y / tParam * height), Colors.Gray);
+
+					}
 
 				if (IsIntersectableQ)
 				{
 					if (qPolygonBoundary != null)
 						foreach (var tuple in qPolygonBoundary)
 						{
-							bitmap.DrawLineDDA((int)(tuple.Item1.X / sParam * halfWidth + halfWidth), (int)(tuple.Item1.Y / tParam * height), (int)(tuple.Item2.X / sParam * halfWidth + halfWidth), (int)(tuple.Item2.Y / tParam * height), Colors.Gray);
+							bitmap.DrawLineDDA((int)(tuple.Item1.X / sParam * (halfWidth - 3) + halfWidth), (int)(tuple.Item1.Y / tParam * height), (int)(tuple.Item2.X / sParam * (halfWidth - 3) + halfWidth), (int)(tuple.Item2.Y / tParam * height), Colors.Gray);
 						}
 
-					if (qPolygon != null)
-						for (int i = 0; i < qPolygon.Count - 1; i++)
-						{
-							var item1 = qPolygon[i];
-							var item2 = qPolygon[i + 1];
-							if (System.Math.Abs(item1.X - item2.X) < 0.1 && System.Math.Abs(item1.Y - item2.Y) < 0.1)
-								bitmap.DrawLineDDA((int)(item1.X / uParam * halfWidth + halfWidth), (int)(item1.Y / vParam * height), (int)(item2.X / uParam * halfWidth + halfWidth), (int)(item2.Y / vParam * height), Colors.Gray);
 
-						}
 
 				}
 			}
@@ -367,6 +361,12 @@ namespace CadCat.GeometryModels
 			}
 
 			//check dla dwucykliczności
+
+			if (boundaryIntersections.Count == 2)
+			{
+				return false;
+			}
+
 			var lastIntersection = boundaryIntersections.First().type;
 
 			foreach (var boundaryIntersection in boundaryIntersections.Skip(1))
@@ -385,6 +385,7 @@ namespace CadCat.GeometryModels
 				tmp2.Y -= 0.001;
 				return new Tuple<Vector2, Vector2>(tmp, tmp2);
 			}).ToList();
+
 			#endregion
 			return true;
 
