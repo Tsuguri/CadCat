@@ -11,6 +11,7 @@ using MaterialDesignThemes.Wpf;
 using CadCat.UIControls;
 using CadCat.ModelInterfaces;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using CadCat.GeometryModels.Proxys;
 using CadCat.Utilities;
 using GM1.Serialization;
@@ -212,6 +213,8 @@ namespace CadCat.DataStructures
 
 		#endregion
 
+		public DialogHost Host { get; set; }
+
 		#endregion
 
 		#region Commands
@@ -237,7 +240,7 @@ namespace CadCat.DataStructures
 		private ICommand convertToPointsCommand;
 		private ICommand mergePointsCommand;
 		private ICommand intersectSurfacesCommand;
-
+		private ICommand drawIntersection;
 
 		private ICommand goToSelectedCommand;
 		private ICommand removeCommand;
@@ -246,6 +249,7 @@ namespace CadCat.DataStructures
 
 		private ICommand saveFileCommand;
 		private ICommand loadFileCommand;
+
 
 		public ICommand LoadFileCommand => loadFileCommand ?? (loadFileCommand = new CommandHandler(LoadFile));
 		public ICommand SaveFileCommand => saveFileCommand ?? (saveFileCommand = new CommandHandler(SaveFile));
@@ -287,6 +291,9 @@ namespace CadCat.DataStructures
 		public ICommand IntersectSurfacesCommand => intersectSurfacesCommand ??
 													(intersectSurfacesCommand = new CommandHandler(IntersectSurfaces));
 
+
+		public ICommand DrawIntersection => drawIntersection ??
+		                                            (drawIntersection = new CommandHandler(DrawIntersectionInWindow));
 		#endregion
 
 		#region CreatingModels
@@ -876,6 +883,37 @@ namespace CadCat.DataStructures
 				};
 
 				DialogHost.Show(sampleMessageDialog, "RootDialog");
+			}
+		}
+
+		private void DrawIntersectionInWindow()
+		{
+			var selected = models.Where(x => x is CuttingCurve).ToList();
+
+			if (selected.Count != 1)
+			{
+				var sampleMessageDialog = new MessageHost
+				{
+					Message = { Text = "Select one curve to draw." }
+				};
+
+				DialogHost.Show(sampleMessageDialog, "RootDialog");
+			}
+			else
+			{
+				var bufferBitmap = new WriteableBitmap(400, 200, 96, 96, PixelFormats.Pbgra32, null);
+				var curve = selected[0] as CuttingCurve;
+				curve?.Draw(bufferBitmap);
+				var sampleMessageDialog = new ImageHost();
+				sampleMessageDialog.SetImage(bufferBitmap);
+
+				var oldWidth = Host.Width;
+				var oldHeigth = Host.Height;
+				Host.Height = 350;
+				Host.Width = 400;
+				DialogHost.Show(sampleMessageDialog, "RootDialog");
+				Host.Width = oldWidth;
+				Host.Height = oldHeigth;
 			}
 		}
 

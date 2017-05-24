@@ -43,6 +43,7 @@ namespace CadCat
 			data = new SceneData();
 			DataContext = data;
 			InitializeComponent();
+			data.Host = DialogHost;
 
 			ctx = new RenderingContext(data, image);
 			var cam = new Camera

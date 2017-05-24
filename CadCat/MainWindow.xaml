@@ -23,7 +23,7 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
-    <materialDesign:DialogHost Identifier="RootDialog">
+    <materialDesign:DialogHost Identifier="RootDialog" x:Name="DialogHost">
 
         <Grid>
             <Grid.RowDefinitions>

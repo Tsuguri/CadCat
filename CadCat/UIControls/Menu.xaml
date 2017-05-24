@@ -27,6 +27,7 @@
         </MenuItem>
         <MenuItem Header="Surfaces">
             <MenuItem Header="Intersect" Command="{Binding IntersectSurfacesCommand}" />
+            <MenuItem Header="Draw intersection parameters" Command="{Binding DrawIntersection}" />
         </MenuItem>
     </Menu>
 </UserControl>

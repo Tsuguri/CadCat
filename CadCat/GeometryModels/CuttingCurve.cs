@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using CadCat.DataStructures;
 using CadCat.Math;
@@ -112,6 +114,32 @@ namespace CadCat.GeometryModels
 			var interp = new BsplineInterpolator(pts.Select(x => scene.CreateCatPoint(P.GetPosition(x.X, x.Y))), scene);
 			scene.AddNewModel(interp);
 			//scene.RemoveModel(this);
+		}
+
+		public void Draw(WriteableBitmap bitmap)
+		{
+			bitmap.Clear(Colors.White);
+			double width = bitmap.Width;
+			double halfWidth = width / 2;
+			double height = bitmap.Height;
+			double uParam = P.FirstParamLimit;
+			double vParam = P.SecondParamLimit;
+			double sParam = Q.FirstParamLimit;
+			double tParam = Q.SecondParamLimit;
+			using (bitmap.GetBitmapContext())
+			{
+				for (int i = 0; i < points.Count - 1 + (cyclic ? 1 : 0); i++)
+				{
+					var from = points[i];
+					var to = points[(i + 1) % points.Count];
+					if (System.Math.Abs(from.X - to.X) < 0.1 && System.Math.Abs(from.Y - to.Y) < 0.1)
+						bitmap.DrawLineDDA((int)(from.X / uParam * halfWidth), (int)(from.Y / vParam * height), (int)(to.X / uParam * halfWidth), (int)(to.Y / vParam * height), Colors.DarkOrchid);
+					if (System.Math.Abs(from.Z - to.Z) < 0.1 && System.Math.Abs(from.W - to.W) < 0.1)
+						bitmap.DrawLineDDA((int)(from.Z / sParam * halfWidth + halfWidth), (int)(from.W / tParam * height), (int)(to.Z / sParam * halfWidth + halfWidth), (int)(to.W / tParam * height), Colors.DarkGreen);
+				}
+				bitmap.DrawLineDDA((int)halfWidth, 0, (int)halfWidth, (int)height, Colors.Red);
+			}
+
 		}
 	}
 }

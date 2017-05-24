@@ -137,6 +137,9 @@
     <Compile Include="Rendering\StandardRenderer.cs" />
     <Compile Include="Rendering\StereoscopicRender.cs" />
     <Compile Include="Tools\Cursor.cs" />
+    <Compile Include="UIControls\ImageHost.xaml.cs">
+      <DependentUpon>ImageHost.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UIControls\LeftSideMenu.xaml.cs">
       <DependentUpon>LeftSideMenu.xaml</DependentUpon>
     </Compile>
@@ -183,6 +186,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="UIControls\ImageHost.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UIControls\LeftSideMenu.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
