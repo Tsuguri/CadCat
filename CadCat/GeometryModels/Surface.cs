@@ -1,16 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Input;
 using CadCat.DataStructures;
 using CadCat.Math;
 using CadCat.ModelInterfaces;
 using CadCat.Utilities;
+using Xceed.Wpf.DataGrid;
 
 namespace CadCat.GeometryModels
 {
+
+
 	public class Surface : Model, IIntersectable
 	{
-		private readonly List<CuttingCurve> cuttingCurves = new List<CuttingCurve>();
+		private readonly ObservableCollection<CuttingCurveWrapper> cuttingCurves = new ObservableCollection<CuttingCurveWrapper>();
+		private bool eachOrAny;
+
+		public bool EachOrAny
+		{
+			get { return eachOrAny; }
+			set
+			{
+				if (eachOrAny != value)
+				{
+					eachOrAny = value;
+					OnPropertyChanged();
+					SideChanged();
+				}
+			}
+		}
+		public ObservableCollection<CuttingCurveWrapper> CuttingCurves => cuttingCurves;
 		private readonly List<Patch> patches;
 		private readonly List<CatPoint> catPoints;
 		private readonly SceneData scene;
@@ -172,13 +193,17 @@ namespace CadCat.GeometryModels
 		public bool[,] GetAvaiablePatch(int u, int v, int uDiv, int vDiv)
 		{
 			var avaiable = new bool[vDiv, uDiv];
+			bool val = eachOrAny || cuttingCurves.Count == 0;
 			for (int i = 0; i < uDiv; i++)
 			{
 				for (int j = 0; j < vDiv; j++)
-					avaiable[j, i] = true;
+					avaiable[j, i] = val;
 			}
-			if (cuttingCurves.Count > 0 && cuttingCurves[0].IsIntersectable(this))
-				cuttingCurves[0].PointsContainedByCurve(avaiable, true, this, u, u + 1, v, v + 1);
+
+			foreach (var cuttingCurveWrapper in cuttingCurves)
+			{
+				cuttingCurveWrapper.curve.PointsContainedByCurve(avaiable, cuttingCurveWrapper.Side, this, u, u + 1, v, v + 1, eachOrAny);
+			}
 
 			return avaiable;
 		}
@@ -294,6 +319,15 @@ namespace CadCat.GeometryModels
 
 		}
 
+		public void RemoveCurve(CuttingCurve curve)
+		{
+			var p = CuttingCurves.Where(x => x.curve == curve);
+			var cur = p.FirstOrDefault();
+			if (cur != null)
+				cuttingCurves.Remove(cur);
+			SideChanged();
+		}
+
 		public IEnumerable<ParametrizedPoint> GetPointsForSearch(int firstParamDiv, int secondParamDiv)
 		{
 			float uDiv = PatchesU / (float)(firstParamDiv + 2);
@@ -310,7 +344,18 @@ namespace CadCat.GeometryModels
 
 		public void SetCuttingCurve(CuttingCurve curve)
 		{
-			cuttingCurves.Add(curve);
+			if (!curve.IsIntersectable(this))
+				return;
+
+			cuttingCurves.Add(new CuttingCurveWrapper(curve, this));
+			foreach (var orderedPatch in orderedPatches)
+			{
+				orderedPatch.ShouldRegenerate();
+			}
+		}
+
+		public void SideChanged()
+		{
 			foreach (var orderedPatch in orderedPatches)
 			{
 				orderedPatch.ShouldRegenerate();

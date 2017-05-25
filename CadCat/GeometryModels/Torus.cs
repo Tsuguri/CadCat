@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using CadCat.Math;
 using CadCat.ModelInterfaces;
 using CadCat.Rendering;
+using CadCat.Utilities;
 
 namespace CadCat.GeometryModels
 {
@@ -12,8 +14,24 @@ namespace CadCat.GeometryModels
 	class Torus : ParametrizedModel, IIntersectable
 	{
 		//private List<ModelLine> lines;
+		private bool eachOrAny;
 
-		private List<CuttingCurve> cuttingCurves = new List<CuttingCurve>();
+		public bool EachOrAny
+		{
+			get { return eachOrAny; }
+			set
+			{
+				if (value != eachOrAny)
+				{
+					modelReady = false;
+					eachOrAny = value;
+					OnPropertyChanged();
+				}
+			}
+		}
+		private readonly ObservableCollection<CuttingCurveWrapper> cuttingCurves = new ObservableCollection<CuttingCurveWrapper>();
+
+		public ObservableCollection<CuttingCurveWrapper> CuttingCurves => cuttingCurves;
 		private List<int> indices;
 		private List<Math.Vector3> points;
 
@@ -214,6 +232,20 @@ namespace CadCat.GeometryModels
 			throw new System.NotImplementedException();
 		}
 
+		public void SideChanged()
+		{
+			modelReady = false;
+		}
+
+		public void RemoveCurve(CuttingCurve curve)
+		{
+			var p = CuttingCurves.Where(x => x.curve == curve);
+			var cur = p.FirstOrDefault();
+			if (cur != null)
+				cuttingCurves.Remove(cur);
+			SideChanged();
+		}
+
 		public IEnumerable<ParametrizedPoint> GetPointsForSearch(int firstParamDiv, int secondParamDiv)
 		{
 			Real bigStep = Math.Utils.Pi * 2 / firstParamDiv;
@@ -232,20 +264,24 @@ namespace CadCat.GeometryModels
 		private bool[,] GetAvaiablePoints(int uDiv, int vDiv)
 		{
 			var pts = new bool[vDiv, uDiv];
+			bool val = eachOrAny || cuttingCurves.Count == 0;
 			for (int i = 0; i < uDiv; i++)
 			{
 				for (int j = 0; j < vDiv; j++)
-					pts[j, i] = true;
+					pts[j, i] = val;
 			}
-			if (cuttingCurves.Count > 0)
-				cuttingCurves[0].PointsContainedByCurve(pts, true, this, 0, FirstParamLimit, 0, SecondParamLimit);
+
+			foreach (var cuttingCurveWrapper in cuttingCurves)
+			{
+				cuttingCurveWrapper.curve.PointsContainedByCurve(pts, cuttingCurves[0].Side, this, 0, FirstParamLimit, 0, SecondParamLimit,eachOrAny);
+			}
 			return pts;
 		}
 
 		public void SetCuttingCurve(CuttingCurve curve)
 		{
 			modelReady = false;
-			cuttingCurves.Add(curve);
+			cuttingCurves.Add(new CuttingCurveWrapper(curve,this));
 		}
 	}
 }

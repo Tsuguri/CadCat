@@ -168,7 +168,7 @@ namespace CadCat.Math
 					point = new Vector4(pP.Value.X, pP.Value.Y, qP.Value.X, qP.Value.Y);
 
 				} while ((p.GetPosition(point.X, point.Y) - p.GetPosition(prevPoint.X, prevPoint.Y)).Length() > 0.0001 && i < 1000);
-				if (points.Count > 0 && (p.GetPosition(point.X, point.Y) - p.GetPosition(startPoint.X, startPoint.Y)).Length() <
+				if (points.Count > 3 && (p.GetPosition(point.X, point.Y) - p.GetPosition(startPoint.X, startPoint.Y)).Length() <
 					0.0001)
 					break;
 
@@ -199,8 +199,8 @@ namespace CadCat.Math
 			var distance = distanceFun(point);
 			double dist = distance;
 			Vector4 pt = point;
-			try
-			{
+			//try
+			//{
 
 				do
 				{
@@ -226,11 +226,11 @@ namespace CadCat.Math
 						return null;
 					pt = new Vector4(pPos.Value, qPos.Value);
 				} while (System.Math.Abs(distance - dist) > double.Epsilon);
-			}
-			catch (Exception)
-			{
-				return null;
-			}
+			//}
+			//catch (Exception e)
+			//{
+			//	return null;
+			//}
 
 			return pt;
 		}

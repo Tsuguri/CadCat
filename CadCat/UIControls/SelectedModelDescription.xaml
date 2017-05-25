@@ -30,6 +30,7 @@
                                 <RowDefinition Height="25"/>
                                 <RowDefinition Height="25"/>
                                 <RowDefinition Height="25"/>
+                                <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
                             <TextBlock Grid.Column="0" Grid.Row="0">R</TextBlock>
                             <control:NumericSlider Grid.Column="1" Grid.Row="0" Value="{Binding R}" IncrementMultiplier="0.1" />
@@ -39,6 +40,32 @@
                             <control:NumericSlider Grid.Column="1" Grid.Row="2" Value="{Binding RDensity}" />
                             <TextBlock Grid.Column="0" Grid.Row="3">rDensity</TextBlock>
                             <control:NumericSlider Grid.Column="1" Grid.Row="3" Value="{Binding rDensity}" />
+                            <TextBlock Grid.Column="0" Grid.Row="4">EachOrAny</TextBlock>
+                            <ToggleButton Grid.Column="1" Grid.Row="4" IsChecked="{Binding EachOrAny}"></ToggleButton>
+                            <ItemsControl Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding CuttingCurves}">
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style>
+                                        <Setter Property="FrameworkElement.DataContext" Value="{Binding RelativeSource={RelativeSource Self}}"/>
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="40"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <ToggleButton Grid.Column="0" IsChecked="{Binding Side}"></ToggleButton>
+                                            <TextBlock Grid.Column="1" Text="{Binding Name}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </Grid>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type models:Cube}">
@@ -173,6 +200,7 @@
                                     <RowDefinition Height="40" />
                                     <RowDefinition Height="40" />
                                     <RowDefinition Height="40" />
+                                    <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="60" />
@@ -192,13 +220,43 @@
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="40" />
+                                    <RowDefinition Height="40" />
+                                    <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <Button Command="{Binding BothDivUpCommand}">BothDivUp</Button>
-                                <Button Grid.Column="1" Command="{Binding BothDivDownCommand}">BothDivDown</Button>
+                                <Button Grid.Row="0" Grid.Column="1" Command="{Binding BothDivDownCommand}">BothDivDown</Button>
+                                <TextBlock Grid.Column="0" Grid.Row="1">EachOrAny</TextBlock>
+                                <ToggleButton Grid.Column="1" Grid.Row="1" IsChecked="{Binding EachOrAny}"></ToggleButton>
+                                <ItemsControl Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding CuttingCurves}">
+                                    <ItemsControl.ItemContainerStyle>
+                                        <Style>
+                                            <Setter Property="FrameworkElement.DataContext" Value="{Binding RelativeSource={RelativeSource Self}}"/>
+                                        </Style>
+                                    </ItemsControl.ItemContainerStyle>
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="40"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ToggleButton Grid.Column="0" IsChecked="{Binding Side}"></ToggleButton>
+                                                <TextBlock Grid.Column="1" Text="{Binding Name}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+
                             </Grid>
                         </StackPanel>
                     </DataTemplate>

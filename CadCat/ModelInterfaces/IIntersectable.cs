@@ -25,6 +25,9 @@ namespace CadCat.ModelInterfaces
 		Vector2? ConfirmParams(double u, double v);
 		Vector2 ClipParams(double u, double v);
 
+		void SideChanged();
+		void RemoveCurve(CuttingCurve curve);
+
 		IEnumerable<ParametrizedPoint> GetPointsForSearch(int firstParamDiv, int secondParamDiv);
 
 		void SetCuttingCurve(CuttingCurve curve);

@@ -95,6 +95,8 @@ namespace CadCat.GeometryModels
 			{
 				scene.RemovePoint(point);
 			}
+			P?.RemoveCurve(this);
+			Q?.RemoveCurve(this);
 		}
 
 		public override void Render(BaseRenderer renderer)
@@ -438,7 +440,7 @@ namespace CadCat.GeometryModels
 		private List<Vector2> poly;
 		private List<Tuple<Vector2, Vector2>> boundary;
 
-		public void PointsContainedByCurve(bool[,] pts, bool partA, IIntersectable sender, double uFrom, double uTo, double vFrom, double vTo)
+		public void PointsContainedByCurve(bool[,] pts, bool partA, IIntersectable sender, double uFrom, double uTo, double vFrom, double vTo, bool additive)
 		{
 			var uStep = (uTo - uFrom) / (pts.GetLength(1) - 1.0);
 			var vStep = (vTo - vFrom) / (pts.GetLength(0) - 1.0);
@@ -448,7 +450,7 @@ namespace CadCat.GeometryModels
 			for (int i = 0; i < pts.GetLength(1); i++)
 				for (int j = 0; j < pts.GetLength(0); j++)
 				{
-					if (pts[j, i])
+					if (pts[j, i] == additive)
 					{
 						pts[j, i] = PointBelongs(partA, sender, new Vector2(i * uStep + uFrom, j * vStep + vFrom));
 					}
