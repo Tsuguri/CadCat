@@ -57,47 +57,47 @@ namespace CadCat
 			image.SizeChanged += Image_SizeChanged;
 			resizeTimer = new DispatcherTimer { Interval = new TimeSpan(0, 0, 0, 0, 300) };
 
-			data.CreateBezierPatch();
-			var ptch = data.Models[0] as TempSurface;
+			//data.CreateBezierPatch();
+			//var ptch = data.Models[0] as TempSurface;
 			
-			if (ptch != null)
-			{
-				ptch.UDensity = 5;
-				ptch.VDensity = 10;
-				ptch.Width = 3;
-				ptch.Height = 5;
-				ptch.Type = SurfaceType.Bezier;
-				ptch.Convert(data);
+			//if (ptch != null)
+			//{
+			//	ptch.UDensity = 5;
+			//	ptch.VDensity = 10;
+			//	ptch.Width = 3;
+			//	ptch.Height = 5;
+			//	ptch.Type = SurfaceType.Bezier;
+			//	ptch.Convert(data);
 
-				Surface bspline = null;
-				foreach (var model in data.Models)
-				{
-					if (model is Surface)
-					{
-						bspline = model as Surface;
-						break;
-					}
-				}
+			//	Surface bspline = null;
+			//	foreach (var model in data.Models)
+			//	{
+			//		if (model is Surface)
+			//		{
+			//			bspline = model as Surface;
+			//			break;
+			//		}
+			//	}
 
-				if (bspline != null)
-				{
-					var max = bspline.SecondParamLimit;
-					var step = max / 30.0;
+			//	if (bspline != null)
+			//	{
+			//		var max = bspline.SecondParamLimit;
+			//		var step = max / 30.0;
 
-					for (int i = 0; i < 30; i++)
-					{
-						var p = bspline.GetPosition(0.1, i * step);
-						var tang = bspline.GetFirstParamDerivative(0, i * step);
-						var fir  = data.CreateCatPoint(p, false);
-						fir.IsSelected = true;
-						var sec = data.CreateCatPoint(p + tang, false);
-						sec.IsSelected = true;
-						data.CreateBezier();
-						fir.IsSelected = false;
-						sec.IsSelected = false;
-					}
-				}
-			}
+			//		for (int i = 0; i < 30; i++)
+			//		{
+			//			var p = bspline.GetPosition(0.1, i * step);
+			//			var tang = bspline.GetFirstParamDerivative(0, i * step);
+			//			var fir  = data.CreateCatPoint(p, false);
+			//			fir.IsSelected = true;
+			//			var sec = data.CreateCatPoint(p + tang, false);
+			//			sec.IsSelected = true;
+			//			data.CreateBezier();
+			//			fir.IsSelected = false;
+			//			sec.IsSelected = false;
+			//		}
+			//	}
+			//}
 
 			//data.LoadFromFile("C:\\Users\\Adam\\Desktop\\TwoBeziers.xml");
 			RunTimer();

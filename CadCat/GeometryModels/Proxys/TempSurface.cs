@@ -45,8 +45,6 @@ namespace CadCat.GeometryModels.Proxys
 		private Real curvatureAngle = 180.0;
 		private bool curved;
 
-		private double curvatureDisplacement = 0;
-
 		private SurfaceType type = SurfaceType.Bezier;
 
 

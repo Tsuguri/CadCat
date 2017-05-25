@@ -403,7 +403,7 @@ namespace CadCat.DataStructures
 				cycle = CreatePatchCycle(pts, patches);
 
 			}
-			catch (Exception e)
+			catch (Exception)
 			{
 				cycle = null;
 			}
@@ -874,6 +874,8 @@ namespace CadCat.DataStructures
 				//intersection.ForEach(x => CreateHiddenCatPoint(sel[0].GetPosition(x.X, x.Y)));
 				var curv = new CuttingCurve(intersection,sel[0], sel[1], this, cyclic, CuttingCurveApproximation);
 				AddNewModel(curv);
+				sel[0].SetCuttingCurve(curv);
+				sel[1].SetCuttingCurve(curv);
 			}
 			else
 			{
@@ -1095,7 +1097,7 @@ namespace CadCat.DataStructures
 			{
 				scene = p.DeserializeFromFile(filename);
 			}
-			catch (Exception e)
+			catch (Exception)
 			{
 				return;
 			}

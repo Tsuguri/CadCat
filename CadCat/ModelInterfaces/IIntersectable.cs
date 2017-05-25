@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CadCat.GeometryModels;
 using CadCat.Math;
 
 namespace CadCat.ModelInterfaces
@@ -29,6 +30,8 @@ namespace CadCat.ModelInterfaces
 		Vector2 ClipParams(double u, double v);
 
 		IEnumerable<ParametrizedPoint> GetPointsForSearch(int firstParamDiv, int secondParamDiv);
+
+		void SetCuttingCurve(CuttingCurve curve);
 
 	}
 }

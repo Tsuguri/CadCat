@@ -233,7 +233,7 @@ namespace CadCat.Math
 
 				} while (System.Math.Abs(distance - dist) > double.Epsilon);
 			}
-			catch (Exception e)
+			catch (Exception)
 			{
 				return null;
 			}

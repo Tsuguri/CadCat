@@ -128,7 +128,7 @@
     <Compile Include="Math\Vector3.cs" />
     <Compile Include="Math\Vector4.cs" />
     <Compile Include="ModelInterfaces\IConvertibleToPoints.cs" />
-    <Compile Include="ModelInterfaces\Intersectable.cs" />
+    <Compile Include="ModelInterfaces\IIntersectable.cs" />
     <Compile Include="ModelInterfaces\ITypeChangeable.cs" />
     <Compile Include="ModelInterfaces\Test.cs" />
     <Compile Include="Rendering\Camera.cs" />

@@ -13,7 +13,7 @@ namespace CadCat.GeometryModels
 {
 	class Surface : Model, IIntersectable
 	{
-
+		private readonly List<CuttingCurve> cuttingCurves = new List<CuttingCurve>();
 		private readonly List<Patch> patches;
 		private readonly List<CatPoint> catPoints;
 		private readonly SceneData scene;
@@ -296,6 +296,11 @@ namespace CadCat.GeometryModels
 					yield return new ParametrizedPoint { Parametrization = new Vector2(i * uDiv, j * vDiv), Position = GetPosition(i * uDiv, j * vDiv) };
 				}
 			}
+		}
+
+		public void SetCuttingCurve(CuttingCurve curve)
+		{
+			cuttingCurves.Add(curve);
 		}
 
 		#endregion

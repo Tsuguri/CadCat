@@ -11,7 +11,7 @@ namespace CadCat.GeometryModels
 		bool changed = false;
 
 		private List<Vector3> berensteinPoints;
-		private List<Vector3> renderPoints;
+		//private List<Vector3> renderPoints;
 		public BsplineInterpolator(IEnumerable<CatPoint> points, SceneData scene) : base(points, scene)
 		{
 			changed = true;
@@ -110,12 +110,6 @@ namespace CadCat.GeometryModels
 				berensteinPoints.Add(ptC);
 				berensteinPoints.Add(ptD);
 			}
-
-
-
-
-			int x = 0;
-
 		}
 
 		private void PowerToBerenStein(Vector3 a, Vector3 b, Vector3 c, Vector3 d, out Vector3 newA, out Vector3 newB, out Vector3 newC, out Vector3 newD)

@@ -37,7 +37,8 @@ namespace CadCat.GeometryModels
 		private List<Tuple<Vector2, Vector2>> qPolygonBoundary;
 		private List<Tuple<Vector2, Vector2>> pPolygonBoundary;
 
-		private bool[,] testSet;
+		private bool[,] PtestSet;
+		private bool[,] QtestSet;
 
 		public bool IsIntersectableQ { get; private set; }
 
@@ -91,12 +92,24 @@ namespace CadCat.GeometryModels
 
 			if (IsIntersectableP)
 			{
-				testSet = new bool[40, 40];
-				for (int i = 0; i < 40; i++)
-					for (int j = 0; j < 40; j++)
-						testSet[i, j] = true;
+				var size = 10;
+				PtestSet = new bool[size, size];
+				for (int i = 0; i < size; i++)
+					for (int j = 0; j < size; j++)
+						PtestSet[i, j] = true;
 
-				PointsContainedByCurve(testSet, true, P);
+				PointsContainedByCurve(PtestSet, true, P);
+			}
+
+			if (IsIntersectableQ)
+			{
+				var size = 10;
+				QtestSet = new bool[size, size];
+				for (int i = 0; i < size; i++)
+				for (int j = 0; j < size; j++)
+					QtestSet[i, j] = true;
+
+				PointsContainedByCurve(QtestSet, true, Q);
 			}
 
 		}
@@ -161,7 +174,7 @@ namespace CadCat.GeometryModels
 					for (int i = 0; i < pPolygon.Count - 1 + (cyclic ? 1 : 0); i++)
 					{
 						var item1 = pPolygon[i];
-						var item2 = pPolygon[(i + 1)%pPolygon.Count];
+						var item2 = pPolygon[(i + 1) % pPolygon.Count];
 						if (System.Math.Abs(item1.X - item2.X) < 0.1 && System.Math.Abs(item1.Y - item2.Y) < 0.1)
 							bitmap.DrawLineDDA((int)(item1.X / uParam * halfWidth), (int)(item1.Y / vParam * height), (int)(item2.X / uParam * halfWidth), (int)(item2.Y / vParam * height), Colors.Gray);
 
@@ -182,9 +195,9 @@ namespace CadCat.GeometryModels
 					for (int i = 0; i < qPolygon.Count - 1 + (cyclic ? 1 : 0); i++)
 					{
 						var item1 = qPolygon[i];
-						var item2 = qPolygon[(i + 1)%qPolygon.Count];
+						var item2 = qPolygon[(i + 1) % qPolygon.Count];
 						if (System.Math.Abs(item1.X - item2.X) < 0.1 && System.Math.Abs(item1.Y - item2.Y) < 0.1)
-							bitmap.DrawLineDDA((int)(item1.X / sParam * (halfWidth-3) + halfWidth), (int)(item1.Y / tParam * height), (int)(item2.X / sParam * (halfWidth - 3) + halfWidth), (int)(item2.Y / tParam * height), Colors.Gray);
+							bitmap.DrawLineDDA((int)(item1.X / sParam * (halfWidth - 3) + halfWidth), (int)(item1.Y / tParam * height), (int)(item2.X / sParam * (halfWidth - 3) + halfWidth), (int)(item2.Y / tParam * height), Colors.Gray);
 
 					}
 
@@ -199,6 +212,33 @@ namespace CadCat.GeometryModels
 
 
 				}
+
+				if (PtestSet != null)
+				{
+					var uStep = P.FirstParamLimit / (PtestSet.GetLength(1) - 1.0);
+					var vStep = P.SecondParamLimit / (PtestSet.GetLength(0) - 1.0);
+
+
+					for (int i = 0; i < PtestSet.GetLength(1); i++)
+						for (int j = 0; j < PtestSet.GetLength(0); j++)
+						{
+								bitmap.DrawEllipseCentered((int)(i * uStep / uParam * halfWidth), (int)(j * vStep / vParam * height), 1, 1, PtestSet[j,i] ? Colors.Green : Colors.Red);
+						}
+				}
+
+				if (QtestSet != null)
+				{
+					var uStep = Q.FirstParamLimit / (QtestSet.GetLength(1) - 1.0);
+					var vStep = Q.SecondParamLimit / (QtestSet.GetLength(0) - 1.0);
+
+
+					for (int i = 0; i < QtestSet.GetLength(1); i++)
+					for (int j = 0; j < QtestSet.GetLength(0); j++)
+					{
+						bitmap.DrawEllipseCentered((int)(i * uStep / uParam * halfWidth + halfWidth), (int)(j * vStep / vParam * height), 1, 1, QtestSet[j, i] ? Colors.Green : Colors.Red);
+					}
+				}
+
 			}
 
 		}
@@ -326,6 +366,8 @@ namespace CadCat.GeometryModels
 
 			#region Cyclic
 
+			var addEdges = new List<Tuple<Vector2, Vector2>>();
+
 			for (int i = 0; i < pts.Count; i++)
 			{
 				if ((pts[i] - pts[(i + 1) % pts.Count]).Length() > 0.1)
@@ -336,6 +378,10 @@ namespace CadCat.GeometryModels
 					{
 						var right = pt1.X > pt2.X;
 						var avgheigh = (pt1.Y + pt2.Y) / 2;
+
+						addEdges.Add(new Tuple<Vector2, Vector2>(new Vector2(-0.001, avgheigh),new Vector2(0.001, avgheigh) ));
+						addEdges.Add(new Tuple<Vector2, Vector2>(new Vector2(inters.FirstParamLimit - 0.001, avgheigh),new Vector2(inters.FirstParamLimit+0.001, avgheigh) ));
+
 
 						leftEdge.Add(new BoundaryIntersection { X = 0, Y = avgheigh, type = !right ? BoundaryIntersection.IntersectionType.Out : BoundaryIntersection.IntersectionType.In });
 						rightEdge.Add(new BoundaryIntersection { X = inters.FirstParamLimit, Y = avgheigh, type = right ? BoundaryIntersection.IntersectionType.Out : BoundaryIntersection.IntersectionType.In });
@@ -355,7 +401,7 @@ namespace CadCat.GeometryModels
 
 			if (boundaryIntersections.Count == 0 || (!inters.FirstParamLooped || !inters.SecondParamLooped))
 			{
-				var up = Cut(upperEdge.OrderBy(x => x.X), new Vector2(-0.001, -0.001), new Vector2(inters.FirstParamLimit + 0.001, -0.001)).ToList();
+				var up = Cut(upperEdge.OrderBy(x => x.X), new Vector2(-0.001, -0.001), new Vector2(inters.FirstParamLimit + 0.001, -0.001)).Concat(addEdges).ToList();
 				boundary = up;
 				return true;
 			}
@@ -384,7 +430,7 @@ namespace CadCat.GeometryModels
 				var tmp2 = x.Item2;
 				tmp2.Y -= 0.001;
 				return new Tuple<Vector2, Vector2>(tmp, tmp2);
-			}).ToList();
+			}).Concat(addEdges).ToList();
 
 			#endregion
 			return true;
@@ -415,11 +461,16 @@ namespace CadCat.GeometryModels
 			}
 		}
 
+		private List<Vector2> poly;
+		private List<Tuple<Vector2, Vector2>> boundary;
+
 		public void PointsContainedByCurve(bool[,] pts, bool partA, IIntersectable sender)
 		{
 			var uStep = sender.FirstParamLimit / (pts.GetLength(1) - 1.0);
 			var vStep = sender.SecondParamLimit / (pts.GetLength(0) - 1.0);
 
+			poly = sender == P ? pPolygon : qPolygon;
+			boundary = sender == P ? pPolygonBoundary : qPolygonBoundary;
 			for (int i = 0; i < pts.GetLength(1); i++)
 				for (int j = 0; j < pts.GetLength(0); j++)
 				{
@@ -432,8 +483,8 @@ namespace CadCat.GeometryModels
 
 		public bool PointBelongs(bool partA, IIntersectable sender, Vector2 point)
 		{
-			var poly = sender == P ? pPolygon : qPolygon;
-			var boundary = sender == P ? pPolygonBoundary : qPolygonBoundary;
+			
+
 			var lineTo = point;
 			lineTo.Y -= 2 * sender.SecondParamLimit;
 
