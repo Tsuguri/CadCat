@@ -12,7 +12,28 @@ namespace CadCat.Math
 			public int Corner;
 		}
 
-		public static Tuple<List<Vector2>, List<int>> MarchingAszklars(bool[,] ptsAvaiable, double uWidth, double vWidth, bool uCycled, bool vCycled)
+		private static int iterations = 5;
+		private static Vector2 FindPoint(Vector2 from, Vector2 to, Func<Vector2, bool> check)
+		{
+			var left = from;
+			var right = to;
+			var leftBelongs = check(left);
+			Vector2 last = left;
+			for (int i = 0; i < iterations; i++)
+			{
+				last = (left + right) * 0.5;
+				var afgBelongs = check(last);
+				if (leftBelongs == afgBelongs)
+				{
+					left = last;
+				}
+				else
+					right = last;
+			}
+			return last;
+		}
+
+		public static Tuple<List<Vector2>, List<int>> MarchingAszklars(bool[,] ptsAvaiable, double uWidth, double vWidth, bool uCycled, bool vCycled, Func<Vector2, bool> check)
 		{
 			var vertices = new List<Vector2>();
 			var indices = new List<int>();
@@ -44,13 +65,13 @@ namespace CadCat.Math
 					if (ptsAvaiable[j, i] != ptsAvaiable[j + 1, i])
 					{
 						vertAvai[j, i].Down = vertices.Count;
-						vertices.Add(new Vector2(i * uStep, (j + 0.5) * vStep));
+						vertices.Add(FindPoint(new Vector2(i * uStep, j * vStep), new Vector2(i * uStep, (j + 1) * vStep), check));
 					}
 
 					if (ptsAvaiable[j, i] != ptsAvaiable[j, i + 1])
 					{
 						vertAvai[j, i].Right = vertices.Count;
-						vertices.Add(new Vector2((i + 0.5) * uStep, j * vStep));
+						vertices.Add(FindPoint(new Vector2(i * uStep, j * vStep), new Vector2((i + 1) * uStep, j * vStep), check));
 					}
 				}
 
@@ -64,7 +85,7 @@ namespace CadCat.Math
 				if (ptsAvaiable[vDensity - 1, i] != ptsAvaiable[vDensity - 1, i + 1])
 				{
 					vertAvai[vDensity - 1, i].Right = vertices.Count;
-					vertices.Add(new Vector2((i + 0.5) * uStep, (vDensity - 1) * vStep));
+					vertices.Add(FindPoint(new Vector2(i * uStep, (vDensity - 1) * vStep), new Vector2((i + 1) * uStep, (vDensity - 1) * vStep), check));
 				}
 			}
 
@@ -79,7 +100,7 @@ namespace CadCat.Math
 				if (ptsAvaiable[i, uDensity - 1] != ptsAvaiable[i + 1, uDensity - 1])
 				{
 					vertAvai[i, uDensity - 1].Down = vertices.Count;
-					vertices.Add(new Vector2((uDensity - 1) * uStep, (i + 0.5) * vStep));
+					vertices.Add(FindPoint(new Vector2((uDensity - 1) * uStep, i * vStep), new Vector2((uDensity - 1) * uStep, (i + 1) * vStep), check));
 				}
 			}
 

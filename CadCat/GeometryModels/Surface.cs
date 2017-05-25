@@ -208,6 +208,15 @@ namespace CadCat.GeometryModels
 			return avaiable;
 		}
 
+		public bool IsPointAvaiable(int u, int v, Vector2 point)
+		{
+			point.X += u;
+			point.Y += v;
+			if (!eachOrAny)
+				return cuttingCurves.Any(x => x.curve.PointAvaiable(this, point, x.Side));
+			return cuttingCurves.All(x => x.curve.PointAvaiable(this, point, x.Side));
+		}
+
 		public Vector3 GetPosition(double firstParam, double secondParam)
 		{
 			int u = (int)System.Math.Floor(firstParam);

@@ -461,7 +461,8 @@ namespace CadCat.GeometryModels
 
 			if (pts[from, column] == pts[to, column])
 			{
-				for (int i = from; i < to; i++)
+
+				for (int i = from + 1; i < to; i++)
 					pts[i, column] = pts[from, column];
 			}
 			else
@@ -476,10 +477,8 @@ namespace CadCat.GeometryModels
 
 		}
 
-		private int counter;
 		public void PointsContainedByCurve(bool[,] pts, bool partA, IIntersectable sender, double uFrom, double uTo, double vFrom, double vTo, bool additive)
 		{
-			counter = 0;
 			var uStep = (uTo - uFrom) / (pts.GetLength(1) - 1.0);
 			var vStep = (vTo - vFrom) / (pts.GetLength(0) - 1.0);
 			poly = sender == P ? pPolygon : qPolygon;
@@ -510,8 +509,8 @@ namespace CadCat.GeometryModels
 			{
 				QtestSet = new bool[ptss.GetLength(0), ptss.GetLength(1)];
 				for (int i = 0; i < QtestSet.GetLength(0); i++)
-				for (int j = 0; j < QtestSet.GetLength(1); j++)
-					QtestSet[i, j] = ptss[i, j] % 2 == 0;
+					for (int j = 0; j < QtestSet.GetLength(1); j++)
+						QtestSet[i, j] = ptss[i, j] % 2 == 0;
 			}
 
 			if (additive)
@@ -530,67 +529,55 @@ namespace CadCat.GeometryModels
 						pts[j, i] = pts[j, i] || (ptss[j, i] % 2 == 0) == partA;
 					}
 			}
-			Console.WriteLine($"Should be: {pts.GetLength(1) * pts.GetLength(0)}, is: {counter}");
+		}
 
-			//for (int i = 0; i < pts.GetLength(1); i++)
-			//	for (int j = 0; j < pts.GetLength(0); j++)
-			//	{
-			//		if (pts[j, i] == additive)
-			//		{
-			//			pts[j, i] = PointBelongs(sender, new Vector2(i * uStep + uFrom, j * vStep + vFrom)) % 2 == 0;
-			//		}
-			//	}
+		public bool PointAvaiable(IIntersectable sender, Vector2 point, bool partA)
+		{
+			return (PointBelongs(sender, point) % 2 == 0) == partA;
 		}
 
 		public int PointBelongs(IIntersectable sender, Vector2 point)
 		{
-
 			counter++;
-			var lineTo = point;
-			lineTo.Y -= 2 * sender.SecondParamLimit;
-
-			int p = boundary?.Count(tuple => IntersectLines(tuple.Item1, tuple.Item2, point, lineTo)) ?? 0;
-
-			for (int i = 0; i < poly.Count - 1; i++)
+			int p = boundary?.Count(tuple => IntersectLines(tuple.Item1, tuple.Item2, point)) ?? 0;
+			Vector2 p1, p2;
+			int cnt = poly.Count - 1;
+			for (int i = 0; i < cnt; i++)
 			{
-				if ((poly[i] - poly[i + 1]).Length() < 0.1)
-					if (IntersectLines(poly[i], poly[i + 1], point, lineTo))
+				p1 = poly[i];
+				p2 = poly[i + 1];
+				if ((p1 - p2).Length() < 0.1)
+					if (IntersectLines(p1, p2, point))
 						p++;
 			}
-			if(cyclic)
-				if ((poly[poly.Count - 1] - poly[0]).Length() < 0.1)
+			if (cyclic)
+				if ((poly[cnt] - poly[0]).Length() < 0.1)
 				{
-					if (IntersectLines(poly[poly.Count - 1], poly[0], point, lineTo))
+					if (IntersectLines(poly[cnt], poly[0], point))
 						p++;
 				}
 
 			return p;
 		}
 
-		private bool IntersectLines(Vector2 firstFrom, Vector2 firstTo, Vector2 secondFrom, Vector2 secondTo)
+		private bool IntersectLines(Vector2 segment1, Vector2 segment2, Vector2 point)
 		{
-			var d1 = (secondTo - secondFrom).Cross(firstFrom - secondFrom);
-			var d2 = (secondTo - secondFrom).Cross(firstTo - secondFrom);
-			var d3 = (firstTo - firstFrom).Cross(secondFrom - firstFrom);
-			var d4 = (firstTo - firstFrom).Cross(secondTo - firstFrom);
-
-			var d12 = d1 * d2;
-			var d34 = d3 * d4;
-			if (d12 > 0 && d34 > 0)
+			if ((segment1.X - point.X) * (segment2.X - point.X) > 0)
 				return false;
-			if (d12 < 0 && d34 < 0)
-				return true;
 
-			return OnRectiange(firstFrom, secondFrom, secondTo) || OnRectiange(firstTo, secondFrom, secondTo)
-				   || OnRectiange(secondFrom, firstFrom, firstTo) || OnRectiange(secondTo, firstFrom, firstTo);
+			return segment1.Y + (segment2.Y - segment1.Y) * (point.X - segment1.X) / (segment2.X - segment1.X) < point.Y;
 		}
 
-		private bool OnRectiange(Vector2 q, Vector2 p1, Vector2 p2)
+		private static int counter = 0;
+		public static void ResetCounter()
 		{
-			return System.Math.Min(p1.X, p2.X) < q.X && q.X <= System.Math.Max(p1.X, p2.X)
-				   && System.Math.Min(p1.Y, p2.Y) < q.Y && q.Y <= System.Math.Max(p1.Y, p2.Y);
+			counter = 0;
 		}
 
+		public static void DrawResult(int shouldBe)
+		{
+			Console.WriteLine($"Should be {shouldBe}, is: {counter}.");
+		}
 		public bool IsIntersectable(IIntersectable sender)
 		{
 			if (sender == P)

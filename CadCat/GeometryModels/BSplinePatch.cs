@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows.Media;
@@ -167,7 +168,8 @@ namespace CadCat.GeometryModels
 		{
 			var avai = Surface.GetAvaiablePatch(UPos, VPos, WidthDiv, HeightDiv);
 
-			var aszk = SurfaceFilling.MarchingAszklars(avai, 1, 1, false, false);
+			Func<Vector2, bool> check = vector2 => Surface.IsPointAvaiable(UPos, VPos, vector2);
+			var aszk = SurfaceFilling.MarchingAszklars(avai, 1, 1, false, false, check);
 
 			meshIndices = aszk.Item2;
 			parametrizationPoints = aszk.Item1;

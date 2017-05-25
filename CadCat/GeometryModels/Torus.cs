@@ -119,11 +119,12 @@ namespace CadCat.GeometryModels
 
 		private void GenerateModel(Real bigRadius, Real smallRadius, int bigAngleDensity, int smallAngleDensity)
 		{
+			CuttingCurve.ResetCounter();
 			var ptsAvaiable = GetAvaiablePoints(bigAngleDensity, smallAngleDensity);
 
 
-			var tup = SurfaceFilling.MarchingAszklars(ptsAvaiable, FirstParamLimit, SecondParamLimit, true, true);
-
+			var tup = SurfaceFilling.MarchingAszklars(ptsAvaiable, FirstParamLimit, SecondParamLimit, true, true, PointAvaiable);
+			CuttingCurve.DrawResult(bigAngleDensity * smallAngleDensity);
 			this.indices = tup.Item2;
 			points = tup.Item1.Select(x => CalculatePoint(x.X, x.Y, bigRadius, smallRadius)).ToList();
 			modelReady = true;
@@ -274,9 +275,16 @@ namespace CadCat.GeometryModels
 
 			foreach (var cuttingCurveWrapper in cuttingCurves)
 			{
-				cuttingCurveWrapper.curve.PointsContainedByCurve(pts, cuttingCurves[0].Side, this, 0, FirstParamLimit, 0, SecondParamLimit, eachOrAny);
+				cuttingCurveWrapper.curve.PointsContainedByCurve(pts, cuttingCurveWrapper.Side, this, 0, FirstParamLimit, 0, SecondParamLimit, eachOrAny);
 			}
 			return pts;
+		}
+
+		private bool PointAvaiable(Vector2 point)
+		{
+			if (!eachOrAny)
+				return cuttingCurves.Any(x => x.curve.PointAvaiable(this, point, x.Side));
+			return cuttingCurves.All(x => x.curve.PointAvaiable(this, point, x.Side));
 		}
 
 		public void SetCuttingCurve(CuttingCurve curve)
