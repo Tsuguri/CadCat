@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using CadCat.DataStructures;
 using CadCat.Math;
@@ -11,15 +8,15 @@ using CadCat.Utilities;
 
 namespace CadCat.GeometryModels
 {
-	class Surface : Model, IIntersectable
+	public class Surface : Model, IIntersectable
 	{
 		private readonly List<CuttingCurve> cuttingCurves = new List<CuttingCurve>();
 		private readonly List<Patch> patches;
 		private readonly List<CatPoint> catPoints;
 		private readonly SceneData scene;
 
-		private bool uLooped;
-		private bool vLooped;
+		private readonly bool uLooped;
+		private readonly bool vLooped;
 		private bool showPolygon;
 		private bool showPoints;
 
@@ -76,8 +73,8 @@ namespace CadCat.GeometryModels
 				}
 			}
 		}
-		private Proxys.SurfaceType surfacetype;
-		public Proxys.SurfaceType SurfaceType => surfacetype;
+
+		public Proxys.SurfaceType SurfaceType { get; }
 
 		public IEnumerable<Patch> GetPatches()
 		{
@@ -103,18 +100,19 @@ namespace CadCat.GeometryModels
 
 		public Surface(Proxys.SurfaceType surfacetype, Patch[,] patches, List<CatPoint> catPoints, SceneData scene, bool uLooped, bool vLooped)
 		{
-			this.surfacetype = surfacetype;
+			SurfaceType = surfacetype;
 			this.patches = new List<Patch>();
 			this.uLooped = uLooped;
 			this.vLooped = vLooped;
 			foreach (var patch in patches)
 			{
 				this.patches.Add(patch);
+				patch.SetSurface(this);
 			}
 			this.catPoints = catPoints;
 			this.scene = scene;
-			this.PatchesU = patches.GetLength(1);
-			this.PatchesV = patches.GetLength(0);
+			PatchesU = patches.GetLength(1);
+			PatchesV = patches.GetLength(0);
 
 			this.catPoints.ForEach(x =>
 			{
@@ -122,7 +120,7 @@ namespace CadCat.GeometryModels
 				x.DependentUnremovable += 1;
 			});
 
-			this.orderedPatches = patches;
+			orderedPatches = patches;
 			ShowPoints = ShowPoints;
 		}
 
@@ -171,75 +169,87 @@ namespace CadCat.GeometryModels
 		public bool FirstParamLooped => false;
 		public bool SecondParamLooped => false;
 
+		public bool[,] GetAvaiablePatch(int u, int v, int uDiv, int vDiv)
+		{
+			var avaiable = new bool[vDiv, uDiv];
+			for (int i = 0; i < uDiv; i++)
+			{
+				for (int j = 0; j < vDiv; j++)
+					avaiable[j, i] = true;
+			}
+			if (cuttingCurves.Count > 0 && cuttingCurves[0].IsIntersectable(this))
+				cuttingCurves[0].PointsContainedByCurve(avaiable, true, this, u, u + 1, v, v + 1);
 
+			return avaiable;
+		}
 
 		public Vector3 GetPosition(double firstParam, double secondParam)
 		{
-			int U = (int)System.Math.Floor(firstParam);
-			int V = (int)System.Math.Floor(secondParam);
-			double uNormalized = firstParam - U;
-			double vNormalized = secondParam - V;
+			int u = (int)System.Math.Floor(firstParam);
+			int v = (int)System.Math.Floor(secondParam);
+			double uNormalized = firstParam - u;
+			double vNormalized = secondParam - v;
 
-			if (U == PatchesU && uNormalized < 0.005 || V == PatchesV && vNormalized < 0.005f)
+			if (u == PatchesU && uNormalized < 0.005 || v == PatchesV && vNormalized < 0.005f)
 			{
-				var newU = U == PatchesU ? U - 1 : U;
-				var newUnormalized = U == PatchesU ? 1.0f : uNormalized;
-				var newV = V == PatchesV ? V - 1 : V;
-				var newVNormalized = V == PatchesV ? 1.0f : vNormalized;
+				var newU = u == PatchesU ? u - 1 : u;
+				var newUnormalized = u == PatchesU ? 1.0f : uNormalized;
+				var newV = v == PatchesV ? v - 1 : v;
+				var newVNormalized = v == PatchesV ? 1.0f : vNormalized;
 				return orderedPatches[newV, newU].GetPoint(newUnormalized, newVNormalized);
 			}
 
-			if (U >= PatchesU || V >= PatchesV)
+			if (u >= PatchesU || v >= PatchesV)
 			{
 				throw new ArgumentException("Invalid argument, parametrization out of scope!");
 			}
-			return orderedPatches[V, U].GetPoint(uNormalized, vNormalized);
+			return orderedPatches[v, u].GetPoint(uNormalized, vNormalized);
 		}
 
 		public Vector3 GetFirstParamDerivative(double firstParam, double secondParam)
 		{
-			int U = (int)System.Math.Floor(firstParam);
-			int V = (int)System.Math.Floor(secondParam);
-			double uNormalized = firstParam - U;
-			double vNormalized = secondParam - V;
+			int u = (int)System.Math.Floor(firstParam);
+			int v = (int)System.Math.Floor(secondParam);
+			double uNormalized = firstParam - u;
+			double vNormalized = secondParam - v;
 
-			if (U == PatchesU && uNormalized < 0.0001 || V == PatchesV && vNormalized < 0.0001f)
+			if (u == PatchesU && uNormalized < 0.0001 || v == PatchesV && vNormalized < 0.0001f)
 			{
-				var newU = U == PatchesU ? U - 1 : U;
-				var newUnormalized = U == PatchesU ? 1.0f : uNormalized;
-				var newV = V == PatchesV ? V - 1 : V;
-				var newVNormalized = V == PatchesV ? 1.0f : vNormalized;
+				var newU = u == PatchesU ? u - 1 : u;
+				var newUnormalized = u == PatchesU ? 1.0f : uNormalized;
+				var newV = v == PatchesV ? v - 1 : v;
+				var newVNormalized = v == PatchesV ? 1.0f : vNormalized;
 				return orderedPatches[newU, newV].GetPoint(newUnormalized, newVNormalized);
 			}
 
-			if (U >= PatchesU || V >= PatchesV)
+			if (u >= PatchesU || v >= PatchesV)
 			{
 				throw new ArgumentException("Invalid argument, parametrization out of scope!");
 			}
-			return orderedPatches[V, U].GetUDerivative(uNormalized, vNormalized);
+			return orderedPatches[v, u].GetUDerivative(uNormalized, vNormalized);
 		}
 
 		public Vector3 GetSecondParamDerivative(double firstParam, double secondParam)
 		{
-			int U = (int)System.Math.Floor(firstParam);
-			int V = (int)System.Math.Floor(secondParam);
-			double uNormalized = firstParam - U;
-			double vNormalized = secondParam - V;
+			int u = (int)System.Math.Floor(firstParam);
+			int v = (int)System.Math.Floor(secondParam);
+			double uNormalized = firstParam - u;
+			double vNormalized = secondParam - v;
 
-			if (U == PatchesU && uNormalized < 0.0001 || V == PatchesV && vNormalized < 0.0001f)
+			if (u == PatchesU && uNormalized < 0.0001 || v == PatchesV && vNormalized < 0.0001f)
 			{
-				var newU = U == PatchesU ? U - 1 : U;
-				var newUnormalized = U == PatchesU ? 1.0f : uNormalized;
-				var newV = V == PatchesV ? V - 1 : V;
-				var newVNormalized = V == PatchesV ? 1.0f : vNormalized;
+				var newU = u == PatchesU ? u - 1 : u;
+				var newUnormalized = u == PatchesU ? 1.0f : uNormalized;
+				var newV = v == PatchesV ? v - 1 : v;
+				var newVNormalized = v == PatchesV ? 1.0f : vNormalized;
 				return orderedPatches[newU, newV].GetPoint(newUnormalized, newVNormalized);
 			}
 
-			if (U >= PatchesU || V >= PatchesV)
+			if (u >= PatchesU || v >= PatchesV)
 			{
 				throw new ArgumentException("Invalid argument, parametrization out of scope!");
 			}
-			return orderedPatches[V, U].GetVDerivative(uNormalized, vNormalized);
+			return orderedPatches[v, u].GetVDerivative(uNormalized, vNormalized);
 		}
 
 		public ParametrizedPoint GetClosestPointParams(Vector3 point)
@@ -301,6 +311,10 @@ namespace CadCat.GeometryModels
 		public void SetCuttingCurve(CuttingCurve curve)
 		{
 			cuttingCurves.Add(curve);
+			foreach (var orderedPatch in orderedPatches)
+			{
+				orderedPatch.ShouldRegenerate();
+			}
 		}
 
 		#endregion

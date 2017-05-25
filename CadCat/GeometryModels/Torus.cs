@@ -103,7 +103,7 @@ namespace CadCat.GeometryModels
 			var ptsAvaiable = GetAvaiablePoints(bigAngleDensity, smallAngleDensity);
 
 
-			var tup = SurfaceFilling.MarchingAszklars(ptsAvaiable, FirstParamLimit, SecondParamLimit);
+			var tup = SurfaceFilling.MarchingAszklars(ptsAvaiable, FirstParamLimit, SecondParamLimit, true, true);
 
 			this.indices = tup.Item2;
 			points = tup.Item1.Select(x => CalculatePoint(x.X, x.Y, bigRadius, smallRadius)).ToList();
@@ -237,30 +237,10 @@ namespace CadCat.GeometryModels
 				for (int j = 0; j < vDiv; j++)
 					pts[j, i] = true;
 			}
-			//var uStep = FirstParamLimit / (uDiv - 1);
-			//var vStep = SecondParamLimit / (vDiv - 1);
-
-
-			//for (int i = 0; i < uDiv; i++)
-			//	for (int j = 0; j < vDiv; j++)
-			//	{
-			//		pts[j, i] = CheckPoint(i * uStep, j * vStep);
-			//	}
-
-			//return pts;
 			if (cuttingCurves.Count > 0)
-				cuttingCurves[0].PointsContainedByCurve(pts, true, this);
+				cuttingCurves[0].PointsContainedByCurve(pts, true, this, 0, FirstParamLimit, 0, SecondParamLimit);
 			return pts;
 		}
-
-		private bool CheckPoint(double u, double v)
-		{
-			if (cuttingCurves.Count == 0)
-				return true;
-
-			return cuttingCurves[0].PointBelongs(false, this, new Vector2(u, v));
-		}
-
 
 		public void SetCuttingCurve(CuttingCurve curve)
 		{

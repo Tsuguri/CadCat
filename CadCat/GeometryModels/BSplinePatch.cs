@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media;
-using System.Windows.Navigation;
 using CadCat.DataStructures;
 using CadCat.Math;
 using CadCat.Rendering;
-using Microsoft.Win32;
 
 namespace CadCat.GeometryModels
 {
@@ -17,9 +12,10 @@ namespace CadCat.GeometryModels
 	{
 		private readonly CatPoint[] points = new CatPoint[16];
 		private readonly CatPoint[,] pointsOrdererd = new CatPoint[4, 4];
-		private readonly List<Vector3> mesh = new List<Vector3>();
+		private List<Vector2> parametrizationPoints;
+		private List<Vector3> mesh = new List<Vector3>();
 		private readonly List<Vector3> normals = new List<Vector3>();
-		private readonly List<int> meshIndices = new List<int>();
+		private List<int> meshIndices = new List<int>();
 		private readonly List<int> normalindices = new List<int>();
 		private readonly SceneData scene;
 
@@ -68,11 +64,12 @@ namespace CadCat.GeometryModels
 			for (int i = 0; i < 4; i++)
 				for (int j = 0; j < 4; j++)
 				{
-					var pt = scene.CreateHiddenCatPoint(new Math.Vector3(i, System.Math.Sin(Math.Utils.Pi * (i * 0.5 + j * 0.1) / 2.0), j));
+					var pt = scene.CreateHiddenCatPoint(new Vector3(i, System.Math.Sin(Utils.Pi * (i * 0.5 + j * 0.1) / 2.0), j));
 					points[i + j * 4] = pt;
 					pt.OnChanged += OnBezierPointChanged;
 				}
-			changed = true;
+			ParametrizationChanged = true;
+			Changed = true;
 			owner = true;
 		}
 
@@ -93,13 +90,14 @@ namespace CadCat.GeometryModels
 				{
 					pointsOrdererd[i, j] = pts[i, j];
 				}
-			changed = true;
+			ParametrizationChanged = true;
+			Changed = true;
 			owner = false;
 		}
 
 		private void OnBezierPointChanged(CatPoint point)
 		{
-			changed = true;
+			Changed = true;
 		}
 
 		private void OnBezierPointReplaced(CatPoint point, CatPoint newPoint)
@@ -110,7 +108,8 @@ namespace CadCat.GeometryModels
 				for (int i = 0; i < points.Length; i++)
 					if (points[i] == point)
 						points[i] = newPoint;
-				changed = true;
+				ParametrizationChanged = true;
+				Changed = true;
 				point.OnChanged -= OnBezierPointChanged;
 				newPoint.OnChanged += OnBezierPointChanged;
 				newPoint.OnReplace += OnBezierPointReplaced;
@@ -122,12 +121,13 @@ namespace CadCat.GeometryModels
 
 		public override void Render(BaseRenderer renderer)
 		{
-
-			if (changed)
+			if (ParametrizationChanged)
+				RecalculateParametrizationPoints();
+			if (Changed)
 				RecalculatePoints();
 			base.Render(renderer);
 
-			renderer.ModelMatrix = GetMatrix(false, new Math.Vector3());
+			renderer.ModelMatrix = GetMatrix(false, new Vector3());
 			renderer.SelectedColor = IsSelected ? Colors.LimeGreen : Colors.White;
 			renderer.UseIndices = true;
 
@@ -158,59 +158,30 @@ namespace CadCat.GeometryModels
 
 		private void RecalculatePoints()
 		{
-			mesh.Clear();
-			mesh.Capacity = System.Math.Max(mesh.Capacity, (WidthDiv + 1) * (HeightDiv + 1));
-			normals.Clear();
-			normals.Capacity = System.Math.Max(normals.Capacity, (WidthDiv + 1) * (HeightDiv + 1) * 2);
-			meshIndices.Clear();
-			normalindices.Clear();
-			double widthStep = 1.0 / WidthDiv;
-			double heightStep = 1.0 / HeightDiv;
-			int widthPoints = WidthDiv + 1;
-			int heightPoints = HeightDiv + 1;
+			mesh = parametrizationPoints.Select(x => GetPoint(x.X, x.Y)).ToList();
+			Changed = false;
 
-			for (int i = 0; i < widthPoints; i++)
-				for (int j = 0; j < heightPoints; j++)
-				{
-					var pt = EvaluatePointValue(i * widthStep, j * heightStep);
-					var normal = Vector3.CrossProduct(EvaluateUDerivative(i * widthStep, j * heightStep),
-						EvaluateVDerivative(i * widthStep, j * heightStep));
-					mesh.Insert(i * heightPoints + j, pt);
-					normals.Insert((i * heightPoints + j) * 2, pt);
-					normals.Insert((i * heightPoints + j) * 2 + 1, pt + normal);
-					normalindices.Add((i * heightPoints + j) * 2);
-					normalindices.Add((i * heightPoints + j) * 2 + 1);
-				}
-
-			for (int i = 0; i < widthPoints - 1; i++)
-				for (int j = 0; j < heightPoints - 1; j++)
-				{
-					meshIndices.Add(i * heightPoints + j);
-					meshIndices.Add(i * heightPoints + j + 1);
-					meshIndices.Add(i * heightPoints + j);
-					meshIndices.Add((i + 1) * heightPoints + j);
-				}
-			for (int i = 0; i < widthPoints - 1; i++)
-			{
-				meshIndices.Add(heightPoints * (i + 1) - 1);
-				meshIndices.Add(heightPoints * (i + 2) - 1);
-			}
-			for (int j = 0; j < heightPoints - 1; j++)
-			{
-				meshIndices.Add((widthPoints - 1) * heightPoints + j);
-				meshIndices.Add((widthPoints - 1) * heightPoints + j + 1);
-			}
-			changed = false;
 		}
 
-		private static double[,] temp = new double[2, 4];
-		private static Matrix4 tempMtx;
+		private void RecalculateParametrizationPoints()
+		{
+			var avai = Surface.GetAvaiablePatch(UPos, VPos, WidthDiv, HeightDiv);
+
+			var aszk = SurfaceFilling.MarchingAszklars(avai, 1, 1, false, false);
+
+			meshIndices = aszk.Item2;
+			parametrizationPoints = aszk.Item1;
+			ParametrizationChanged = false;
+			Changed = true;
+		}
+
+		private static Matrix4 _tempMtx;
 		private Vector3 EvaluatePointValue(double u, double v)
 		{
 
 			var uVal = EvaluateBSpline(u, 3);
 			var vVal = EvaluateBSpline(v, 3);
-			tempMtx = uVal.MatrixMultiply(vVal);
+			_tempMtx = uVal.MatrixMultiply(vVal);
 
 
 			return Sum();
@@ -222,7 +193,7 @@ namespace CadCat.GeometryModels
 			for (int i = 0; i < 4; i++)
 				for (int j = 0; j < 4; j++)
 				{
-					sum += pointsOrdererd[j, i].Position * tempMtx[i, j];
+					sum += pointsOrdererd[j, i].Position * _tempMtx[i, j];
 				}
 
 			return sum;
@@ -232,13 +203,13 @@ namespace CadCat.GeometryModels
 		{
 			var uVal = EvaluateBSpline(u, 2);// wyniki w xyz
 			var vVal = EvaluateBSpline(v, 3);
-			tempMtx = uVal.MatrixMultiply(vVal);
+			_tempMtx = uVal.MatrixMultiply(vVal);
 
 			var sum = new Vector3();
 			for (int i = 0; i < 3; i++)
 				for (int j = 0; j < 4; j++)
 				{
-					sum += (pointsOrdererd[j, i + 1].Position - pointsOrdererd[j, i].Position) * tempMtx[i, j];
+					sum += (pointsOrdererd[j, i + 1].Position - pointsOrdererd[j, i].Position) * _tempMtx[i, j];
 				}
 
 			return sum * 1;
@@ -248,13 +219,13 @@ namespace CadCat.GeometryModels
 		{
 			var uVal = EvaluateBSpline(u, 3);
 			var vVal = EvaluateBSpline(v, 2);// wyniki w xyz
-			tempMtx = uVal.MatrixMultiply(vVal);
+			_tempMtx = uVal.MatrixMultiply(vVal);
 
 			var sum = new Vector3();
 			for (int i = 0; i < 4; i++)
 				for (int j = 0; j < 3; j++)
 				{
-					sum += (pointsOrdererd[j + 1, i].Position - pointsOrdererd[j, i].Position) * tempMtx[i, j];
+					sum += (pointsOrdererd[j + 1, i].Position - pointsOrdererd[j, i].Position) * _tempMtx[i, j];
 				}
 
 			return sum * 1;
@@ -262,21 +233,21 @@ namespace CadCat.GeometryModels
 
 		private Vector4 EvaluateBSpline(double t, int degree)
 		{
-			var N = new Vector4 { [0] = 1.0 };
+			var n = new Vector4 { [0] = 1.0 };
 			double tm = 1.0 - t;
 			for (int j = 1; j <= degree; j++)
 			{
 				double saved = 0.0;
 				for (int k = 1; k <= j; k++)
 				{
-					double term = N[k - 1] / ((tm + k - 1.0) + (t + j - k));
-					N[k - 1] = saved + (tm + k - 1.0) * term;
+					double term = n[k - 1] / ((tm + k - 1.0) + (t + j - k));
+					n[k - 1] = saved + (tm + k - 1.0) * term;
 					saved = (t + j - k) * term;
 				}
-				N[j] = saved;
+				n[j] = saved;
 			}
 
-			return N;
+			return n;
 		}
 
 		public override void CleanUp()

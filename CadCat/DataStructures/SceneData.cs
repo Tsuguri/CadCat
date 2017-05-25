@@ -107,7 +107,7 @@ namespace CadCat.DataStructures
 			}
 			set
 			{
-				if ( System.Math.Abs(cuttingCurveApproximation - value) > double.Epsilon && value >= 0.01 && value < 0.4)
+				if (System.Math.Abs(cuttingCurveApproximation - value) > double.Epsilon && value >= 0.01 && value < 0.4)
 				{
 					cuttingCurveApproximation = value;
 					OnPropertyChanged();
@@ -293,7 +293,7 @@ namespace CadCat.DataStructures
 
 
 		public ICommand DrawIntersection => drawIntersection ??
-		                                            (drawIntersection = new CommandHandler(DrawIntersectionInWindow));
+													(drawIntersection = new CommandHandler(DrawIntersectionInWindow));
 		#endregion
 
 		#region CreatingModels
@@ -863,19 +863,37 @@ namespace CadCat.DataStructures
 
 		private void IntersectSurfaces()
 		{
-			var selected = models.Where(x => x.IsSelected).ToList();
-
-			var sel = selected.Select(x => x as IIntersectable).Distinct().ToList();
+			List<Vector4> intersection = null;
+			IIntersectable first = null;
+			IIntersectable second = null;
 			bool cyclic = false;
-			var intersection = sel.Count != 2 ? null : Intersection.Intersect(sel[0], sel[1], this,NewtonStep, out cyclic);
+			try
+			{
 
-			if (intersection != null && intersection.Count>2)
+				var selected = models.Where(x => x.IsSelected).ToList();
+				var sel = selected.Select(x => x as IIntersectable).Distinct().ToList();
+				if (sel.Count == 2)
+				{
+					first = sel[0];
+					second = sel[1];
+					if (first != null && second != null)
+						intersection = Intersection.Intersect(sel[0], sel[1], this, NewtonStep, out cyclic);
+
+				}
+
+			}
+			catch (Exception)
+			{
+				intersection = null;
+			}
+
+			if (intersection != null && intersection.Count > 2)
 			{
 				//intersection.ForEach(x => CreateHiddenCatPoint(sel[0].GetPosition(x.X, x.Y)));
-				var curv = new CuttingCurve(intersection,sel[0], sel[1], this, cyclic, CuttingCurveApproximation);
+				var curv = new CuttingCurve(intersection, first, second, this, cyclic, CuttingCurveApproximation);
 				AddNewModel(curv);
-				sel[0].SetCuttingCurve(curv);
-				sel[1].SetCuttingCurve(curv);
+				first.SetCuttingCurve(curv);
+				second.SetCuttingCurve(curv);
 			}
 			else
 			{

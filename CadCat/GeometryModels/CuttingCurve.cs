@@ -353,8 +353,8 @@ namespace CadCat.GeometryModels
 						var right = pt1.X > pt2.X;
 						var avgheigh = (pt1.Y + pt2.Y) / 2;
 
-						addEdges.Add(new Tuple<Vector2, Vector2>(new Vector2(-0.001, avgheigh),new Vector2(0.001, avgheigh) ));
-						addEdges.Add(new Tuple<Vector2, Vector2>(new Vector2(inters.FirstParamLimit - 0.001, avgheigh),new Vector2(inters.FirstParamLimit+0.001, avgheigh) ));
+						addEdges.Add(new Tuple<Vector2, Vector2>(new Vector2(-0.001, avgheigh), new Vector2(0.001, avgheigh)));
+						addEdges.Add(new Tuple<Vector2, Vector2>(new Vector2(inters.FirstParamLimit - 0.001, avgheigh), new Vector2(inters.FirstParamLimit + 0.001, avgheigh)));
 
 
 						leftEdge.Add(new BoundaryIntersection { X = 0, Y = avgheigh, type = !right ? BoundaryIntersection.IntersectionType.Out : BoundaryIntersection.IntersectionType.In });
@@ -438,10 +438,10 @@ namespace CadCat.GeometryModels
 		private List<Vector2> poly;
 		private List<Tuple<Vector2, Vector2>> boundary;
 
-		public void PointsContainedByCurve(bool[,] pts, bool partA, IIntersectable sender)
+		public void PointsContainedByCurve(bool[,] pts, bool partA, IIntersectable sender, double uFrom, double uTo, double vFrom, double vTo)
 		{
-			var uStep = sender.FirstParamLimit / (pts.GetLength(1) - 1.0);
-			var vStep = sender.SecondParamLimit / (pts.GetLength(0) - 1.0);
+			var uStep = (uTo - uFrom) / (pts.GetLength(1) - 1.0);
+			var vStep = (vTo - vFrom) / (pts.GetLength(0) - 1.0);
 
 			poly = sender == P ? pPolygon : qPolygon;
 			boundary = sender == P ? pPolygonBoundary : qPolygonBoundary;
@@ -450,14 +450,14 @@ namespace CadCat.GeometryModels
 				{
 					if (pts[j, i])
 					{
-						pts[j, i] = PointBelongs(partA, sender, new Vector2(i * uStep, j * vStep));
+						pts[j, i] = PointBelongs(partA, sender, new Vector2(i * uStep + uFrom, j * vStep + vFrom));
 					}
 				}
 		}
 
 		public bool PointBelongs(bool partA, IIntersectable sender, Vector2 point)
 		{
-			
+
 
 			var lineTo = point;
 			lineTo.Y -= 2 * sender.SecondParamLimit;

@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CadCat.Math;
-using Xceed.Wpf.Toolkit.PropertyGrid.Editors;
+﻿using CadCat.Math;
 using CadCat.DataStructures;
 
 namespace CadCat.GeometryModels
 {
 	public abstract class Patch : Model
 	{
-		protected bool changed;
-		private bool showPolygon = false;
+		protected bool ParametrizationChanged;
+		protected bool Changed;
+		private bool showPolygon;
+
+		protected Surface Surface;
 
 		public bool ShowPolygon
 		{
@@ -25,7 +22,7 @@ namespace CadCat.GeometryModels
 		}
 
 
-		private bool showNormal = false;
+		private bool showNormal;
 
 		public bool ShowNormal
 		{
@@ -42,6 +39,15 @@ namespace CadCat.GeometryModels
 		private int widthDiv = 3;
 
 
+		public void SetSurface(Surface surf)
+		{
+			Surface = surf;
+		}
+		public void ShouldRegenerate()
+		{
+			ParametrizationChanged = true;
+		}
+
 		public int UPos { get; set; }
 		public int VPos { get; set; }
 
@@ -53,7 +59,8 @@ namespace CadCat.GeometryModels
 				if (widthDiv != value && value > 0)
 				{
 					widthDiv = value;
-					changed = true;
+					ParametrizationChanged = true;
+					Changed = true;
 					OnPropertyChanged();
 				}
 			}
@@ -67,7 +74,8 @@ namespace CadCat.GeometryModels
 				if (heightDiv != value && value > 0)
 				{
 					heightDiv = value;
-					changed = true;
+					Changed = true;
+					ParametrizationChanged = true;
 					OnPropertyChanged();
 				}
 			}

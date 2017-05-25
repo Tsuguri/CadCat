@@ -67,7 +67,7 @@ namespace CadCat.GeometryModels
 					points[i * 4 + j] = pt;
 					pt.OnChanged += OnBezierPointChanged;
 				}
-			changed = true;
+			Changed = true;
 			owner = true;
 		}
 
@@ -84,13 +84,13 @@ namespace CadCat.GeometryModels
 					pts[i, j].OnChanged += OnBezierPointChanged;
 					pts[i, j].OnReplace += OnBezierPointReplaced;
 				}
-			changed = true;
+			Changed = true;
 			owner = false;
 		}
 
 		private void OnBezierPointChanged(CatPoint point)
 		{
-			changed = true;
+			Changed = true;
 		}
 
 		private void OnBezierPointReplaced(CatPoint point, CatPoint newPoint)
@@ -98,7 +98,7 @@ namespace CadCat.GeometryModels
 			for (int i = 0; i < points.Length; i++)
 				if (points[i] == point)
 					points[i] = newPoint;
-			changed = true;
+			Changed = true;
 			point.OnChanged -= OnBezierPointChanged;
 			if (owner)
 				point.DependentUnremovable -= 1;
@@ -112,7 +112,7 @@ namespace CadCat.GeometryModels
 		public override void Render(BaseRenderer renderer)
 		{
 
-			if (changed)
+			if (Changed)
 				RecalculatePoints();
 			base.Render(renderer);
 
@@ -171,7 +171,7 @@ namespace CadCat.GeometryModels
 				meshIndices.Add((widthPoints - 1) * heightPoints + j);
 				meshIndices.Add((widthPoints - 1) * heightPoints + j + 1);
 			}
-			changed = false;
+			Changed = false;
 		}
 
 		private static double[,] temp = new double[2, 4];
