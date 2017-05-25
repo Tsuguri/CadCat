@@ -557,6 +557,13 @@ namespace CadCat.GeometryModels
 					if (IntersectLines(poly[i], poly[i + 1], point, lineTo))
 						p++;
 			}
+			if(cyclic)
+				if ((poly[poly.Count - 1] - poly[0]).Length() < 0.1)
+				{
+					if (IntersectLines(poly[poly.Count - 1], poly[0], point, lineTo))
+						p++;
+				}
+
 			return p;
 		}
 
