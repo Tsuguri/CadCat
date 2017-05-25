@@ -37,9 +37,6 @@ namespace CadCat.GeometryModels
 		private List<Tuple<Vector2, Vector2>> qPolygonBoundary;
 		private List<Tuple<Vector2, Vector2>> pPolygonBoundary;
 
-		private bool[,] PtestSet;
-		private bool[,] QtestSet;
-
 		public bool IsIntersectableQ { get; private set; }
 
 		public ICommand ConvertToInterpolation => convertToInterpolationCurve ?? (convertToInterpolationCurve = new CommandHandler(Convert));
@@ -89,29 +86,6 @@ namespace CadCat.GeometryModels
 
 			IsIntersectableP = CalculatePolygon(true, out pPolygon, out pPolygonBoundary);
 			IsIntersectableQ = CalculatePolygon(false, out qPolygon, out qPolygonBoundary);
-
-			if (IsIntersectableP)
-			{
-				var size = 10;
-				PtestSet = new bool[size, size];
-				for (int i = 0; i < size; i++)
-					for (int j = 0; j < size; j++)
-						PtestSet[i, j] = true;
-
-				PointsContainedByCurve(PtestSet, true, P);
-			}
-
-			if (IsIntersectableQ)
-			{
-				var size = 10;
-				QtestSet = new bool[size, size];
-				for (int i = 0; i < size; i++)
-				for (int j = 0; j < size; j++)
-					QtestSet[i, j] = true;
-
-				PointsContainedByCurve(QtestSet, true, Q);
-			}
-
 		}
 
 		public override void CleanUp()
@@ -213,31 +187,31 @@ namespace CadCat.GeometryModels
 
 				}
 
-				if (PtestSet != null)
-				{
-					var uStep = P.FirstParamLimit / (PtestSet.GetLength(1) - 1.0);
-					var vStep = P.SecondParamLimit / (PtestSet.GetLength(0) - 1.0);
+				//if (PtestSet != null)
+				//{
+				//	var uStep = P.FirstParamLimit / (PtestSet.GetLength(1) - 1.0);
+				//	var vStep = P.SecondParamLimit / (PtestSet.GetLength(0) - 1.0);
 
 
-					for (int i = 0; i < PtestSet.GetLength(1); i++)
-						for (int j = 0; j < PtestSet.GetLength(0); j++)
-						{
-								bitmap.DrawEllipseCentered((int)(i * uStep / uParam * halfWidth), (int)(j * vStep / vParam * height), 1, 1, PtestSet[j,i] ? Colors.Green : Colors.Red);
-						}
-				}
+				//	for (int i = 0; i < PtestSet.GetLength(1); i++)
+				//		for (int j = 0; j < PtestSet.GetLength(0); j++)
+				//		{
+				//				bitmap.DrawEllipseCentered((int)(i * uStep / uParam * halfWidth), (int)(j * vStep / vParam * height), 1, 1, PtestSet[j,i] ? Colors.Green : Colors.Red);
+				//		}
+				//}
 
-				if (QtestSet != null)
-				{
-					var uStep = Q.FirstParamLimit / (QtestSet.GetLength(1) - 1.0);
-					var vStep = Q.SecondParamLimit / (QtestSet.GetLength(0) - 1.0);
+				//if (QtestSet != null)
+				//{
+				//	var uStep = Q.FirstParamLimit / (QtestSet.GetLength(1) - 1.0);
+				//	var vStep = Q.SecondParamLimit / (QtestSet.GetLength(0) - 1.0);
 
 
-					for (int i = 0; i < QtestSet.GetLength(1); i++)
-					for (int j = 0; j < QtestSet.GetLength(0); j++)
-					{
-						bitmap.DrawEllipseCentered((int)(i * uStep / uParam * halfWidth + halfWidth), (int)(j * vStep / vParam * height), 1, 1, QtestSet[j, i] ? Colors.Green : Colors.Red);
-					}
-				}
+				//	for (int i = 0; i < QtestSet.GetLength(1); i++)
+				//	for (int j = 0; j < QtestSet.GetLength(0); j++)
+				//	{
+				//		bitmap.DrawEllipseCentered((int)(i * uStep / uParam * halfWidth + halfWidth), (int)(j * vStep / vParam * height), 1, 1, QtestSet[j, i] ? Colors.Green : Colors.Red);
+				//	}
+				//}
 
 			}
 
@@ -524,6 +498,15 @@ namespace CadCat.GeometryModels
 		{
 			return System.Math.Min(p1.X, p2.X) < q.X && q.X <= System.Math.Max(p1.X, p2.X)
 				   && System.Math.Min(p1.Y, p2.Y) < q.Y && q.Y <= System.Math.Max(p1.Y, p2.Y);
+		}
+
+		public bool IsIntersectable(IIntersectable sender)
+		{
+			if (sender == P)
+				return IsIntersectableP;
+			if (sender == Q)
+				return IsIntersectableQ;
+			return false;
 		}
 
 	}

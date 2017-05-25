@@ -16,8 +16,6 @@ namespace CadCat.GeometryModels
 		private List<CuttingCurve> cuttingCurves = new List<CuttingCurve>();
 		private List<int> indices;
 		private List<Math.Vector3> points;
-		private readonly List<Vector3> normalMesh = new List<Vector3>();
-		private readonly List<int> normalIndices = new List<int>();
 
 		private bool modelReady;
 
@@ -25,22 +23,6 @@ namespace CadCat.GeometryModels
 		private Real smallRadius = 1.0;
 		private int bigAngleDensity = 16;
 		private int smallAngleDensity = 16;
-
-		private bool drawNormals;
-
-		public bool DrawNormals
-		{
-			get
-			{
-				return drawNormals;
-
-			}
-			set
-			{
-				drawNormals = value;
-				OnPropertyChanged();
-			}
-		}
 
 		public Real R
 		{
@@ -111,247 +93,20 @@ namespace CadCat.GeometryModels
 		}
 
 
-		//protected override void PositionChanged()
-		//{
-		//	base.PositionChanged();
-		//	modelReady = false;
-		//}
-
 		public Torus()
 		{
 		}
 
-		struct QuadData
-		{
-			public int down;
-			public int right;
-			public int corner;
-		}
 
 		private void GenerateModel(Real bigRadius, Real smallRadius, int bigAngleDensity, int smallAngleDensity)
 		{
-			normalIndices.Clear();
-			normalMesh.Clear();
-			Real bigStep = Math.Utils.Pi * 2 / (bigAngleDensity - 1);
-			Real smallStep = Math.Utils.Pi * 2 / (smallAngleDensity - 1);
-			points = new List<Math.Vector3>(bigAngleDensity * smallAngleDensity);
-
 			var ptsAvaiable = GetAvaiablePoints(bigAngleDensity, smallAngleDensity);
 
-			var vertices = new List<Vector2>();
-			var vertAvai = new QuadData[smallAngleDensity, bigAngleDensity];
 
-			{
-				var vert = new QuadData() { corner = -1, down = -1, right = -1 };
-				for (int i = 0; i < smallAngleDensity; i++)
-					for (int j = 0; j < bigAngleDensity; j++)
-						vertAvai[i, j] = vert;
-			}
+			var tup = SurfaceFilling.MarchingAszklars(ptsAvaiable, FirstParamLimit, SecondParamLimit);
 
-			for (int i = 0; i < bigAngleDensity - 1; i++)
-				for (int j = 0; j < smallAngleDensity - 1; j++)
-				{
-					if (ptsAvaiable[j, i])
-					{
-						vertAvai[j, i].corner = vertices.Count;
-						vertices.Add(new Vector2(i * bigStep, j * smallStep));
-
-					}
-
-					if (ptsAvaiable[j, i] != ptsAvaiable[j + 1, i])
-					{
-						vertAvai[j, i].down = vertices.Count;
-						vertices.Add(new Vector2(i * bigStep, (j + 0.5) * smallStep));
-					}
-
-					if (ptsAvaiable[j, i] != ptsAvaiable[j, i + 1])
-					{
-						vertAvai[j, i].right = vertices.Count;
-						vertices.Add(new Vector2((i + 0.5) * bigStep, j * smallStep));
-					}
-				}
-
-			for (int i = 0; i < bigAngleDensity - 1; i++)
-			{
-				if (ptsAvaiable[smallAngleDensity - 1, i])
-				{
-					vertAvai[smallAngleDensity - 1, i].corner = vertices.Count;
-					vertices.Add(new Vector2(i * bigStep, (smallAngleDensity - 1) * smallStep));
-				}
-				if (ptsAvaiable[smallAngleDensity - 1, i] != ptsAvaiable[smallAngleDensity - 1, i + 1])
-				{
-					vertAvai[smallAngleDensity - 1, i].right = vertices.Count;
-					vertices.Add(new Vector2((i + 0.5) * bigStep, (smallAngleDensity - 1) * smallStep));
-				}
-			}
-
-			for (int i = 0; i < smallAngleDensity - 1; i++)
-			{
-				if (ptsAvaiable[i, bigAngleDensity - 1])
-				{
-					vertAvai[i, bigAngleDensity - 1].corner = vertices.Count;
-					vertices.Add(new Vector2((bigAngleDensity - 1) * bigStep, i * smallStep));
-				}
-
-				if (ptsAvaiable[i, bigAngleDensity - 1] != ptsAvaiable[i + 1, bigAngleDensity - 1])
-				{
-					vertAvai[i, bigAngleDensity - 1].down = vertices.Count;
-					vertices.Add(new Vector2((bigAngleDensity - 1) * bigStep, (i + 0.5) * smallStep));
-				}
-			}
-
-			points = vertices.Select(x => CalculatePoint(x.X, x.Y, bigRadius, smallRadius)).ToList();
-
-			indices = new List<int>(bigAngleDensity * smallAngleDensity * 2);
-
-			for (int i = 0; i < bigAngleDensity - 1; i++)
-				for (int j = 0; j < smallAngleDensity - 1; j++)
-				{
-					var lu = ptsAvaiable[j, i];
-					var ru = ptsAvaiable[j, i + 1];
-					var ld = ptsAvaiable[j + 1, i];
-					var rd = ptsAvaiable[j + 1, i + 1];
-
-
-					if (lu && ld)
-					{
-						indices.Add(vertAvai[j, i].corner);
-						indices.Add(vertAvai[j + 1, i].corner);
-					}
-
-					if (lu && ru)
-					{
-						indices.Add(vertAvai[j, i].corner);
-						indices.Add(vertAvai[j, i + 1].corner);
-					}
-
-					if (lu && !ld)
-					{
-						indices.Add(vertAvai[j, i].corner);
-						indices.Add(vertAvai[j, i].down);
-					}
-					if (!lu && ld)
-					{
-						indices.Add(vertAvai[j, i].down);
-						indices.Add(vertAvai[j + 1, i].corner);
-					}
-
-					if (lu && !ru)
-					{
-						indices.Add(vertAvai[j, i].corner);
-						indices.Add(vertAvai[j, i].right);
-					}
-
-					if (!lu && ru)
-					{
-						indices.Add(vertAvai[j, i].right);
-						indices.Add(vertAvai[j, i + 1].corner);
-					}
-
-					if (lu != ru && ru == ld)
-					{
-						indices.Add(vertAvai[j, i].right);
-						indices.Add(vertAvai[j, i].down);
-					}
-
-					if (lu == rd && lu != ld)
-					{
-						indices.Add(vertAvai[j, i].down);
-						indices.Add(vertAvai[j + 1, i].right);
-					}
-
-					if (ru != lu && lu == rd)
-					{
-						indices.Add(vertAvai[j, i].right);
-						indices.Add(vertAvai[j, i + 1].down);
-					}
-
-					if (ld == ru && ld != rd)
-					{
-						indices.Add(vertAvai[j, i + 1].down);
-						indices.Add(vertAvai[j + 1, i].right);
-					}
-
-					if (lu == ld && ru == rd && lu != ru)
-					{
-						indices.Add(vertAvai[j, i].right);
-						indices.Add(vertAvai[j + 1, i].right);
-					}
-
-					if (lu == ru && ld == rd && lu != ld)
-					{
-						indices.Add(vertAvai[j, i].down);
-						indices.Add(vertAvai[j, i + 1].down);
-					}
-
-					int pa = 0;
-				}
-
-			int z = 0;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-			//for (int i = 0; i < bigAngleDensity; i++)
-			//{
-			//	Real bigAngle = bigStep * i;
-			//	for (int j = 0; j < smallAngleDensity; j++)
-			//	{
-			//		Real smallAngle = j * smallStep;
-			//		var pt = CalculatePoint(bigAngle, smallAngle, bigRadius, smallRadius);
-			//		points.Insert(i * smallAngleDensity + j, pt);
-
-			//		var normal = Vector3.CrossProduct(UDeriv(bigAngle, smallAngle), VDeriv(bigAngle, smallAngle)).Normalized();
-			//		normalMesh.Add(pt);
-			//		normalMesh.Add(pt + normal);
-			//		normalIndices.Add((i * smallAngleDensity + j) * 2);
-			//		normalIndices.Add((i * smallAngleDensity + j) * 2 + 1);
-			//	}
-			//}
-			//for (int i = 0; i < bigAngleDensity; i++)
-			//{
-			//	int circleStart = i * smallAngleDensity;
-			//	for (int j = 0; j < smallAngleDensity - 1; j++)
-			//	{
-			//		if (ptsAvaiable[j, i] && ptsAvaiable[j + 1, i])
-			//		{
-			//			indices.Add(circleStart + j);
-			//			indices.Add(circleStart + j + 1);
-			//		}
-
-			//	}
-			//	if (ptsAvaiable[0, i] && ptsAvaiable[ptsAvaiable.GetLength(0) - 1, i])
-			//	{
-			//		indices.Add(circleStart + smallAngleDensity - 1);
-			//		indices.Add(circleStart);
-			//	}
-			//}
-
-			//int vertexCount = points.Count;
-			//for (int i = 0; i < bigAngleDensity; i++)
-			//{
-			//	int circleStart = i * smallAngleDensity;
-			//	for (int j = 0; j < smallAngleDensity; j++)
-			//	{
-			//		if (ptsAvaiable[j, i] && ptsAvaiable[j, (i + 1) % bigAngleDensity])
-			//		{
-			//			indices.Add(circleStart + j);
-			//			indices.Add((circleStart + j + smallAngleDensity) % vertexCount);
-			//		}
-			//	}
-			//}
+			this.indices = tup.Item2;
+			points = tup.Item1.Select(x => CalculatePoint(x.X, x.Y, bigRadius, smallRadius)).ToList();
 			modelReady = true;
 		}
 
@@ -384,14 +139,6 @@ namespace CadCat.GeometryModels
 			renderer.UseIndices = true;
 
 			renderer.ModelMatrix = Transform.CreateTransformMatrix();
-
-			if (DrawNormals)
-			{
-				renderer.Points = normalMesh;
-				renderer.Indices = normalIndices;
-				renderer.Transform();
-				renderer.DrawLines();
-			}
 			renderer.Points = points;
 			renderer.Indices = indices;
 			renderer.Transform();

@@ -116,6 +116,7 @@
     <Compile Include="GeometryModels\Proxys\TempSurface.cs" />
     <Compile Include="Math\Intersection.cs" />
     <Compile Include="Math\Plane.cs" />
+    <Compile Include="Math\SurfaceFilling.cs" />
     <Compile Include="ModelInterfaces\IChangeablePointCount.cs" />
     <Compile Include="GeometryModels\Model.cs" />
     <Compile Include="DataStructures\SpatialData\Transform.cs" />
