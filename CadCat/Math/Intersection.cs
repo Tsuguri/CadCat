@@ -199,8 +199,8 @@ namespace CadCat.Math
 			var distance = distanceFun(point);
 			double dist = distance;
 			Vector4 pt = point;
-			//try
-			//{
+			try
+			{
 
 				do
 				{
@@ -226,11 +226,11 @@ namespace CadCat.Math
 						return null;
 					pt = new Vector4(pPos.Value, qPos.Value);
 				} while (System.Math.Abs(distance - dist) > double.Epsilon);
-			//}
-			//catch (Exception e)
-			//{
-			//	return null;
-			//}
+			}
+			catch (Exception e)
+			{
+				return null;
+			}
 
 			return pt;
 		}

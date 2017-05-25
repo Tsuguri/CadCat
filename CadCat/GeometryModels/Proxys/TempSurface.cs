@@ -425,7 +425,7 @@ namespace CadCat.GeometryModels.Proxys
 					scene.CreateCatPoint((matrix * new Vector4(pts[pts.GetLength(0) - 1, 0] * 2 - pts[pts.GetLength(0) - 2, 1]))
 						.ClipToVector3());
 			}
-			else // TODO: fix curved
+			else
 			{
 				int curvePoints = widthPoints - (IsCylinder ? 3 : 0);
 				Real angleStep = CurvatureAngle / curvePoints;

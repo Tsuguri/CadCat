@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Windows.Media;
 using CadCat.Math;
 using CadCat.ModelInterfaces;
 using CadCat.Rendering;
@@ -155,7 +156,7 @@ namespace CadCat.GeometryModels
 			modelMat = Transform.CreateTransformMatrix();
 			normalMat = modelMat.Inversed().Transposed();
 			renderer.UseIndices = true;
-
+			renderer.SelectedColor = IsSelected ? Colors.LimeGreen : Colors.White;
 			renderer.ModelMatrix = Transform.CreateTransformMatrix();
 			renderer.Points = points;
 			renderer.Indices = indices;
