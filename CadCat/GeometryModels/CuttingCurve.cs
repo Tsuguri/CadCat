@@ -36,7 +36,7 @@ namespace CadCat.GeometryModels
 		private List<Vector2> pPolygon;
 		private List<Tuple<Vector2, Vector2>> qPolygonBoundary;
 		private List<Tuple<Vector2, Vector2>> pPolygonBoundary;
-
+		private bool[,] PtestSet;
 		public bool IsIntersectableQ { get; private set; }
 
 		public ICommand ConvertToInterpolation => convertToInterpolationCurve ?? (convertToInterpolationCurve = new CommandHandler(Convert));
@@ -189,18 +189,18 @@ namespace CadCat.GeometryModels
 
 				}
 
-				//if (PtestSet != null)
-				//{
-				//	var uStep = P.FirstParamLimit / (PtestSet.GetLength(1) - 1.0);
-				//	var vStep = P.SecondParamLimit / (PtestSet.GetLength(0) - 1.0);
+				if (PtestSet != null)
+				{
+					var uStep = P.FirstParamLimit / (PtestSet.GetLength(1) - 1.0);
+					var vStep = P.SecondParamLimit / (PtestSet.GetLength(0) - 1.0);
 
 
-				//	for (int i = 0; i < PtestSet.GetLength(1); i++)
-				//		for (int j = 0; j < PtestSet.GetLength(0); j++)
-				//		{
-				//				bitmap.DrawEllipseCentered((int)(i * uStep / uParam * halfWidth), (int)(j * vStep / vParam * height), 1, 1, PtestSet[j,i] ? Colors.Green : Colors.Red);
-				//		}
-				//}
+					for (int i = 0; i < PtestSet.GetLength(1); i++)
+						for (int j = 0; j < PtestSet.GetLength(0); j++)
+						{
+							bitmap.DrawEllipseCentered((int)(i * uStep / uParam * halfWidth), (int)(j * vStep / vParam * height), 1, 1, PtestSet[j, i] ? Colors.Green : Colors.Red);
+						}
+				}
 
 				//if (QtestSet != null)
 				//{
@@ -440,27 +440,105 @@ namespace CadCat.GeometryModels
 		private List<Vector2> poly;
 		private List<Tuple<Vector2, Vector2>> boundary;
 
-		public void PointsContainedByCurve(bool[,] pts, bool partA, IIntersectable sender, double uFrom, double uTo, double vFrom, double vTo, bool additive)
-		{
-			var uStep = (uTo - uFrom) / (pts.GetLength(1) - 1.0);
-			var vStep = (vTo - vFrom) / (pts.GetLength(0) - 1.0);
 
-			poly = sender == P ? pPolygon : qPolygon;
-			boundary = sender == P ? pPolygonBoundary : qPolygonBoundary;
-			for (int i = 0; i < pts.GetLength(1); i++)
-				for (int j = 0; j < pts.GetLength(0); j++)
-				{
-					if (pts[j, i] == additive)
-					{
-						pts[j, i] = PointBelongs(partA, sender, new Vector2(i * uStep + uFrom, j * vStep + vFrom));
-					}
-				}
+		private void CheckColumn(int[,] pts, IIntersectable sender, double u, int column, int from, int to, double vStep, double vFrom)
+		{
+			//pts[j, i] = PointBelongs(partA, sender, new Vector2(i * uStep + uFrom, j * vStep + vFrom));
+			if (pts[from, column] == -1)
+			{
+				pts[from, column] = PointBelongs(sender, new Vector2(u, from * vStep + vFrom));
+			}
+			if (pts[to, column] == -1)
+			{
+				pts[to, column] = PointBelongs(sender, new Vector2(u, to * vStep + vFrom));
+
+			}
+
+			if (from == to || from + 1 == to)
+				return;
+
+
+			if (pts[from, column] == pts[to, column])
+			{
+				for (int i = from; i < to; i++)
+					pts[i, column] = pts[from, column];
+			}
+			else
+			{
+				var newPt = (from + to) / 2;
+
+				CheckColumn(pts, sender, u, column, from, newPt, vStep, vFrom);
+				CheckColumn(pts, sender, u, column, newPt, to, vStep, vFrom);
+			}
+
+
+
 		}
 
-		public bool PointBelongs(bool partA, IIntersectable sender, Vector2 point)
+		private int counter;
+		public void PointsContainedByCurve(bool[,] pts, bool partA, IIntersectable sender, double uFrom, double uTo, double vFrom, double vTo, bool additive)
+		{
+			counter = 0;
+			var uStep = (uTo - uFrom) / (pts.GetLength(1) - 1.0);
+			var vStep = (vTo - vFrom) / (pts.GetLength(0) - 1.0);
+			poly = sender == P ? pPolygon : qPolygon;
+			boundary = sender == P ? pPolygonBoundary : qPolygonBoundary;
+
+
+			var ptss = new int[pts.GetLength(0), pts.GetLength(1)];
+			for (int i = 0; i < ptss.GetLength(1); i++)
+				for (int j = 0; j < ptss.GetLength(0); j++)
+				{
+					ptss[j, i] = -1;
+				}
+
+			for (int i = 0; i < ptss.GetLength(1); i++)
+			{
+				CheckColumn(ptss, sender, i * uStep + uFrom, i, 0, ptss.GetLength(0) - 1, vStep, vFrom);
+			}
+
+			if (sender == P)
+			{
+				PtestSet = new bool[ptss.GetLength(0), ptss.GetLength(1)];
+				for (int i = 0; i < PtestSet.GetLength(0); i++)
+					for (int j = 0; j < PtestSet.GetLength(1); j++)
+						PtestSet[i, j] = ptss[i, j] % 2 == 0;
+			}
+
+
+
+			if (additive)
+			{
+				for (int i = 0; i < pts.GetLength(1); i++)
+					for (int j = 0; j < pts.GetLength(0); j++)
+					{
+						pts[j, i] = pts[j, i] && (ptss[j, i] % 2 == 0) == partA;
+					}
+			}
+			else
+			{
+				for (int i = 0; i < pts.GetLength(1); i++)
+					for (int j = 0; j < pts.GetLength(0); j++)
+					{
+						pts[j, i] = pts[j, i] || (ptss[j, i] % 2 == 0) == partA;
+					}
+			}
+			Console.WriteLine($"Should be: {pts.GetLength(1) * pts.GetLength(0)}, is: {counter}");
+
+			//for (int i = 0; i < pts.GetLength(1); i++)
+			//	for (int j = 0; j < pts.GetLength(0); j++)
+			//	{
+			//		if (pts[j, i] == additive)
+			//		{
+			//			pts[j, i] = PointBelongs(sender, new Vector2(i * uStep + uFrom, j * vStep + vFrom)) % 2 == 0;
+			//		}
+			//	}
+		}
+
+		public int PointBelongs(IIntersectable sender, Vector2 point)
 		{
 
-
+			counter++;
 			var lineTo = point;
 			lineTo.Y -= 2 * sender.SecondParamLimit;
 
@@ -472,10 +550,7 @@ namespace CadCat.GeometryModels
 					if (IntersectLines(poly[i], poly[i + 1], point, lineTo))
 						p++;
 			}
-
-			if (p % 2 == 0)
-				return partA;
-			return !partA;
+			return p;
 		}
 
 		private bool IntersectLines(Vector2 firstFrom, Vector2 firstTo, Vector2 secondFrom, Vector2 secondTo)
