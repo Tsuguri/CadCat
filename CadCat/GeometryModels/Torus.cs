@@ -273,15 +273,18 @@ namespace CadCat.GeometryModels
 
 			foreach (var cuttingCurveWrapper in cuttingCurves)
 			{
-				cuttingCurveWrapper.curve.PointsContainedByCurve(pts, cuttingCurves[0].Side, this, 0, FirstParamLimit, 0, SecondParamLimit,eachOrAny);
+				cuttingCurveWrapper.curve.PointsContainedByCurve(pts, cuttingCurves[0].Side, this, 0, FirstParamLimit, 0, SecondParamLimit, eachOrAny);
 			}
 			return pts;
 		}
 
 		public void SetCuttingCurve(CuttingCurve curve)
 		{
-			modelReady = false;
-			cuttingCurves.Add(new CuttingCurveWrapper(curve,this));
+			if (curve.IsIntersectable(this))
+			{
+				cuttingCurves.Add(new CuttingCurveWrapper(curve, this));
+				modelReady = false;
+			}
 		}
 	}
 }

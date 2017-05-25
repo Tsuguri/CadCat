@@ -482,7 +482,7 @@ namespace CadCat.GeometryModels.Proxys
 
 		private void ConvertToNurbs(SceneData scene)
 		{
-			throw new NotImplementedException();
+			//throw new NotImplementedException();
 		}
 
 		public void Convert(SceneData scene)
