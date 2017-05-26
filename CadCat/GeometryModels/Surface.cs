@@ -300,6 +300,8 @@ namespace CadCat.GeometryModels
 
 		public Vector2? ConfirmParams(double u, double v)
 		{
+			
+
 			if ((u < 0.0 || u > PatchesU) && !uLooped)
 				return null;
 			if ((v < 0.0 || v > PatchesV) && !vLooped)

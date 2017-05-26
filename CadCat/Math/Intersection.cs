@@ -16,8 +16,9 @@ namespace CadCat.Math
 			double d = newtonStep;
 			cycleIntersection = false;
 			//_data = scene;
-			var pPoints = P.GetPointsForSearch(8, 8).ToList();
-			var qPoints = Q.GetPointsForSearch(8, 8).ToList();
+			int number = 32;
+			var pPoints = P.GetPointsForSearch(number, number).ToList();
+			var qPoints = Q.GetPointsForSearch(number, number).ToList();
 
 			var closestDistance = double.MaxValue;
 			var pPoint = new ParametrizedPoint();
@@ -74,7 +75,7 @@ namespace CadCat.Math
 				return new Vector4(Vector3.DotProduct(diff, du), Vector3.DotProduct(diff, dv), -Vector3.DotProduct(diff, ds), -Vector3.DotProduct(diff, dt)) * 2.0;
 			};
 
-			var startPoint = SimpleGradient(distanceFun, distanceGradient, pPoint, qPoint, P, Q);
+			var startPoint = SimpleGradient(scene,distanceFun, distanceGradient, pPoint, qPoint, P, Q);
 
 
 			if (startPoint == null)
@@ -195,7 +196,7 @@ namespace CadCat.Math
 			return points;
 		}
 
-		private static Vector4? SimpleGradient(Func<Vector4, double> distanceFun, Func<Vector4, Vector4> grad,
+		private static Vector4? SimpleGradient(SceneData scene,Func<Vector4, double> distanceFun, Func<Vector4, Vector4> grad,
 			ParametrizedPoint pPoint, ParametrizedPoint qPoint, IIntersectable p, IIntersectable q)
 		{
 			double alpha = 0.01;
@@ -227,6 +228,8 @@ namespace CadCat.Math
 						i++;
 
 					} while (dist > distance && i < 200);
+					//scene.CreateHiddenCatPoint(p.GetPosition(pt.X, pt.Y));
+					//scene.CreateHiddenCatPoint(q.GetPosition(pt.Z, pt.W));
 
 					var pPos = p.ConfirmParams(pt.X, pt.Y);
 					var qPos = q.ConfirmParams(pt.Z, pt.W);
