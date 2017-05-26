@@ -882,7 +882,7 @@ namespace CadCat.DataStructures
 				}
 
 			}
-			catch (Exception)
+			catch (Exception e)
 			{
 				intersection = null;
 			}
@@ -1247,8 +1247,8 @@ namespace CadCat.DataStructures
 
 				for (int i = 0; i < 3; i++)
 					if (ptches[0, 0].GetCatPoint(0, i) != ptches[bezierSurfaceC2.PatchesV - 1, 0].GetCatPoint(0, i + 1)
-							|| ptches[0, 0].GetCatPoint(1, i) != ptches[bezierSurfaceC2.PatchesV - 1, 0].GetCatPoint(2, i + 1)
-							|| ptches[0, 0].GetCatPoint(2, i) != ptches[bezierSurfaceC2.PatchesV - 1, 0].GetCatPoint(3, i + 1))
+							|| ptches[0, 0].GetCatPoint(0, i) != ptches[bezierSurfaceC2.PatchesV - 1, 0].GetCatPoint(0, i + 1)
+							|| ptches[0, 0].GetCatPoint(0, i) != ptches[bezierSurfaceC2.PatchesV - 1, 0].GetCatPoint(0, i + 1))
 					{
 						loopedV = false;
 						break;
@@ -1257,7 +1257,7 @@ namespace CadCat.DataStructures
 				if (loopedV)
 					for (int i = 0; i < ptches.GetLength(1); i++)
 					{
-						if (ptches[0, 1].GetCatPoint(3, 0) != ptches[bezierSurfaceC2.PatchesV - 1, i].GetCatPoint(3, 1)
+						if (ptches[0, i].GetCatPoint(3, 0) != ptches[bezierSurfaceC2.PatchesV - 1, i].GetCatPoint(3, 1)
 							|| ptches[0, i].GetCatPoint(3, 1) != ptches[bezierSurfaceC2.PatchesV - 1, i].GetCatPoint(3, 2)
 							|| ptches[0, i].GetCatPoint(3, 2) != ptches[bezierSurfaceC2.PatchesV - 1, i].GetCatPoint(3, 3))
 						{
@@ -1265,6 +1265,8 @@ namespace CadCat.DataStructures
 							break;
 						}
 					}
+                if (loopedU == loopedV)
+                    Console.WriteLine($"Surf: {bezierSurfaceC2.Name}");
 
 				var surfacePoints = patches.SelectMany(x => x.EnumerateCatPoints()).Distinct().ToList();
 				var surface = new Surface(SurfaceType.BSpline, ptches, surfacePoints, this, loopedU, loopedV)

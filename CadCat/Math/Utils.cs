@@ -56,4 +56,9 @@ namespace CadCat.Math
 			return x.ToList();
 		}
 	}
+
+	class Consts
+	{
+		public static double Eps = 0.000001;
+	}
 }

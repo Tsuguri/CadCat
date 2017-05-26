@@ -74,14 +74,13 @@ namespace CadCat.Math
 				return new Vector4(Vector3.DotProduct(diff, du), Vector3.DotProduct(diff, dv), -Vector3.DotProduct(diff, ds), -Vector3.DotProduct(diff, dt)) * 2.0;
 			};
 
-
 			var startPoint = SimpleGradient(distanceFun, distanceGradient, pPoint, qPoint, P, Q);
 
 
 			if (startPoint == null)
 				return null;
 
-			//scene.CreateHiddenCatPoint(P.GetPosition(startPoint.X, startPoint.Y));
+			//scene.CreateHiddenCatPoint(P.GetPosition(startPoint.Value.X, startPoint.Value.Y));
 
 			Func<Vector4, bool, Tuple<Matrix4, Vector3>> jacobian = (arg, invert) =>
 			  {
@@ -129,13 +128,13 @@ namespace CadCat.Math
 			bool cyclic;
 			var pts = Newton(P, Q, startPoint.Value, function, jacobian, false, d, out cyclic);
 
-			if (pts.Count < 2)
-				return null;
 			cycleIntersection = cyclic;
 			if (cyclic) return pts;
 			var pts2 = Newton(P, Q, startPoint.Value, function, jacobian, true, d, out cyclic);
 			pts.Reverse();
 			pts.AddRange(pts2);
+			if (pts.Count < 2)
+				return null;
 			return pts;
 		}
 
@@ -155,7 +154,6 @@ namespace CadCat.Math
 					prevPoint = point;
 					var jacob = jacobian(point, inverse);
 					var funRes = function(point, p.GetPosition(startPoint.X, startPoint.Y), jacob.Item2);
-
 					var nextP = point - jacob.Item1.Inversed() * funRes;
 					var pP = p.ConfirmParams(nextP.X, nextP.Y);
 					var qP = q.ConfirmParams(nextP.Z, nextP.W);
@@ -168,16 +166,25 @@ namespace CadCat.Math
 					point = new Vector4(pP.Value.X, pP.Value.Y, qP.Value.X, qP.Value.Y);
 
 				} while ((p.GetPosition(point.X, point.Y) - p.GetPosition(prevPoint.X, prevPoint.Y)).Length() > 0.0001 && i < 1000);
-				if (points.Count > 3 && (p.GetPosition(point.X, point.Y) - p.GetPosition(startPoint.X, startPoint.Y)).Length() <
-					0.0001)
+
+				var newP = p.GetPosition(point.X, point.Y);
+				var lastP = p.GetPosition(startPoint.X, startPoint.Y);
+
+				if (points.Count > 3 && (newP - lastP).Length() < 0.0001)
 					break;
 
-				if (points.Count > 2 && (p.GetPosition(point.X, point.Y) - p.GetPosition(points[0].X, points[0].Y)).Length() < step)
+				if (points.Count > 2)
 				{
-					points.Add(point);
 
-					cyclic = true;
-					break;
+					var start = p.GetPosition(points[0].X, points[0].Y);
+
+					if (points.Count > 2 && (newP - start).Length() < step)
+					{
+						points.Add(point);
+
+						cyclic = true;
+						break;
+					}
 				}
 				startPoint = point;
 				points.Add(startPoint);
@@ -199,6 +206,7 @@ namespace CadCat.Math
 			var distance = distanceFun(point);
 			double dist = distance;
 			Vector4 pt = point;
+			int z = 0;
 			try
 			{
 
@@ -225,12 +233,16 @@ namespace CadCat.Math
 					if (qPos == null || pPos == null)
 						return null;
 					pt = new Vector4(pPos.Value, qPos.Value);
-				} while (System.Math.Abs(distance - dist) > double.Epsilon);
+					z++;
+				} while (System.Math.Abs(distance - dist) > Consts.Eps * Consts.Eps);
 			}
 			catch (Exception e)
 			{
 				return null;
 			}
+
+			if (distanceFun(pt) > Consts.Eps * 100)
+				return null;
 
 			return pt;
 		}

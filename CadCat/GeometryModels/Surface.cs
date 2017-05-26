@@ -219,12 +219,18 @@ namespace CadCat.GeometryModels
 
 		public Vector3 GetPosition(double firstParam, double secondParam)
 		{
-			int u = (int)System.Math.Floor(firstParam);
-			int v = (int)System.Math.Floor(secondParam);
-			double uNormalized = firstParam - u;
-			double vNormalized = secondParam - v;
 
-			if (u == PatchesU && uNormalized < 0.005 || v == PatchesV && vNormalized < 0.005f)
+
+			var prs = ConfirmParams(firstParam, secondParam);
+			if (prs == null)
+				throw new ArgumentException("given parameters exceeds surface bounds");
+
+			int u = (int)System.Math.Floor(prs.Value.X);
+			int v = (int)System.Math.Floor(prs.Value.Y);
+			double uNormalized = prs.Value.X - u;
+			double vNormalized = prs.Value.Y - v;
+
+			if (u == PatchesU && uNormalized < 0.01 || v == PatchesV && vNormalized < 0.01)
 			{
 				var newU = u == PatchesU ? u - 1 : u;
 				var newUnormalized = u == PatchesU ? 1.0f : uNormalized;
@@ -237,6 +243,7 @@ namespace CadCat.GeometryModels
 			{
 				throw new ArgumentException("Invalid argument, parametrization out of scope!");
 			}
+
 			return orderedPatches[v, u].GetPoint(uNormalized, vNormalized);
 		}
 
@@ -253,7 +260,7 @@ namespace CadCat.GeometryModels
 				var newUnormalized = u == PatchesU ? 1.0f : uNormalized;
 				var newV = v == PatchesV ? v - 1 : v;
 				var newVNormalized = v == PatchesV ? 1.0f : vNormalized;
-				return orderedPatches[newU, newV].GetPoint(newUnormalized, newVNormalized);
+				return orderedPatches[newU, newV].GetUDerivative(newUnormalized, newVNormalized);
 			}
 
 			if (u >= PatchesU || v >= PatchesV)
@@ -276,7 +283,7 @@ namespace CadCat.GeometryModels
 				var newUnormalized = u == PatchesU ? 1.0f : uNormalized;
 				var newV = v == PatchesV ? v - 1 : v;
 				var newVNormalized = v == PatchesV ? 1.0f : vNormalized;
-				return orderedPatches[newU, newV].GetPoint(newUnormalized, newVNormalized);
+				return orderedPatches[newU, newV].GetVDerivative(newUnormalized, newVNormalized);
 			}
 
 			if (u >= PatchesU || v >= PatchesV)
