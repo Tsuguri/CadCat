@@ -368,25 +368,8 @@ namespace CadCat.GeometryModels
 				return true;
 			}
 
-
-
-			return false;
-
-			#region Cyclic
-
-
-
-
+			//torus
 			var boundaryIntersections = upperEdge.OrderBy(x => x.X).Concat(rightEdge.OrderBy(x => x.Y)).Concat(lowerEdge.OrderByDescending(x => x.X)).Concat(leftEdge.OrderByDescending(x => x.Y)).ToList();
-
-			if (boundaryIntersections.Count == 0 || (!inters.FirstParamLooped || !inters.SecondParamLooped))
-			{
-				var up = Cut(upperEdge.OrderBy(x => x.X), new Vector2(-0.001, -0.001), new Vector2(inters.FirstParamLimit + 0.001, -0.001)).Concat(addEdges).ToList();
-				boundary = up;
-				return true;
-			}
-
-			//check dla dwucykliczności
 
 			if (boundaryIntersections.Count == 2)
 			{
@@ -402,19 +385,8 @@ namespace CadCat.GeometryModels
 				lastIntersection = boundaryIntersection.type;
 			}
 
-			boundary = Cut(upperEdge.OrderBy(x => x.X), new Vector2(-0.001, 0), new Vector2(inters.FirstParamLimit + 0.001, 0)).ToList();
-			boundary = boundary.Select(x =>
-			{
-				var tmp = x.Item1;
-				tmp.Y -= 0.001;
-				var tmp2 = x.Item2;
-				tmp2.Y -= 0.001;
-				return new Tuple<Vector2, Vector2>(tmp, tmp2);
-			}).Concat(addEdges).ToList();
-
-			#endregion
+			boundary = Cut(upperEdge.OrderBy(x => x.X), new Vector2(-0.001, 0), new Vector2(inters.FirstParamLimit + 0.001, 0)).Concat(addEdges).ToList();
 			return true;
-
 		}
 
 		//private bool met;
@@ -432,12 +404,12 @@ namespace CadCat.GeometryModels
 					lst = bndr;
 				else
 				{
-					yield return new Tuple<Vector2, Vector2>(new Vector2(lst.X, lst.Y), new Vector2(bndr.X, bndr.Y));
+					yield return new Tuple<Vector2, Vector2>(new Vector2(lst.X, lst.Y - 0.0001), new Vector2(bndr.X, bndr.Y - 0.0001));
 				}
 			}
 			if (!meet)
 			{
-				yield return new Tuple<Vector2, Vector2>(new Vector2(lst.X, lst.Y), new Vector2(to.X, to.Y));
+				yield return new Tuple<Vector2, Vector2>(new Vector2(lst.X, lst.Y - 0.0001), new Vector2(to.X, to.Y - 0.0001));
 			}
 		}
 
