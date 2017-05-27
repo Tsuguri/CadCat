@@ -223,6 +223,11 @@ namespace CadCat.Math
 						pt = point - grd * tmpAlpha;
 
 						//pt = new Vector4(P.ClipParams(pt.X, pt.Y), Q.ClipParams(pt.Z, pt.W));
+						var pPos = p.ConfirmParams(pt.X, pt.Y);
+						var qPos = q.ConfirmParams(pt.Z, pt.W);
+						if (qPos == null || pPos == null)
+							return null;
+						pt = new Vector4(pPos.Value, qPos.Value);
 						dist = distanceFun(pt);
 						tmpAlpha /= 2;
 						i++;
@@ -231,11 +236,8 @@ namespace CadCat.Math
 					//scene.CreateHiddenCatPoint(p.GetPosition(pt.X, pt.Y));
 					//scene.CreateHiddenCatPoint(q.GetPosition(pt.Z, pt.W));
 
-					var pPos = p.ConfirmParams(pt.X, pt.Y);
-					var qPos = q.ConfirmParams(pt.Z, pt.W);
-					if (qPos == null || pPos == null)
-						return null;
-					pt = new Vector4(pPos.Value, qPos.Value);
+
+
 					z++;
 				} while (System.Math.Abs(distance - dist) > Consts.Eps * Consts.Eps);
 			}

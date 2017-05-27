@@ -187,8 +187,8 @@ namespace CadCat.GeometryModels
 
 		public float FirstParamLimit => PatchesU;
 		public float SecondParamLimit => PatchesV;
-		public bool FirstParamLooped => false;
-		public bool SecondParamLooped => false;
+		public bool FirstParamLooped => uLooped;
+		public bool SecondParamLooped => vLooped;
 
 		public bool[,] GetAvaiablePatch(int u, int v, int uDiv, int vDiv)
 		{
@@ -300,7 +300,7 @@ namespace CadCat.GeometryModels
 
 		public Vector2? ConfirmParams(double u, double v)
 		{
-			
+
 
 			if ((u < 0.0 || u > PatchesU) && !uLooped)
 				return null;

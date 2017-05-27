@@ -11,6 +11,7 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.TextFormatting;
 using System.Windows.Navigation;
 using CadCat.DataStructures;
 using CadCat.Math;
@@ -153,7 +154,7 @@ namespace CadCat.GeometryModels
 						var item1 = pPolygon[i];
 						var item2 = pPolygon[(i + 1) % pPolygon.Count];
 						if (System.Math.Abs(item1.X - item2.X) < 0.1 && System.Math.Abs(item1.Y - item2.Y) < 0.1)
-							bitmap.DrawLineDDA((int)(item1.X / uParam * halfWidth), (int)(item1.Y / vParam * height), (int)(item2.X / uParam * halfWidth), (int)(item2.Y / vParam * height), Colors.Gray);
+							bitmap.DrawLineDDA((int)(item1.X / uParam * halfWidth), (int)(item1.Y / vParam * height), (int)(item2.X / uParam * halfWidth), (int)(item2.Y / vParam * height), Colors.BlueViolet);
 
 					}
 
@@ -162,7 +163,7 @@ namespace CadCat.GeometryModels
 					if (pPolygonBoundary != null)
 						foreach (var tuple in pPolygonBoundary)
 						{
-							bitmap.DrawLineDDA((int)(tuple.Item1.X / uParam * halfWidth), (int)(tuple.Item1.Y / vParam * height), (int)(tuple.Item2.X / uParam * halfWidth), (int)(tuple.Item2.Y / vParam * height), Colors.Gray);
+							bitmap.DrawLineDDA((int)(tuple.Item1.X / uParam * halfWidth), (int)(tuple.Item1.Y / vParam * height), (int)(tuple.Item2.X / uParam * halfWidth), (int)(tuple.Item2.Y / vParam * height), Colors.BlueViolet);
 						}
 
 
@@ -190,31 +191,31 @@ namespace CadCat.GeometryModels
 
 				}
 
-				if (PtestSet != null)
-				{
-					var uStep = P.FirstParamLimit / (PtestSet.GetLength(1) - 1.0);
-					var vStep = P.SecondParamLimit / (PtestSet.GetLength(0) - 1.0);
+				//if (PtestSet != null)
+				//{
+				//	var uStep = P.FirstParamLimit / (PtestSet.GetLength(1) - 1.0);
+				//	var vStep = P.SecondParamLimit / (PtestSet.GetLength(0) - 1.0);
 
 
-					for (int i = 0; i < PtestSet.GetLength(1); i++)
-						for (int j = 0; j < PtestSet.GetLength(0); j++)
-						{
-							bitmap.DrawEllipseCentered((int)(i * uStep / uParam * halfWidth), (int)(j * vStep / vParam * height), 1, 1, PtestSet[j, i] ? Colors.Green : Colors.Red);
-						}
-				}
+				//	for (int i = 0; i < PtestSet.GetLength(1); i++)
+				//		for (int j = 0; j < PtestSet.GetLength(0); j++)
+				//		{
+				//			bitmap.DrawEllipseCentered((int)(i * uStep / uParam * halfWidth), (int)(j * vStep / vParam * height), 1, 1, PtestSet[j, i] ? Colors.Green : Colors.Red);
+				//		}
+				//}
 
-				if (QtestSet != null)
-				{
-					var uStep = Q.FirstParamLimit / (QtestSet.GetLength(1) - 1.0);
-					var vStep = Q.SecondParamLimit / (QtestSet.GetLength(0) - 1.0);
+				//if (QtestSet != null)
+				//{
+				//	var uStep = Q.FirstParamLimit / (QtestSet.GetLength(1) - 1.0);
+				//	var vStep = Q.SecondParamLimit / (QtestSet.GetLength(0) - 1.0);
 
 
-					for (int i = 0; i < QtestSet.GetLength(1); i++)
-						for (int j = 0; j < QtestSet.GetLength(0); j++)
-						{
-							bitmap.DrawEllipseCentered((int)(i * uStep / uParam * halfWidth + halfWidth), (int)(j * vStep / vParam * height), 1, 1, QtestSet[j, i] ? Colors.Green : Colors.Red);
-						}
-				}
+				//	for (int i = 0; i < QtestSet.GetLength(1); i++)
+				//		for (int j = 0; j < QtestSet.GetLength(0); j++)
+				//		{
+				//			bitmap.DrawEllipseCentered((int)(i * uStep / uParam * halfWidth + halfWidth), (int)(j * vStep / vParam * height), 1, 1, QtestSet[j, i] ? Colors.Green : Colors.Red);
+				//		}
+				//}
 
 			}
 
@@ -238,7 +239,6 @@ namespace CadCat.GeometryModels
 
 		private bool CalculatePolygon(bool p, out List<Vector2> polygon, out List<Tuple<Vector2, Vector2>> boundary)
 		{
-			polygon = null;
 			boundary = null;
 			var upperEdge = new List<BoundaryIntersection>();
 			var lowerEdge = new List<BoundaryIntersection>();
@@ -247,111 +247,96 @@ namespace CadCat.GeometryModels
 			var inters = p ? P : Q;
 			var pts = p ? points.Select(x => new Vector2(x.X, x.Y)).ToList() : points.Select(x => new Vector2(x.Z, x.W)).ToList();
 			polygon = pts;
+
+			var addEdges = new List<Tuple<Vector2, Vector2>>();
+			var last = pts.Count - 1;
+
 			#region NonCyclic
 
-			if (!cyclic && (inters.FirstParamLooped || inters.SecondParamLooped))
-				return false;
-
+			// non looped surface with cyclic curve - always can trim
+			if (cyclic && !inters.FirstParamLooped && !inters.SecondParamLooped)
+				return true;
+			int cnt = 0;
+			int u = 0;
+			int v = 0;
 
 			if (!cyclic)
 			{
-				var last = pts.Count - 1;
-				if (System.Math.Abs(System.Math.Abs(inters.FirstParamLimit / 2.0 - pts[0].X) - inters.FirstParamLimit / 2.0) < 0.01)
-				{
-					if (pts[0].X < inters.FirstParamLimit / 2.0)
-					{
-						var tmp = pts[0];
-						tmp.X = -0.001;
-						pts[0] = tmp;
-						leftEdge.Add(new BoundaryIntersection { AssociatedVertexIndex = 0, type = BoundaryIntersection.IntersectionType.In, X = 0, Y = pts[0].Y });
-					}
-					else
-					{
-						var tmp = pts[0];
-						tmp.X = inters.FirstParamLimit + 0.001;
-						pts[0] = tmp;
-						rightEdge.Add(new BoundaryIntersection { AssociatedVertexIndex = 0, type = BoundaryIntersection.IntersectionType.In, X = inters.FirstParamLimit, Y = pts[0].Y });
-					}
-				}
-				else if (System.Math.Abs(System.Math.Abs(inters.SecondParamLimit / 2.0 - pts[0].Y) - inters.SecondParamLimit / 2.0) < 0.01)
-				{
-					if (pts[0].Y < inters.SecondParamLimit / 2.0)
-					{
-						var tmp = pts[0];
-						tmp.Y = -0.001;
-						pts[0] = tmp;
-						upperEdge.Add(new BoundaryIntersection { AssociatedVertexIndex = 0, type = BoundaryIntersection.IntersectionType.In, Y = 0, X = pts[0].X });
-					}
-					else
-					{
-						var tmp = pts[0];
-						tmp.Y = inters.SecondParamLimit + 0.001;
-						pts[0] = tmp;
-						lowerEdge.Add(new BoundaryIntersection { AssociatedVertexIndex = 0, type = BoundaryIntersection.IntersectionType.In, Y = inters.SecondParamLimit, X = pts[0].X });
 
+				if (!inters.FirstParamLooped)
+				{
+					if (System.Math.Abs(System.Math.Abs(inters.FirstParamLimit / 2.0 - pts[0].X) - inters.FirstParamLimit / 2.0) < 0.01)
+					{
+						var tmp = pts[0];
+						cnt++;
+						v++;
+						addEdges.Add(tmp.X < inters.FirstParamLimit / 2.0
+							? new Tuple<Vector2, Vector2>(new Vector2(-0.001, tmp.Y), new Vector2(0.001, tmp.Y))
+							: new Tuple<Vector2, Vector2>(new Vector2(inters.FirstParamLimit - 0.001, tmp.Y),
+								new Vector2(inters.FirstParamLimit + 0.001, tmp.Y)));
+					}
+					if (System.Math.Abs(System.Math.Abs(inters.FirstParamLimit / 2.0 - pts[last].X) - inters.FirstParamLimit / 2.0) < 0.01)
+					{
+						var tmp = pts[last];
+						cnt++;
+						v++;
+						addEdges.Add(tmp.X < inters.FirstParamLimit / 2.0
+							? new Tuple<Vector2, Vector2>(new Vector2(-0.001, tmp.Y), new Vector2(0.001, tmp.Y))
+							: new Tuple<Vector2, Vector2>(new Vector2(inters.FirstParamLimit - 0.001, tmp.Y),
+								new Vector2(inters.FirstParamLimit + 0.001, tmp.Y)));
 					}
 				}
 
-				if (System.Math.Abs(System.Math.Abs(inters.FirstParamLimit / 2.0 - pts[last].X) - inters.FirstParamLimit / 2.0) < 0.01)
-				{
-					if (pts[last].X < inters.FirstParamLimit / 2.0)
-					{
-						var tmp = pts[last];
-						tmp.X = -0.001;
-						pts[last] = tmp;
-						leftEdge.Add(new BoundaryIntersection { AssociatedVertexIndex = last, type = BoundaryIntersection.IntersectionType.Out, X = 0, Y = pts[last].Y });
-					}
-					else
-					{
-						var tmp = pts[last];
-						tmp.X = inters.FirstParamLimit + 0.001;
-						pts[last] = tmp;
-						rightEdge.Add(new BoundaryIntersection { AssociatedVertexIndex = 0, type = BoundaryIntersection.IntersectionType.Out, X = inters.FirstParamLimit, Y = pts[last].Y });
 
+				if (System.Math.Abs(System.Math.Abs(inters.SecondParamLimit / 2.0 - pts[0].Y) - inters.SecondParamLimit / 2.0) < 0.01)
+				{
+					//should count as intersection only if second param is not looped.
+					if (!inters.SecondParamLooped)
+					{
+						cnt++;
+						u++;
 					}
+					if (pts[0].Y < inters.SecondParamLimit / 2)
+						upperEdge.Add(new BoundaryIntersection { AssociatedVertexIndex = 0, X = pts[0].X });
 				}
-				else if (System.Math.Abs(System.Math.Abs(inters.SecondParamLimit / 2.0 - pts[last].Y) - inters.SecondParamLimit / 2.0) < 0.01)
+				if (System.Math.Abs(System.Math.Abs(inters.SecondParamLimit / 2.0 - pts[last].Y) - inters.SecondParamLimit / 2.0) < 0.01)
 				{
-					if (pts[last].Y < inters.SecondParamLimit / 2.0)
+					if (!inters.SecondParamLooped)
 					{
-						var tmp = pts[last];
-						tmp.Y = -0.001;
-						pts[last] = tmp;
-						upperEdge.Add(new BoundaryIntersection { AssociatedVertexIndex = last, type = BoundaryIntersection.IntersectionType.Out, Y = 0, X = pts[last].X });
+						cnt++;
+						u++;
 					}
-					else
-					{
-						var tmp = pts[last];
-						tmp.Y = inters.SecondParamLimit + 0.001;
-						pts[last] = tmp;
-						lowerEdge.Add(new BoundaryIntersection { AssociatedVertexIndex = last, type = BoundaryIntersection.IntersectionType.Out, Y = inters.SecondParamLimit, X = pts[last].X });
+					if (pts[last].Y < inters.SecondParamLimit / 2)
+						upperEdge.Add(new BoundaryIntersection { AssociatedVertexIndex = 0, X = pts[last].X });
 
-					}
 				}
 
-				if (leftEdge.Count + rightEdge.Count + upperEdge.Count + lowerEdge.Count != 2)
+				//if more/less than 2 boundaries intersection - non trimming edge.
+				if (cnt != 2)
 					return false;
 
+				var up = Cut(upperEdge.OrderBy(x => x.X), new Vector2(-0.001, -0.001), new Vector2(inters.FirstParamLimit + 0.001, -0.001)).Concat(addEdges).ToList();
 
-				var up = Cut(upperEdge.OrderBy(x => x.X), new Vector2(-0.001, -0.001), new Vector2(inters.FirstParamLimit + 0.001, -0.001)).ToList();
-				boundary = up;
+				// if 2 intersections on non-looped surface, or 2 intersections on non-looped edge of cylinder-like surface.
+				if (!inters.FirstParamLooped && !inters.SecondParamLooped)
+				{
+					boundary = up;
+					return true;
+				}
 
-				return true;
+				if ((inters.FirstParamLooped && u != 2) || (inters.SecondParamLooped && v != 2))
+					return false;
 			}
-
 			#endregion
+			//tu są odsiane: niecykliczna krzywa na nieloopniętej powierzchni, cykliczna na nieloopnietej.
 
-			#region Cyclic
-
-			var addEdges = new List<Tuple<Vector2, Vector2>>();
-
-			for (int i = 0; i < pts.Count; i++)
+			for (int i = 0; i < pts.Count - (cyclic ? 0 : 1); i++)
 			{
-				if ((pts[i] - pts[(i + 1) % pts.Count]).Length() > 0.1)
+				if ((pts[i] - pts[(i + 1) % pts.Count]).Length() > 0.5)
 				{
 					var pt1 = pts[i];
 					var pt2 = pts[(i + 1) % pts.Count];
-					if (System.Math.Abs(pt1.X - pt2.X) > 0.1)
+					if (System.Math.Abs(pt1.X - pt2.X) > 0.5)
 					{
 						var right = pt1.X > pt2.X;
 						var avgheigh = (pt1.Y + pt2.Y) / 2;
@@ -364,7 +349,7 @@ namespace CadCat.GeometryModels
 						rightEdge.Add(new BoundaryIntersection { X = inters.FirstParamLimit, Y = avgheigh, type = right ? BoundaryIntersection.IntersectionType.Out : BoundaryIntersection.IntersectionType.In });
 					}
 
-					if (System.Math.Abs(pt1.Y - pt2.Y) > 0.1)
+					if (System.Math.Abs(pt1.Y - pt2.Y) > 0.5)
 					{
 						var up = pt1.Y < pt2.Y;
 						var avgwidth = (pt1.X + pt2.X) / 2;
@@ -373,6 +358,24 @@ namespace CadCat.GeometryModels
 					}
 				}
 			}
+
+			//walec o zawiniętej jednej powierzchni:
+
+			if (u == 2 || v == 2 || !inters.FirstParamLooped || !inters.SecondParamLooped)
+			{
+				var up = Cut(upperEdge.OrderBy(x => x.X), new Vector2(-0.001, -0.001), new Vector2(inters.FirstParamLimit + 0.001, -0.001)).Concat(addEdges).ToList();
+				boundary = up;
+				return true;
+			}
+
+
+
+			return false;
+
+			#region Cyclic
+
+
+
 
 			var boundaryIntersections = upperEdge.OrderBy(x => x.X).Concat(rightEdge.OrderBy(x => x.Y)).Concat(lowerEdge.OrderByDescending(x => x.X)).Concat(leftEdge.OrderByDescending(x => x.Y)).ToList();
 
