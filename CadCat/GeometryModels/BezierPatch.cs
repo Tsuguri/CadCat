@@ -11,47 +11,6 @@ namespace CadCat.GeometryModels
 {
 	class BezierPatch : Patch
 	{
-		private readonly CatPoint[] points = new CatPoint[16];
-		private readonly SceneData scene;
-
-
-		private readonly bool owner;
-
-
-		private static readonly List<int> Indices = new List<int>()
-		{
-			0,1,
-			1,2,
-			2,3,
-
-			4,5,
-			5,6,
-			6,7,
-
-			8,9,
-			9,10,
-			10,11,
-
-			12,13,
-			13,14,
-			14,15,
-
-			0,4,
-			4,8,
-			8,12,
-
-			1,5,
-			5,9,
-			9,13,
-
-			2,6,
-			6,10,
-			10,14,
-
-			3,7,
-			7,11,
-			11,15
-		};
 
 		public BezierPatch(SceneData scene)
 		{

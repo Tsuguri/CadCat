@@ -103,6 +103,18 @@ namespace CadCat.GeometryModels
 
 			IsIntersectableP = CalculatePolygon(true, out pPolygon, out pPolygonBoundary);
 			IsIntersectableQ = CalculatePolygon(false, out qPolygon, out qPolygonBoundary);
+
+
+			if (IsIntersectableQ)
+			{
+				QtestSet = new bool[100, 100];
+
+				for (int i = 0; i < 100; i++)
+					for (int j = 0; j < 100; j++)
+						QtestSet[i, j] = true;
+				PointsContainedByCurve(QtestSet, true, Q, 0, Q.FirstParamLimit, 0, Q.SecondParamLimit, true);
+			}
+
 		}
 
 		public override void CleanUp()
@@ -164,14 +176,17 @@ namespace CadCat.GeometryModels
 			using (bitmap.GetBitmapContext())
 			{
 				if (pPolygon != null)
+				{
+					var minSize = System.Math.Min(P.FirstParamLimit, P.SecondParamLimit) * 0.8;
 					for (int i = 0; i < pPolygon.Count - 1 + (cyclic ? 1 : 0); i++)
 					{
 						var item1 = pPolygon[i];
 						var item2 = pPolygon[(i + 1) % pPolygon.Count];
-						if (System.Math.Abs(item1.X - item2.X) < 0.1 && System.Math.Abs(item1.Y - item2.Y) < 0.1)
+						if (System.Math.Abs(item1.X - item2.X) < minSize && System.Math.Abs(item1.Y - item2.Y) < minSize)
 							bitmap.DrawLineDDA((int)(item1.X / uParam * halfWidth), (int)(item1.Y / vParam * height), (int)(item2.X / uParam * halfWidth), (int)(item2.Y / vParam * height), Colors.BlueViolet);
 
 					}
+				}
 
 				if (IsIntersectableP)
 				{
@@ -185,14 +200,17 @@ namespace CadCat.GeometryModels
 				}
 
 				if (qPolygon != null)
+				{
+					var minSize = System.Math.Min(Q.FirstParamLimit, Q.SecondParamLimit) * 0.8;
 					for (int i = 0; i < qPolygon.Count - 1 + (cyclic ? 1 : 0); i++)
 					{
 						var item1 = qPolygon[i];
 						var item2 = qPolygon[(i + 1) % qPolygon.Count];
-						if (System.Math.Abs(item1.X - item2.X) < 0.1 && System.Math.Abs(item1.Y - item2.Y) < 0.1)
+						if (System.Math.Abs(item1.X - item2.X) < minSize && System.Math.Abs(item1.Y - item2.Y) < minSize)
 							bitmap.DrawLineDDA((int)(item1.X / sParam * (halfWidth - 3) + halfWidth), (int)(item1.Y / tParam * height), (int)(item2.X / sParam * (halfWidth - 3) + halfWidth), (int)(item2.Y / tParam * height), Colors.Gray);
 
 					}
+				}
 
 				if (IsIntersectableQ)
 				{
@@ -219,18 +237,18 @@ namespace CadCat.GeometryModels
 				//		}
 				//}
 
-				//if (QtestSet != null)
-				//{
-				//	var uStep = Q.FirstParamLimit / (QtestSet.GetLength(1) - 1.0);
-				//	var vStep = Q.SecondParamLimit / (QtestSet.GetLength(0) - 1.0);
+				if (QtestSet != null)
+				{
+					var uStep = Q.FirstParamLimit / (QtestSet.GetLength(1) - 1.0);
+					var vStep = Q.SecondParamLimit / (QtestSet.GetLength(0) - 1.0);
 
 
-				//	for (int i = 0; i < QtestSet.GetLength(1); i++)
-				//		for (int j = 0; j < QtestSet.GetLength(0); j++)
-				//		{
-				//			bitmap.DrawEllipseCentered((int)(i * uStep / uParam * halfWidth + halfWidth), (int)(j * vStep / vParam * height), 1, 1, QtestSet[j, i] ? Colors.Green : Colors.Red);
-				//		}
-				//}
+					for (int i = 0; i < QtestSet.GetLength(1); i++)
+						for (int j = 0; j < QtestSet.GetLength(0); j++)
+						{
+							bitmap.DrawEllipseCentered((int)(i * uStep / sParam * (halfWidth-3) + halfWidth), (int)(j * vStep / tParam * height), 1, 1, QtestSet[j, i] ? Colors.Green : Colors.Red);
+						}
+				}
 
 			}
 
@@ -487,21 +505,21 @@ namespace CadCat.GeometryModels
 				CheckColumn(ptss, sender, i * uStep + uFrom, i, 0, ptss.GetLength(0) - 1, vStep, vFrom);
 			}
 
-			if (sender == P)
-			{
-				PtestSet = new bool[ptss.GetLength(0), ptss.GetLength(1)];
-				for (int i = 0; i < PtestSet.GetLength(0); i++)
-					for (int j = 0; j < PtestSet.GetLength(1); j++)
-						PtestSet[i, j] = ptss[i, j] % 2 == 0;
-			}
+			//if (sender == P)
+			//{
+			//	PtestSet = new bool[ptss.GetLength(0), ptss.GetLength(1)];
+			//	for (int i = 0; i < PtestSet.GetLength(0); i++)
+			//		for (int j = 0; j < PtestSet.GetLength(1); j++)
+			//			PtestSet[i, j] = ptss[i, j] % 2 == 0;
+			//}
 
-			if (sender == Q)
-			{
-				QtestSet = new bool[ptss.GetLength(0), ptss.GetLength(1)];
-				for (int i = 0; i < QtestSet.GetLength(0); i++)
-					for (int j = 0; j < QtestSet.GetLength(1); j++)
-						QtestSet[i, j] = ptss[i, j] % 2 == 0;
-			}
+			//if (sender == Q)
+			//{
+			//	QtestSet = new bool[ptss.GetLength(0), ptss.GetLength(1)];
+			//	for (int i = 0; i < QtestSet.GetLength(0); i++)
+			//		for (int j = 0; j < QtestSet.GetLength(1); j++)
+			//			QtestSet[i, j] = ptss[i, j] % 2 == 0;
+			//}
 
 			if (additive)
 			{
@@ -532,16 +550,18 @@ namespace CadCat.GeometryModels
 			int p = boundary?.Count(tuple => IntersectLines(tuple.Item1, tuple.Item2, point)) ?? 0;
 			Vector2 p1, p2;
 			int cnt = poly.Count - 1;
+			var minSize = System.Math.Min(sender.FirstParamLimit, sender.SecondParamLimit)*0.8;
+
 			for (int i = 0; i < cnt; i++)
 			{
 				p1 = poly[i];
 				p2 = poly[i + 1];
-				if ((p1 - p2).Length() < 0.1)
+				if ((p1 - p2).Length() < minSize)
 					if (IntersectLines(p1, p2, point))
 						p++;
 			}
 			if (cyclic)
-				if ((poly[cnt] - poly[0]).Length() < 0.1)
+				if ((poly[cnt] - poly[0]).Length() < minSize)
 				{
 					if (IntersectLines(poly[cnt], poly[0], point))
 						p++;

@@ -66,21 +66,6 @@ namespace CadCat.GeometryModels
 			}
 		}
 
-		private bool showNormals;
-		public bool ShowNormals
-		{
-			get { return showNormals; }
-			set
-			{
-				showNormals = value;
-				OnPropertyChanged();
-				foreach (var bezierPatch in patches)
-				{
-					bezierPatch.ShowNormal = showNormals;
-				}
-			}
-		}
-
 		public bool ShowPoints
 		{
 			get { return showPoints; }

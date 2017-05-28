@@ -11,50 +11,7 @@ namespace CadCat.GeometryModels
 {
 	class BSplinePatch : Patch
 	{
-		private readonly CatPoint[] points = new CatPoint[16];
 		private readonly CatPoint[,] pointsOrdererd = new CatPoint[4, 4];
-
-		private readonly List<Vector3> normals = new List<Vector3>();
-		private readonly List<int> normalindices = new List<int>();
-		private readonly SceneData scene;
-
-		private readonly bool owner;
-
-
-		private static readonly List<int> Indices = new List<int>
-		{
-			0,1,
-			1,2,
-			2,3,
-
-			4,5,
-			5,6,
-			6,7,
-
-			8,9,
-			9,10,
-			10,11,
-
-			12,13,
-			13,14,
-			14,15,
-
-			0,4,
-			4,8,
-			8,12,
-
-			1,5,
-			5,9,
-			9,13,
-
-			2,6,
-			6,10,
-			10,14,
-
-			3,7,
-			7,11,
-			11,15
-		};
 
 		public BSplinePatch(SceneData scene)
 		{
@@ -74,8 +31,6 @@ namespace CadCat.GeometryModels
 
 		public BSplinePatch(CatPoint[,] pts)
 		{
-			Debug.Assert(points.Length == 16);
-
 			for (int i = 0; i < 4; i++)
 				for (int j = 0; j < 4; j++)
 				{
@@ -136,13 +91,6 @@ namespace CadCat.GeometryModels
 				renderer.Points = points.Select(x => x.Position).ToList();
 
 
-				renderer.Transform();
-				renderer.DrawLines();
-			}
-			if (ShowNormal)
-			{
-				renderer.Indices = normalindices;
-				renderer.Points = normals;
 				renderer.Transform();
 				renderer.DrawLines();
 			}

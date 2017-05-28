@@ -12,6 +12,9 @@ namespace CadCat.GeometryModels
 		private bool showPolygon;
 
 		protected Surface Surface;
+		protected bool owner;
+		protected SceneData scene;
+		protected CatPoint[] points = new CatPoint[16];
 
 		public bool ShowPolygon
 		{
@@ -22,20 +25,40 @@ namespace CadCat.GeometryModels
 				OnPropertyChanged();
 			}
 		}
-
-
-		private bool showNormal;
-
-		public bool ShowNormal
+		protected static readonly List<int> Indices = new List<int>()
 		{
-			get { return showNormal; }
-			set
-			{
-				showNormal = value;
-				OnPropertyChanged();
-			}
-		}
+			0,1,
+			1,2,
+			2,3,
 
+			4,5,
+			5,6,
+			6,7,
+
+			8,9,
+			9,10,
+			10,11,
+
+			12,13,
+			13,14,
+			14,15,
+
+			0,4,
+			4,8,
+			8,12,
+
+			1,5,
+			5,9,
+			9,13,
+
+			2,6,
+			6,10,
+			10,14,
+
+			3,7,
+			7,11,
+			11,15
+		};
 
 		private int heightDiv = 3;
 		private int widthDiv = 3;
