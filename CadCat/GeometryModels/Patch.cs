@@ -1,4 +1,6 @@
-﻿using CadCat.Math;
+﻿using System;
+using System.Collections.Generic;
+using CadCat.Math;
 using CadCat.DataStructures;
 
 namespace CadCat.GeometryModels
@@ -80,6 +82,23 @@ namespace CadCat.GeometryModels
 				}
 			}
 		}
+
+		protected void RecalculateParametrizationPoints()
+		{
+			var avai = Surface.GetAvaiablePatch(UPos, VPos, WidthDiv, HeightDiv);
+
+			Func<Vector2, bool> check = vector2 => Surface.IsPointAvaiable(UPos, VPos, vector2);
+			var aszk = SurfaceFilling.MarchingAszklars(avai, 1, 1, false, false, check);
+
+			meshIndices = aszk.Item2;
+			parametrizationPoints = aszk.Item1;
+			ParametrizationChanged = false;
+			Changed = true;
+		}
+
+		protected List<Vector2> parametrizationPoints;
+		protected List<Vector3> mesh = new List<Vector3>();
+		protected List<int> meshIndices = new List<int>();
 
 		public abstract Vector3 GetPoint(double u, double v);
 		public abstract CatPoint GetCatPoint(int u, int v);

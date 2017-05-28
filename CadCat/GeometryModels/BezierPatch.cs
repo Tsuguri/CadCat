@@ -12,8 +12,6 @@ namespace CadCat.GeometryModels
 	class BezierPatch : Patch
 	{
 		private readonly CatPoint[] points = new CatPoint[16];
-		private readonly List<Vector3> mesh = new List<Vector3>();
-		private readonly List<int> meshIndices = new List<int>();
 		private readonly SceneData scene;
 
 
@@ -68,6 +66,7 @@ namespace CadCat.GeometryModels
 					pt.OnChanged += OnBezierPointChanged;
 				}
 			Changed = true;
+			ParametrizationChanged = true;
 			owner = true;
 		}
 
@@ -84,6 +83,7 @@ namespace CadCat.GeometryModels
 					pts[i, j].OnChanged += OnBezierPointChanged;
 					pts[i, j].OnReplace += OnBezierPointReplaced;
 				}
+			ParametrizationChanged = true;
 			Changed = true;
 			owner = false;
 		}
@@ -111,7 +111,8 @@ namespace CadCat.GeometryModels
 
 		public override void Render(BaseRenderer renderer)
 		{
-
+			if (ParametrizationChanged)
+				RecalculateParametrizationPoints();
 			if (Changed)
 				RecalculatePoints();
 			base.Render(renderer);
@@ -139,38 +140,7 @@ namespace CadCat.GeometryModels
 
 		private void RecalculatePoints()
 		{
-			mesh.Clear();
-			mesh.Capacity = System.Math.Max(mesh.Capacity, (WidthDiv + 1) * (HeightDiv + 1));
-			meshIndices.Clear();
-			double widthStep = 1.0 / WidthDiv;
-			double heightStep = 1.0 / HeightDiv;
-			int widthPoints = WidthDiv + 1;
-			int heightPoints = HeightDiv + 1;
-
-			for (int i = 0; i < widthPoints; i++)
-				for (int j = 0; j < heightPoints; j++)
-				{
-					mesh.Insert(i * heightPoints + j, EvaluatePointValue(i * widthStep, j * heightStep));
-				}
-
-			for (int i = 0; i < widthPoints - 1; i++)
-				for (int j = 0; j < heightPoints - 1; j++)
-				{
-					meshIndices.Add(i * heightPoints + j);
-					meshIndices.Add(i * heightPoints + j + 1);
-					meshIndices.Add(i * heightPoints + j);
-					meshIndices.Add((i + 1) * heightPoints + j);
-				}
-			for (int i = 0; i < widthPoints - 1; i++)
-			{
-				meshIndices.Add(heightPoints * (i + 1) - 1);
-				meshIndices.Add(heightPoints * (i + 2) - 1);
-			}
-			for (int j = 0; j < heightPoints - 1; j++)
-			{
-				meshIndices.Add((widthPoints - 1) * heightPoints + j);
-				meshIndices.Add((widthPoints - 1) * heightPoints + j + 1);
-			}
+			mesh = parametrizationPoints.Select(x => GetPoint(x.X, x.Y)).ToList();
 			Changed = false;
 		}
 

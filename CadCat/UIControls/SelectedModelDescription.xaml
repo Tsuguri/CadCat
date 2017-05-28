@@ -173,7 +173,7 @@
 
                         </Grid>
                     </DataTemplate>
-                    <DataTemplate DataType="{x:Type models:BezierPatch}">
+                    <DataTemplate DataType="{x:Type models:Patch}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="40" />
@@ -297,8 +297,15 @@
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="40"/>
+                                <RowDefinition Height="40"/>
                             </Grid.RowDefinitions>
-                            <Button Command="{Binding ConvertToInterpolation}">Convert</Button>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width=" 40" />
+                                <ColumnDefinition Width=" *" />
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.ColumnSpan="2" Command="{Binding ConvertToInterpolation}">Convert</Button>
+                            <ToggleButton Grid.Column="0" Grid.Row="1" IsChecked="{Binding ShowPoints}" />
+                            <TextBlock Grid.Column="1" Grid.Row="1">ShowPoints</TextBlock>
                         </Grid>
                     </DataTemplate>
                 </ContentControl.Resources>

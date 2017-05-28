@@ -41,6 +41,21 @@ namespace CadCat.GeometryModels
 		private bool[,] QtestSet;
 		public bool IsIntersectableQ { get; private set; }
 
+		private bool showPoints = true;
+
+		public bool ShowPoints
+		{
+			get { return showPoints; }
+			set
+			{
+				if (showPoints != value)
+				{
+					showPoints = value;
+					catPoints.ForEach(x => x.Visible = value);
+				}
+			}
+		}
+
 		public ICommand ConvertToInterpolation => convertToInterpolationCurve ?? (convertToInterpolationCurve = new CommandHandler(Convert));
 
 		public CuttingCurve(List<Vector4> points, IIntersectable P, IIntersectable Q, SceneData scene, bool cyclic, double minimumStep = 0.1)

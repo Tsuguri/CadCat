@@ -13,10 +13,8 @@ namespace CadCat.GeometryModels
 	{
 		private readonly CatPoint[] points = new CatPoint[16];
 		private readonly CatPoint[,] pointsOrdererd = new CatPoint[4, 4];
-		private List<Vector2> parametrizationPoints;
-		private List<Vector3> mesh = new List<Vector3>();
+
 		private readonly List<Vector3> normals = new List<Vector3>();
-		private List<int> meshIndices = new List<int>();
 		private readonly List<int> normalindices = new List<int>();
 		private readonly SceneData scene;
 
@@ -164,18 +162,7 @@ namespace CadCat.GeometryModels
 
 		}
 
-		private void RecalculateParametrizationPoints()
-		{
-			var avai = Surface.GetAvaiablePatch(UPos, VPos, WidthDiv, HeightDiv);
 
-			Func<Vector2, bool> check = vector2 => Surface.IsPointAvaiable(UPos, VPos, vector2);
-			var aszk = SurfaceFilling.MarchingAszklars(avai, 1, 1, false, false, check);
-
-			meshIndices = aszk.Item2;
-			parametrizationPoints = aszk.Item1;
-			ParametrizationChanged = false;
-			Changed = true;
-		}
 
 		private static Matrix4 _tempMtx;
 		private Vector3 EvaluatePointValue(double u, double v)
