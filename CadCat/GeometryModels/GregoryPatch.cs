@@ -465,7 +465,7 @@ namespace CadCat.GeometryModels
 		}
 	}
 
-	class GregoryPatch : Patch
+	class GregoryPatch : Model
 	{
 		private PatchCycle cycle;
 		private SceneData data;
@@ -488,6 +488,45 @@ namespace CadCat.GeometryModels
 				adjacentPatches.ForEach(x => x.UpdatePointVisibility(value));
 				centerPoint.Visible = value;
 
+			}
+		}
+
+		private bool showPolygon = true;
+
+		public bool ShowPolygon
+		{
+			get { return showPolygon; }
+			set
+			{
+				showPolygon = value;
+				OnPropertyChanged();
+			}
+		}
+
+		private int widthDiv = 2;
+		private int heightDiv = 2;
+
+		public int WidthDiv
+		{
+			get { return widthDiv; }
+			set
+			{
+				if (value < 1 || value > 50)
+					return;
+				widthDiv = value;
+				OnPropertyChanged();
+			}
+		}
+
+		public int HeightDiv
+		{
+			get { return heightDiv; }
+			set
+			{
+				if (value < 1 || value > 50)
+					return;
+				heightDiv = value;
+				OnPropertyChanged();
 			}
 		}
 
@@ -597,26 +636,6 @@ namespace CadCat.GeometryModels
 		public override string GetName()
 		{
 			return "Gregory patch: " + base.GetName();
-		}
-
-		public override Vector3 GetPoint(double u, double v)
-		{
-			throw new NotImplementedException();
-		}
-
-		public override Vector3 GetUDerivative(double u, double v)
-		{
-			throw new NotImplementedException();
-		}
-
-		public override Vector3 GetVDerivative(double u, double v)
-		{
-			throw new NotImplementedException();
-		}
-
-		public override CatPoint GetCatPoint(int u, int v)
-		{
-			throw new NotImplementedException();
 		}
 	}
 }

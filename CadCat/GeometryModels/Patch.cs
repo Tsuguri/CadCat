@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Media;
 using CadCat.Math;
 using CadCat.DataStructures;
+using CadCat.Rendering;
+using Xceed.Wpf.Toolkit.PropertyGrid;
 
 namespace CadCat.GeometryModels
 {
@@ -11,10 +15,12 @@ namespace CadCat.GeometryModels
 		protected bool Changed;
 		private bool showPolygon;
 
+
 		protected Surface Surface;
 		protected bool owner;
 		protected SceneData scene;
-		protected CatPoint[] points = new CatPoint[16];
+		//protected CatPoint[] points = new CatPoint[16];
+		protected readonly CatPoint[,] pointsOrdererd = new CatPoint[4, 4];
 
 		public bool ShowPolygon
 		{
@@ -106,6 +112,26 @@ namespace CadCat.GeometryModels
 			}
 		}
 
+		protected Patch(CatPoint[,] pts)
+		{
+			for (int i = 0; i < 4; i++)
+				for (int j = 0; j < 4; j++)
+				{
+					//points[i * 4 + j] = pts[i, j]; // i -U, j- V
+					pts[i, j].OnChanged += OnBezierPointChanged;
+					pts[i, j].OnReplace += OnBezierPointReplaced;
+				}
+
+			for (int i = 0; i < 4; i++)
+				for (int j = 0; j < 4; j++)
+				{
+					pointsOrdererd[i, j] = pts[i, j];
+				}
+			ParametrizationChanged = true;
+			Changed = true;
+			owner = false;
+		}
+
 		protected void RecalculateParametrizationPoints()
 		{
 			var avai = Surface.GetAvaiablePatch(UPos, VPos, WidthDiv, HeightDiv);
@@ -119,13 +145,114 @@ namespace CadCat.GeometryModels
 			Changed = true;
 		}
 
+		private void RecalculatePoints()
+		{
+			mesh = parametrizationPoints.Select(x => GetPoint(x.X, x.Y)).ToList();
+			Changed = false;
+		}
+
 		protected List<Vector2> parametrizationPoints;
 		protected List<Vector3> mesh = new List<Vector3>();
 		protected List<int> meshIndices = new List<int>();
 
 		public abstract Vector3 GetPoint(double u, double v);
-		public abstract CatPoint GetCatPoint(int u, int v);
+
+		public CatPoint GetCatPoint(int u, int v)
+		{
+			//points[j * 4 + i] = pts[i, j]
+			return pointsOrdererd[v, u];
+		}
 		public abstract Vector3 GetUDerivative(double u, double v);
 		public abstract Vector3 GetVDerivative(double u, double v);
+
+		protected void OnBezierPointChanged(CatPoint point)
+		{
+			Changed = true;
+		}
+
+		protected void OnBezierPointReplaced(CatPoint point, CatPoint newPoint)
+		{
+			if (point != newPoint)
+			{
+
+				//for (int i = 0; i < points.Length; i++)
+				//	if (points[i] == point)
+				//		points[i] = newPoint;
+				for (int i = 0; i < pointsOrdererd.GetLength(1); i++)
+					for (int j = 0; j < pointsOrdererd.GetLength(0); j++)
+						if (pointsOrdererd[j, i] == point)
+						{
+							pointsOrdererd[j, i] = newPoint;
+						}
+
+
+				ParametrizationChanged = true;
+				Changed = true;
+				point.OnChanged -= OnBezierPointChanged;
+				if (owner)
+					point.DependentUnremovable -= 1;
+				newPoint.OnChanged += OnBezierPointChanged;
+				if (owner)
+					newPoint.DependentUnremovable += 1;
+				newPoint.OnChanged += OnBezierPointChanged;
+				newPoint.OnReplace += OnBezierPointReplaced;
+			}
+
+		}
+
+		public override void Render(BaseRenderer renderer)
+		{
+			if (ParametrizationChanged)
+				RecalculateParametrizationPoints();
+			if (Changed)
+				RecalculatePoints();
+			base.Render(renderer);
+
+			renderer.ModelMatrix = GetMatrix(false, new Vector3());
+			renderer.SelectedColor = IsSelected ? Colors.LimeGreen : Colors.White;
+			renderer.UseIndices = true;
+
+			if (ShowPolygon)
+			{
+				renderer.Indices = Indices;
+				renderer.Points = EnumerateCatPoints().Select(x => x.Position).ToList();
+
+
+				renderer.Transform();
+				renderer.DrawLines();
+			}
+
+
+			renderer.Indices = meshIndices;
+			renderer.Points = mesh;
+
+			renderer.Transform();
+			renderer.DrawLines();
+		}
+
+		public override IEnumerable<CatPoint> EnumerateCatPoints()
+		{
+			for (int i = 0; i < pointsOrdererd.GetLength(1); i++)
+				for (int j = 0; j < pointsOrdererd.GetLength(0); j++)
+					yield return pointsOrdererd[j, i];
+		}
+
+		public override void CleanUp()
+		{
+			base.CleanUp();
+			if (owner)
+			{
+				for (int i = 0; i < pointsOrdererd.GetLength(1); i++)
+					for (int j = 0; j < pointsOrdererd.GetLength(0); j++)
+					{
+						pointsOrdererd[j, i].DependentUnremovable -= 1;
+						scene.RemovePoint(pointsOrdererd[j, i]);
+
+					}
+			}
+		}
+
+
+
 	}
 }

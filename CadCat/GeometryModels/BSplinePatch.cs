@@ -11,104 +11,17 @@ namespace CadCat.GeometryModels
 {
 	class BSplinePatch : Patch
 	{
-		private readonly CatPoint[,] pointsOrdererd = new CatPoint[4, 4];
 
-		public BSplinePatch(SceneData scene)
+		public BSplinePatch(CatPoint[,] pts) : base(pts)
 		{
-			this.scene = scene;
-
-			for (int i = 0; i < 4; i++)
-				for (int j = 0; j < 4; j++)
-				{
-					var pt = scene.CreateHiddenCatPoint(new Vector3(i, System.Math.Sin(Utils.Pi * (i * 0.5 + j * 0.1) / 2.0), j));
-					points[i + j * 4] = pt;
-					pt.OnChanged += OnBezierPointChanged;
-				}
-			ParametrizationChanged = true;
-			Changed = true;
-			owner = true;
-		}
-
-		public BSplinePatch(CatPoint[,] pts)
-		{
-			for (int i = 0; i < 4; i++)
-				for (int j = 0; j < 4; j++)
-				{
-					points[i * 4 + j] = pts[i, j]; // i -U, j- V
-					pts[i, j].OnChanged += OnBezierPointChanged;
-					pts[i, j].OnReplace += OnBezierPointReplaced;
-				}
-
-			for (int i = 0; i < 4; i++)
-				for (int j = 0; j < 4; j++)
-				{
-					pointsOrdererd[i, j] = pts[i, j];
-				}
-			ParametrizationChanged = true;
-			Changed = true;
-			owner = false;
-		}
-
-		private void OnBezierPointChanged(CatPoint point)
-		{
-			Changed = true;
-		}
-
-		private void OnBezierPointReplaced(CatPoint point, CatPoint newPoint)
-		{
-			if (point != newPoint)
-			{
-
-				for (int i = 0; i < points.Length; i++)
-					if (points[i] == point)
-						points[i] = newPoint;
-				ParametrizationChanged = true;
-				Changed = true;
-				point.OnChanged -= OnBezierPointChanged;
-				newPoint.OnChanged += OnBezierPointChanged;
-				newPoint.OnReplace += OnBezierPointReplaced;
-			}
-
 		}
 
 
 
-		public override void Render(BaseRenderer renderer)
-		{
-			if (ParametrizationChanged)
-				RecalculateParametrizationPoints();
-			if (Changed)
-				RecalculatePoints();
-			base.Render(renderer);
-
-			renderer.ModelMatrix = GetMatrix(false, new Vector3());
-			renderer.SelectedColor = IsSelected ? Colors.LimeGreen : Colors.White;
-			renderer.UseIndices = true;
-
-			if (ShowPolygon)
-			{
-				renderer.Indices = Indices;
-				renderer.Points = points.Select(x => x.Position).ToList();
 
 
-				renderer.Transform();
-				renderer.DrawLines();
-			}
 
 
-			renderer.Indices = meshIndices;
-			renderer.Points = mesh;
-
-			renderer.Transform();
-			renderer.DrawLines();
-		}
-
-		private void RecalculatePoints()
-		{
-			mesh = parametrizationPoints.Select(x => GetPoint(x.X, x.Y)).ToList();
-			Changed = false;
-
-		}
 
 
 
@@ -187,22 +100,9 @@ namespace CadCat.GeometryModels
 			return n;
 		}
 
-		public override void CleanUp()
-		{
-			base.CleanUp();
-			if (owner)
-			{
-				foreach (var pt in points)
-				{
-					scene.RemovePoint(pt);
-				}
-			}
-		}
 
-		public override IEnumerable<CatPoint> EnumerateCatPoints()
-		{
-			return points;
-		}
+
+
 
 		public override string GetName()
 		{
@@ -222,12 +122,6 @@ namespace CadCat.GeometryModels
 		public override Vector3 GetVDerivative(double u, double v)
 		{
 			return EvaluateVDerivative(u, v);
-		}
-
-		public override CatPoint GetCatPoint(int u, int v)
-		{
-			//points[j * 4 + i] = pts[i, j]
-			return pointsOrdererd[v, u];
 		}
 	}
 }
