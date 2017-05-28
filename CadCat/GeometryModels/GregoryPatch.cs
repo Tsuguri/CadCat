@@ -416,10 +416,6 @@ namespace CadCat.GeometryModels
 			var uh = EvaluateB(u);
 			var vh = EvaluateB(v);
 
-
-
-
-
 			// baza berensteina:
 
 			Vector4 firstRow = p00.WPos * vh.X + p10.WPos * vh.Y + p20.WPos * vh.Z + p30.WPos * vh.W;
@@ -427,20 +423,6 @@ namespace CadCat.GeometryModels
 			Vector4 thirdRow = p02.WPos * vh.X + (p02P.WPos * (1 - u) + p13P.WPos * v) / (1 - u + v) * vh.Y + (p23P.WPos * (1 - v) + p32P.WPos * (1 - u)) / (2 - u - v) * vh.Z + p32.WPos * vh.W;
 
 			Vector4 fourthRow = p03.WPos * vh.X + p13.WPos * vh.Y + p23.WPos * vh.Z + p33.WPos * vh.W;
-
-			//baza Hermita:
-
-			//Vector3 firstRow = p00.Position * vh.X + p30.Position * vh.Y + (p10.Position - p00.Position) * 3 * vh.Z + (p30.Position - p20.Position) * 3 * vh.W;
-			//Vector3 secondRow = p03.Position * vh.X + p33.Position * vh.Y + (p13.Position - p03.Position) * 3 * vh.Z +
-			//					(p33.Position - p23.Position) * 3 * vh.W;
-			//Vector3 thirdRow = (p01.Position - p00.Position) * 3 * vh.X + (p31.Position - p30.Position) * 3 * vh.Y + ((p01P.Position - p00.Position) * 3 * u + (p10P.Position - p00.Position) * 3 * v) / (u + v) * vh.Z + ((p20P.Position - p30.Position) * 3 * (1 - v) + (p31P.Position - p30.Position) * 3 * u) / (1 - v + u) * vh.W;
-
-			//Vector3 fourthRow = (p03.Position - p02.Position) * 3 * vh.X + (p33.Position - p32.Position) * 3 * vh.Y + ((p02P.Position - p03.Position) * 3 * (1 - u) + (p13P.Position - p03.Position) * 3 * v) / (1 - u + v) * vh.Z + ((p23P.Position - p33.Position) * 3 * (1 - v) + (p32P.Position - p33.Position) * 3 * (1 - u)) / (2 - u - v) * vh.W;
-
-
-
-
-
 
 			var result = firstRow * uh.X + secondRow * uh.Y + thirdRow * uh.Z + fourthRow * uh.W;
 			return result.ToNormalizedVector3();

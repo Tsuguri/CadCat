@@ -17,14 +17,6 @@ namespace CadCat.GeometryModels
 		}
 
 
-
-
-
-
-
-
-
-
 		private static Matrix4 _tempMtx;
 		private Vector3 EvaluatePointValue(double u, double v)
 		{
