@@ -166,7 +166,7 @@ namespace CadCat.Math
 					i++;
 					point = new Vector4(pP.Value.X, pP.Value.Y, qP.Value.X, qP.Value.Y);
 
-				} while ((p.GetPosition(point.X, point.Y) - p.GetPosition(prevPoint.X, prevPoint.Y)).Length() < 0.0001 && i < 1000);
+				} while ((p.GetPosition(point.X, point.Y) - p.GetPosition(prevPoint.X, prevPoint.Y)).Length() > 0.0001 && i < 1000);
 
 				if (i > 990)
 				{
