@@ -143,7 +143,7 @@ namespace CadCat.GeometryModels
 
 		public override string GetName()
 		{
-			return "Cutting curve" + base.GetName();
+			return "aCutting curve" + base.GetName();
 		}
 
 		private void Convert()
@@ -175,6 +175,21 @@ namespace CadCat.GeometryModels
 			double tParam = Q.SecondParamLimit;
 			using (bitmap.GetBitmapContext())
 			{
+
+
+				if (QtestSet != null)
+				{
+					var uStep = Q.FirstParamLimit / (QtestSet.GetLength(1) - 1.0);
+					var vStep = Q.SecondParamLimit / (QtestSet.GetLength(0) - 1.0);
+
+
+					for (int i = 0; i < QtestSet.GetLength(1); i++)
+					for (int j = 0; j < QtestSet.GetLength(0); j++)
+					{
+						bitmap.DrawEllipseCentered((int)(i * uStep / sParam * (halfWidth - 3) + halfWidth), (int)(j * vStep / tParam * height), 1, 1, QtestSet[j, i] ? Colors.LightGray : Colors.LightBlue);
+					}
+				}
+
 				if (pPolygon != null)
 				{
 					var minSize = System.Math.Min(P.FirstParamLimit, P.SecondParamLimit) * 0.8;
@@ -207,7 +222,7 @@ namespace CadCat.GeometryModels
 						var item1 = qPolygon[i];
 						var item2 = qPolygon[(i + 1) % qPolygon.Count];
 						if (System.Math.Abs(item1.X - item2.X) < minSize && System.Math.Abs(item1.Y - item2.Y) < minSize)
-							bitmap.DrawLineDDA((int)(item1.X / sParam * (halfWidth - 3) + halfWidth), (int)(item1.Y / tParam * height), (int)(item2.X / sParam * (halfWidth - 3) + halfWidth), (int)(item2.Y / tParam * height), Colors.Gray);
+							bitmap.DrawLineDDA((int)(item1.X / sParam * (halfWidth - 3) + halfWidth), (int)(item1.Y / tParam * height), (int)(item2.X / sParam * (halfWidth - 3) + halfWidth), (int)(item2.Y / tParam * height), Colors.DarkViolet);
 
 					}
 				}
@@ -217,7 +232,7 @@ namespace CadCat.GeometryModels
 					if (qPolygonBoundary != null)
 						foreach (var tuple in qPolygonBoundary)
 						{
-							bitmap.DrawLineDDA((int)(tuple.Item1.X / sParam * (halfWidth - 3) + halfWidth), (int)(tuple.Item1.Y / tParam * height), (int)(tuple.Item2.X / sParam * (halfWidth - 3) + halfWidth), (int)(tuple.Item2.Y / tParam * height), Colors.Gray);
+							bitmap.DrawLineDDA((int)(tuple.Item1.X / sParam * (halfWidth - 3) + halfWidth), (int)(tuple.Item1.Y / tParam * height), (int)(tuple.Item2.X / sParam * (halfWidth - 3) + halfWidth), (int)(tuple.Item2.Y / tParam * height), Colors.DarkViolet);
 						}
 
 
@@ -237,18 +252,7 @@ namespace CadCat.GeometryModels
 				//		}
 				//}
 
-				if (QtestSet != null)
-				{
-					var uStep = Q.FirstParamLimit / (QtestSet.GetLength(1) - 1.0);
-					var vStep = Q.SecondParamLimit / (QtestSet.GetLength(0) - 1.0);
 
-
-					for (int i = 0; i < QtestSet.GetLength(1); i++)
-						for (int j = 0; j < QtestSet.GetLength(0); j++)
-						{
-							bitmap.DrawEllipseCentered((int)(i * uStep / sParam * (halfWidth-3) + halfWidth), (int)(j * vStep / tParam * height), 1, 1, QtestSet[j, i] ? Colors.Green : Colors.Red);
-						}
-				}
 
 			}
 
@@ -363,26 +367,28 @@ namespace CadCat.GeometryModels
 			#endregion
 			//tu są odsiane: niecykliczna krzywa na nieloopniętej powierzchni, cykliczna na nieloopnietej.
 
+			var minDiff = System.Math.Min(inters.FirstParamLimit, inters.SecondParamLimit) * 0.8;
+
 			for (int i = 0; i < pts.Count - (cyclic ? 0 : 1); i++)
 			{
-				if ((pts[i] - pts[(i + 1) % pts.Count]).Length() > 0.5)
+				if ((pts[i] - pts[(i + 1) % pts.Count]).Length() > minDiff)
 				{
 					var pt1 = pts[i];
 					var pt2 = pts[(i + 1) % pts.Count];
-					if (System.Math.Abs(pt1.X - pt2.X) > 0.5)
+					if (System.Math.Abs(pt1.X - pt2.X) > minDiff)
 					{
 						var right = pt1.X > pt2.X;
 						var avgheigh = (pt1.Y + pt2.Y) / 2;
 
-						addEdges.Add(new Tuple<Vector2, Vector2>(new Vector2(-0.001, avgheigh), new Vector2(0.001, avgheigh)));
-						addEdges.Add(new Tuple<Vector2, Vector2>(new Vector2(inters.FirstParamLimit - 0.001, avgheigh), new Vector2(inters.FirstParamLimit + 0.001, avgheigh)));
+						addEdges.Add(new Tuple<Vector2, Vector2>(new Vector2(-0.001, avgheigh), right ? pt2 : pt1));
+						addEdges.Add(new Tuple<Vector2, Vector2>(right ? pt1 : pt2, new Vector2(inters.FirstParamLimit + 0.001, avgheigh)));
 
 
 						leftEdge.Add(new BoundaryIntersection { X = 0, Y = avgheigh, type = !right ? BoundaryIntersection.IntersectionType.Out : BoundaryIntersection.IntersectionType.In });
 						rightEdge.Add(new BoundaryIntersection { X = inters.FirstParamLimit, Y = avgheigh, type = right ? BoundaryIntersection.IntersectionType.Out : BoundaryIntersection.IntersectionType.In });
 					}
 
-					if (System.Math.Abs(pt1.Y - pt2.Y) > 0.5)
+					if (System.Math.Abs(pt1.Y - pt2.Y) > minDiff)
 					{
 						var up = pt1.Y < pt2.Y;
 						var avgwidth = (pt1.X + pt2.X) / 2;
