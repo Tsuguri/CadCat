@@ -128,7 +128,6 @@ namespace CadCat.Math
 
 			bool cyclic;
 			var pts = Newton(P, Q, startPoint.Value, function, jacobian, false, d, out cyclic);
-
 			cycleIntersection = cyclic;
 			if (cyclic) return pts;
 			var pts2 = Newton(P, Q, startPoint.Value, function, jacobian, true, d, out cyclic);
@@ -158,6 +157,7 @@ namespace CadCat.Math
 					var nextP = point - jacob.Item1.Inversed() * funRes;
 					var pP = p.ConfirmParams(nextP.X, nextP.Y);
 					var qP = q.ConfirmParams(nextP.Z, nextP.W);
+					
 					if (qP == null || pP == null)
 					{
 						end = true;
@@ -166,14 +166,18 @@ namespace CadCat.Math
 					i++;
 					point = new Vector4(pP.Value.X, pP.Value.Y, qP.Value.X, qP.Value.Y);
 
-				} while ((p.GetPosition(point.X, point.Y) - p.GetPosition(prevPoint.X, prevPoint.Y)).Length() > 0.0001 && i < 1000);
+				} while ((p.GetPosition(point.X, point.Y) - p.GetPosition(prevPoint.X, prevPoint.Y)).Length() < 0.0001 && i < 1000);
 
+				if (i > 990)
+				{
+					return new List<Vector4>();
+				}
 				var newP = p.GetPosition(point.X, point.Y);
 				var lastP = p.GetPosition(startPoint.X, startPoint.Y);
 
 				if (points.Count > 3 && (newP - lastP).Length() < 0.0001)
 					break;
-
+				
 				if (points.Count > 2)
 				{
 
@@ -187,6 +191,8 @@ namespace CadCat.Math
 						break;
 					}
 				}
+				if (points.Count > 100000)
+					return points;//new List<Vector4>();
 				startPoint = point;
 				points.Add(startPoint);
 
