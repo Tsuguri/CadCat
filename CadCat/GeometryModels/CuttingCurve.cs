@@ -410,13 +410,26 @@ namespace CadCat.GeometryModels
 			//torus
 			var boundaryIntersections = upperEdge.OrderBy(x => x.X).Concat(rightEdge.OrderBy(x => x.Y)).Concat(lowerEdge.OrderByDescending(x => x.X)).Concat(leftEdge.OrderByDescending(x => x.Y)).ToList();
 
-			if (boundaryIntersections.Count == 2)
+			if (boundaryIntersections.Count == 2 || boundaryIntersections.Count%2==1)
 			{
 				return false;
 			}
+			if (boundaryIntersections.Count == 0)
+			{
+				boundary = new List<Tuple<Vector2, Vector2>>();
+				return true;
+			}
+			BoundaryIntersection.IntersectionType lastIntersection;
+			try
+			{
 
-			var lastIntersection = boundaryIntersections.First().type;
+				lastIntersection = boundaryIntersections.First().type;
 
+			}
+			catch (Exception)
+			{
+				return false;
+			}
 			foreach (var boundaryIntersection in boundaryIntersections.Skip(1))
 			{
 				if (lastIntersection == boundaryIntersection.type)

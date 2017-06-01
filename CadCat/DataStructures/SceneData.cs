@@ -1032,8 +1032,8 @@ namespace CadCat.DataStructures
 									Name = patch.Name,
 									SurfaceDivisionsU = patch.WidthDiv,
 									SurfaceDivisionsV = patch.HeightDiv,
-									PatchU = patch.UPos,
 									PatchV = patch.VPos,
+									PatchU = patch.UPos,
 									Points = new PointsU4V4()
 								};
 								int ind = 0;
@@ -1166,15 +1166,15 @@ namespace CadCat.DataStructures
 					var pts = new CatPoint[4, 4];
 					for (int i = 0; i < 4; i++)
 						for (int j = 0; j < 4; j++)
-							pts[i, j] = catPoints[bezierSurfaceC0Patch.Points[i, j]];
+							pts[i, j] = catPoints[bezierSurfaceC0Patch.Points[j, i]];
 					var patch = new BezierPatch(pts)
 					{
 						ShowPolygon = false,
 						HeightDiv = bezierSurfaceC0Patch.SurfaceDivisionsV,
 						WidthDiv = bezierSurfaceC0Patch.SurfaceDivisionsU,
 						Name = bezierSurfaceC0Patch.Name,
-						UPos = bezierSurfaceC0Patch.PatchU,
-						VPos = bezierSurfaceC0Patch.PatchV
+						VPos = bezierSurfaceC0Patch.PatchU,
+						UPos = bezierSurfaceC0Patch.PatchV
 					};
 					AddNewModel(patch);
 					patches.Add(patch);
@@ -1265,8 +1265,8 @@ namespace CadCat.DataStructures
 							break;
 						}
 					}
-                if (loopedU == loopedV)
-                    Console.WriteLine($"Surf: {bezierSurfaceC2.Name}");
+				if (loopedU == loopedV)
+					Console.WriteLine($"Surf: {bezierSurfaceC2.Name}");
 
 				var surfacePoints = patches.SelectMany(x => x.EnumerateCatPoints()).Distinct().ToList();
 				var surface = new Surface(SurfaceType.BSpline, ptches, surfacePoints, this, loopedU, loopedV)

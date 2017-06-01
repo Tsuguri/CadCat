@@ -232,8 +232,8 @@ namespace CadCat.GeometryModels
 
 		public override IEnumerable<CatPoint> EnumerateCatPoints()
 		{
-			for (int i = 0; i < pointsOrdererd.GetLength(1); i++)
-				for (int j = 0; j < pointsOrdererd.GetLength(0); j++)
+			for (int j = 0; j < pointsOrdererd.GetLength(0); j++)
+				for (int i = 0; i < pointsOrdererd.GetLength(1); i++)
 					yield return pointsOrdererd[j, i];
 		}
 
