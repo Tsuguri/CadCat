@@ -81,7 +81,7 @@ namespace CadCat.Math
 			if (startPoint == null)
 				return null;
 
-			//scene.CreateHiddenCatPoint(P.GetPosition(startPoint.Value.X, startPoint.Value.Y));
+			scene.CreateHiddenCatPoint(P.GetPosition(startPoint.Value.X, startPoint.Value.Y));
 
 			Func<Vector4, bool, Tuple<Matrix4, Vector3>> jacobian = (arg, invert) =>
 			  {
@@ -127,10 +127,10 @@ namespace CadCat.Math
 			 };
 
 			bool cyclic;
-			var pts = Newton(P, Q, startPoint.Value, function, jacobian, false, d, out cyclic);
+			var pts = Newton(scene, P, Q, startPoint.Value, function, jacobian, false, d, out cyclic);
 			cycleIntersection = cyclic;
 			if (cyclic) return pts;
-			var pts2 = Newton(P, Q, startPoint.Value, function, jacobian, true, d, out cyclic);
+			var pts2 = Newton(scene, P, Q, startPoint.Value, function, jacobian, true, d, out cyclic);
 			pts.Reverse();
 			pts.AddRange(pts2);
 			if (pts.Count < 2)
@@ -138,7 +138,7 @@ namespace CadCat.Math
 			return pts;
 		}
 
-		private static List<Vector4> Newton(IIntersectable p, IIntersectable q, Vector4 startPoint, Func<Vector4, Vector3, Vector3, Vector4> function, Func<Vector4, bool, Tuple<Matrix4, Vector3>> jacobian, bool inverse, double step, out bool cyclic)
+		private static List<Vector4> Newton(SceneData scene, IIntersectable p, IIntersectable q, Vector4 startPoint, Func<Vector4, Vector3, Vector3, Vector4> function, Func<Vector4, bool, Tuple<Matrix4, Vector3>> jacobian, bool inverse, double step, out bool cyclic)
 		{
 			var points = new List<Vector4>();
 			//var startestPoint = startPoint;
@@ -165,8 +165,10 @@ namespace CadCat.Math
 					}
 					i++;
 					point = new Vector4(pP.Value.X, pP.Value.Y, qP.Value.X, qP.Value.Y);
+                    var pp = p.GetPosition(point.X, point.Y);
+                    //scene.CreateHiddenCatPoint(pp);
 
-				} while ((p.GetPosition(point.X, point.Y) - p.GetPosition(prevPoint.X, prevPoint.Y)).Length() > 0.0001 && i < 1000);
+                } while ((p.GetPosition(point.X, point.Y) - p.GetPosition(prevPoint.X, prevPoint.Y)).Length() > 0.0001 && i < 1000);
 
 				if (i > 990)
 				{

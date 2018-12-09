@@ -11,6 +11,7 @@ namespace CadCat.GeometryModels
 {
 	class BSplinePatch : Patch
 	{
+        static float toolRad = 0.5f;
 
 		public BSplinePatch(CatPoint[,] pts) : base(pts)
 		{
@@ -25,8 +26,9 @@ namespace CadCat.GeometryModels
 			var vVal = EvaluateBSpline(v, 3);
 			_tempMtx = uVal.MatrixMultiply(vVal);
 
+            var normal = Normal(u, v).Normalized();
 
-			return Sum();
+			return Sum() + normal*toolRad;
 		}
 
 		private Vector3 Sum()
@@ -40,8 +42,21 @@ namespace CadCat.GeometryModels
 
 			return sum;
 		}
+        private static readonly double tt = 0.001;
 
-		private Vector3 EvaluateUDerivative(double u, double v)
+        private Vector3 EvaluateUDerivative(double u, double v)
+        {
+            var u1 = u - tt;
+            var u2 = u + tt;
+            if (u2 > 1) { u2 = 1; u1 = 1 - 2 * tt; }
+            if (u1 < 0) { u1 = 0; u2 = 2 * tt; }
+
+            var p1 = EvaluatePointValue(u1, v);
+            var p2 = EvaluatePointValue(u2, v);
+            return (p2-p1)/(2.0*tt);
+        }
+
+		private Vector3 EvaluateUDer(double u, double v)
 		{
 			var uVal = EvaluateBSpline(u, 2);// wyniki w xyz
 			var vVal = EvaluateBSpline(v, 3);
@@ -57,7 +72,25 @@ namespace CadCat.GeometryModels
 			return sum * 1;
 		}
 
-		private Vector3 EvaluateVDerivative(double u, double v)
+        private Vector3 Normal(double u, double v)
+        {
+            var d1 = EvaluateUDer(u, v);
+            var d2 = EvaluateVDer(u, v);
+            return Vector3.CrossProduct(d1, d2);
+        }
+
+		private Vector3 EvaluateVDerivative(double u, double v) {
+            var v1 = v - tt;
+            var v2 = v + tt;
+            if (v2 > 1) { v2 = 1; v1 = 1 - 2 * tt; }
+            if (v1 < 0) { v1 = 0; v2 = 2 * tt; }
+
+            var p1 = EvaluatePointValue(u, v1);
+            var p2 = EvaluatePointValue(u, v2);
+            return (p2 - p1)/(2.0*tt);
+        }
+
+        private Vector3 EvaluateVDer(double u, double v)
 		{
 			var uVal = EvaluateBSpline(u, 3);
 			var vVal = EvaluateBSpline(v, 2);// wyniki w xyz

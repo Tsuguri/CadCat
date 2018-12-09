@@ -56,6 +56,8 @@ namespace CadCat.GeometryModels
 			}
 		}
 
+        public IEnumerable<Vector4> Points => points;
+
 		public ICommand ConvertToInterpolation => convertToInterpolationCurve ?? (convertToInterpolationCurve = new CommandHandler(Convert));
 
 		public CuttingCurve(List<Vector4> points, IIntersectable P, IIntersectable Q, SceneData scene, bool cyclic, double minimumStep = 0.1)
